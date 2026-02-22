@@ -1,0 +1,12 @@
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+
+server:
+  port: 8080
+
+# Логирование
+logging:
+  level:
+    com.mipt.portal: DEBUG
+    org.springframework.web: INFO
