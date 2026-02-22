@@ -51,7 +51,6 @@ public class UserController {
   }
 }
 
-// DTO классы (можно в этом же файле или отдельно)
 class RegisterRequest {
   private String email;
   private String name;
