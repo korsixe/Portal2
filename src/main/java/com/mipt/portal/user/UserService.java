@@ -25,6 +25,7 @@ public class UserService {
   @Transactional
   public Optional<User> registerUser(String email, String name, String password,
       String passwordAgain, Address address, String studyProgram, int course) {
+    log.info("Attempting to register user with email: {}", email);
     try {
       if (email == null || email.trim().isEmpty()) {
         log.warn("Registration failed - email is empty");
@@ -62,7 +63,7 @@ public class UserService {
       user.setRating(0.0);
       user.setCoins(0);
       user.setAdList(new ArrayList<>());
-      user.setModerator(false);
+      user.addRole(Role.USER); // устанавливаем роль пользователя по умолчанию
 
       Optional<User> savedUserOpt = userRepository.save(user);
       if (savedUserOpt.isEmpty()) {
@@ -70,7 +71,7 @@ public class UserService {
       }
       User savedUser = savedUserOpt.get();
 
-      log.info("User registered successfully: {}", email);
+      log.info("User registered successfully with ID: {} and email: {}", savedUser.getId(), email);
 
       savedUser.setHashPassword(null);
       savedUser.setSalt(null);
@@ -84,6 +85,7 @@ public class UserService {
   }
 
   public Optional<User> loginUser(String email, String password) {
+    log.info("User login attempt with email: {}", email);
     try {
       if (email == null || email.trim().isEmpty()) {
         log.warn("Login failed - email is empty");
@@ -408,6 +410,95 @@ public class UserService {
     } catch (Exception e) {
       log.error("Error deducting coins: {}", e.getMessage(), e);
       return Optional.empty();
+    }
+  }
+
+  /**
+   * Назначает роль модератора пользователю
+   */
+  @Transactional
+  public Optional<Boolean> assignModeratorRole(Long userId) {
+    log.info("Assigning moderator role to user ID: {}", userId);
+    try {
+      Optional<User> userOpt = userRepository.findById(userId);
+      if (userOpt.isEmpty()) {
+        log.warn("Assign moderator role failed - user not found: {}", userId);
+        return Optional.empty();
+      }
+
+      User user = userOpt.get();
+      user.addRole(Role.MODERATOR);
+
+      Optional<User> savedUserOpt = userRepository.save(user);
+      if (savedUserOpt.isPresent()) {
+        log.info("Moderator role assigned successfully to user: {}", userId);
+        return Optional.of(true);
+      }
+
+      log.error("Failed to save user after assigning moderator role: {}", userId);
+      return Optional.of(false);
+
+    } catch (Exception e) {
+      log.error("Error assigning moderator role to user {}: {}", userId, e.getMessage());
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Убирает роль модератора у пользователя
+   */
+  @Transactional
+  public Optional<Boolean> revokeModeratorRole(Long userId) {
+    log.info("Revoking moderator role from user ID: {}", userId);
+    try {
+      Optional<User> userOpt = userRepository.findById(userId);
+      if (userOpt.isEmpty()) {
+        log.warn("Revoke moderator role failed - user not found: {}", userId);
+        return Optional.empty();
+      }
+
+      User user = userOpt.get();
+      user.removeRole(Role.MODERATOR);
+
+      Optional<User> savedUserOpt = userRepository.save(user);
+      if (savedUserOpt.isPresent()) {
+        log.info("Moderator role revoked successfully from user: {}", userId);
+        return Optional.of(true);
+      }
+
+      log.error("Failed to save user after revoking moderator role: {}", userId);
+      return Optional.of(false);
+
+    } catch (Exception e) {
+      log.error("Error revoking moderator role from user {}: {}", userId, e.getMessage());
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Проверяет, является ли пользователь модератором
+   */
+  public boolean isUserModerator(Long userId) {
+    try {
+      Optional<User> userOpt = userRepository.findById(userId);
+      return userOpt.map(User::isModerator).orElse(false);
+    } catch (Exception e) {
+      log.error("Error checking moderator status: {}", e.getMessage(), e);
+      return false;
+    }
+  }
+
+  /**
+   * Получает всех пользователей с ролью модератора
+   */
+  public List<User> getAllModerators() {
+    try {
+      // TODO: через Spring Data JPA?
+      log.info("Getting all moderators - method placeholder");
+      return new ArrayList<>();
+    } catch (Exception e) {
+      log.error("Error getting all moderators: {}", e.getMessage(), e);
+      return new ArrayList<>();
     }
   }
 }

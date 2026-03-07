@@ -2,9 +2,11 @@ package com.mipt.portal.address;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.Embeddable;
 
 @Data
 @NoArgsConstructor
+@Embeddable
 public class Address {
   private String fullAddress;
   private String city;               // Город
