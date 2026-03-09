@@ -1,5 +1,8 @@
 package com.mipt.portal.announcement.dto;
 
+import com.mipt.portal.announcement.Category;
+import com.mipt.portal.announcement.Condition;
+import java.time.Instant;
 import lombok.Data;
 
 /**
@@ -11,4 +14,8 @@ public class AnnouncementFilterDto {
   private String text;
   private Integer minPrice;
   private Integer maxPrice;
+  private Category category;
+  private String subcategory;
+  private Condition condition;
+  private Instant createdAfter;
 }

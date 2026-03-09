@@ -4,12 +4,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import java.util.List;
 
-/**
- * DTO для создания нового объявления
- * Используется для отделения запроса клиента от внутренней сущности
- * Содержит аннотации валидации для проверки корректности входящих данных.
- */
 @Data
 public class AnnouncementCreateDto {
   @NotBlank(message = "Название обязательно")
@@ -23,5 +19,6 @@ public class AnnouncementCreateDto {
 
   @NotNull(message = "ID автора обязателен")
   private Long authorId;
-}
 
+  private List<String> photoUrls;
+}
