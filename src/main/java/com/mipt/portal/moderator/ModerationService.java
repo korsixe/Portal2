@@ -32,15 +32,15 @@ public class ModerationService {
      */
     public Optional<Boolean> promoteModerator(Long userId, Long adminUserId) {
         try {
-            // Проверяем, что назначающий является модератором или администратором
-            if (!userService.isUserModerator(adminUserId)) {
-                log.warn("Promote moderator failed - user {} is not a moderator", adminUserId);
+            // Проверяем, что назначающий является администратором
+            if (!userService.isUserAdmin(adminUserId)) {
+                log.warn("Promote moderator failed - user {} is not an admin", adminUserId);
                 return Optional.of(false);
             }
 
             Optional<Boolean> result = userService.assignModeratorRole(userId);
             if (result.isPresent() && result.get()) {
-                log.info("User {} promoted to moderator by user {}", userId, adminUserId);
+                log.info("User {} promoted to moderator by admin {}", userId, adminUserId);
                 return Optional.of(true);
             }
 
@@ -57,15 +57,15 @@ public class ModerationService {
      */
     public Optional<Boolean> demoteModerator(Long userId, Long adminUserId) {
         try {
-            // Проверяем, что отзывающий является модератором или администратором
-            if (!userService.isUserModerator(adminUserId)) {
-                log.warn("Demote moderator failed - user {} is not a moderator", adminUserId);
+            // Проверяем, что отзывающий является администратором
+            if (!userService.isUserAdmin(adminUserId)) {
+                log.warn("Demote moderator failed - user {} is not an admin", adminUserId);
                 return Optional.of(false);
             }
 
             Optional<Boolean> result = userService.revokeModeratorRole(userId);
             if (result.isPresent() && result.get()) {
-                log.info("User {} demoted from moderator by user {}", userId, adminUserId);
+                log.info("User {} demoted from moderator by admin {}", userId, adminUserId);
                 return Optional.of(true);
             }
 

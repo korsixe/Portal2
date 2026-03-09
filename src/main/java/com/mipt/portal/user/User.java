@@ -46,6 +46,13 @@ public class User {
   }
 
   /**
+   * Проверяет, является ли пользователь администратором
+   */
+  public boolean isAdmin() {
+    return hasRole(Role.ADMIN);
+  }
+
+  /**
    * Добавляет роль пользователю
    */
   public void addRole(Role role) {

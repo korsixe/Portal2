@@ -493,11 +493,116 @@ public class UserService {
    */
   public List<User> getAllModerators() {
     try {
-      // TODO: через Spring Data JPA?
-      log.info("Getting all moderators - method placeholder");
-      return new ArrayList<>();
+      List<User> allUsers = userRepository.findAll();
+      List<User> moderators = allUsers.stream()
+          .filter(User::isModerator)
+          .peek(user -> {
+            user.setHashPassword(null);
+            user.setSalt(null);
+          })
+          .toList();
+
+      log.info("Found {} moderators", moderators.size());
+      return moderators;
     } catch (Exception e) {
       log.error("Error getting all moderators: {}", e.getMessage(), e);
+      return new ArrayList<>();
+    }
+  }
+
+  /**
+   * Назначает роль администратора пользователю
+   */
+  @Transactional
+  public Optional<Boolean> assignAdminRole(Long userId) {
+    log.info("Assigning admin role to user ID: {}", userId);
+    try {
+      Optional<User> userOpt = userRepository.findById(userId);
+      if (userOpt.isEmpty()) {
+        log.warn("Assign admin role failed - user not found: {}", userId);
+        return Optional.empty();
+      }
+
+      User user = userOpt.get();
+      user.addRole(Role.ADMIN);
+
+      Optional<User> savedUserOpt = userRepository.save(user);
+      if (savedUserOpt.isPresent()) {
+        log.info("Admin role assigned successfully to user: {}", userId);
+        return Optional.of(true);
+      }
+
+      log.error("Failed to save user after assigning admin role: {}", userId);
+      return Optional.of(false);
+
+    } catch (Exception e) {
+      log.error("Error assigning admin role to user {}: {}", userId, e.getMessage());
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Убирает роль администратора у пользователя
+   */
+  @Transactional
+  public Optional<Boolean> revokeAdminRole(Long userId) {
+    log.info("Revoking admin role from user ID: {}", userId);
+    try {
+      Optional<User> userOpt = userRepository.findById(userId);
+      if (userOpt.isEmpty()) {
+        log.warn("Revoke admin role failed - user not found: {}", userId);
+        return Optional.empty();
+      }
+
+      User user = userOpt.get();
+      user.removeRole(Role.ADMIN);
+
+      Optional<User> savedUserOpt = userRepository.save(user);
+      if (savedUserOpt.isPresent()) {
+        log.info("Admin role revoked successfully from user: {}", userId);
+        return Optional.of(true);
+      }
+
+      log.error("Failed to save user after revoking admin role: {}", userId);
+      return Optional.of(false);
+
+    } catch (Exception e) {
+      log.error("Error revoking admin role from user {}: {}", userId, e.getMessage());
+      return Optional.empty();
+    }
+  }
+
+  /**
+   * Проверяет, является ли пользователь администратором
+   */
+  public boolean isUserAdmin(Long userId) {
+    try {
+      Optional<User> userOpt = userRepository.findById(userId);
+      return userOpt.map(User::isAdmin).orElse(false);
+    } catch (Exception e) {
+      log.error("Error checking admin status: {}", e.getMessage(), e);
+      return false;
+    }
+  }
+
+  /**
+   * Получает всех пользователей с ролью администратора
+   */
+  public List<User> getAllAdmins() {
+    try {
+      List<User> allUsers = userRepository.findAll();
+      List<User> admins = allUsers.stream()
+          .filter(User::isAdmin)
+          .peek(user -> {
+            user.setHashPassword(null);
+            user.setSalt(null);
+          })
+          .toList();
+
+      log.info("Found {} admins", admins.size());
+      return admins;
+    } catch (Exception e) {
+      log.error("Error getting all admins: {}", e.getMessage(), e);
       return new ArrayList<>();
     }
   }
