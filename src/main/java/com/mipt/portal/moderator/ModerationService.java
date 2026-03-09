@@ -96,7 +96,6 @@ public class ModerationService {
 
             // TODO: Здесь можно добавить более детальную проверку прав
             // разные типы модераторов с разными правами
-            // Пока считаем, что все модераторы имеют одинаковые права
 
             log.debug("Permission granted for user {} to perform action: {}", userId, action);
             return true;
