@@ -1,4 +1,4 @@
-package com.mipt.portal.annoucementContent.media;
+//package com.mipt.portal.annoucementContent.media;
 
 
 import lombok.RequiredArgsConstructor;
