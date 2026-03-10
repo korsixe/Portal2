@@ -2,6 +2,7 @@ package com.mipt.portal.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -10,6 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true) // Включаем поддержку @PreAuthorize
 public class SecurityConfig {
 
   @Bean
@@ -20,12 +22,21 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
-        .csrf().disable()
+        .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(authz -> authz
-            .anyRequest().permitAll()  // Разрешаем все запросы
+            // Публичные эндпоинты
+            .requestMatchers("/api/users/register", "/api/users/login").permitAll()
+            // Системные эндпоинты для инициализации
+            .requestMatchers("/api/system/**").permitAll()
+            // Администраторские эндпоинты
+            .requestMatchers("/api/admin/**").hasRole("ADMIN")
+            // Модераторские эндпоинты
+            .requestMatchers("/api/moderation/**").hasAnyRole("MODERATOR", "ADMIN")
+            // Остальные запросы требуют аутентификации
+            .anyRequest().authenticated()
         )
-        .formLogin().disable()  // Отключаем страницу логина
-        .httpBasic().disable();  // Отключаем базовую аутентификацию
+        .formLogin(form -> form.disable())
+        .httpBasic(basic -> basic.disable());
 
     return http.build();
   }
