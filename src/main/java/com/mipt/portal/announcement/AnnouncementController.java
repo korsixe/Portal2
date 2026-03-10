@@ -23,8 +23,11 @@ public class AnnouncementController {
   }
 
   @GetMapping("/search")
-  public List<Announcement> search(AnnouncementFilterDto filter) {
-    return service.searchApproved(filter);
+  public List<Announcement> search(
+          AnnouncementFilterDto filter,
+          @RequestParam(defaultValue = "createdAt") String sortBy,
+          @RequestParam(defaultValue = "DESC") String direction) {
+    return service.searchApproved(filter, sortBy, direction);
   }
 
   @GetMapping("/moderator/pending")
@@ -44,4 +47,5 @@ public class AnnouncementController {
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
   }
+
 }

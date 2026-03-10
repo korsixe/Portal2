@@ -18,4 +18,6 @@ public class AnnouncementFilterDto {
   private String subcategory;
   private Condition condition;
   private Instant createdAfter;
+  private String sortBy;
+  private String sortDirection;
 }

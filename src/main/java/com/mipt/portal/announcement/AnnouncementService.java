@@ -3,6 +3,7 @@ package com.mipt.portal.announcement;
 import com.mipt.portal.announcement.dto.AnnouncementCreateDto;
 import com.mipt.portal.announcement.dto.AnnouncementFilterDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,8 +33,9 @@ public class AnnouncementService {
   }
 
   @Transactional(readOnly = true)
-  public List<Announcement> searchApproved(AnnouncementFilterDto filter) {
-    return repository.findAll(AnnouncementSpecification.build(filter, AdStatus.ACTIVE));
+  public List<Announcement> searchApproved(AnnouncementFilterDto filter, String sortBy, String direction) {
+    Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+    return repository.findAll(AnnouncementSpecification.build(filter, AdStatus.ACTIVE), sort);
   }
 
   @Transactional(readOnly = true)
