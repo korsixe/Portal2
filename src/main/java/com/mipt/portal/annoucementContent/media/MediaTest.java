@@ -1,11 +1,9 @@
-package com.mipt.portal.annoucementContent;
+package com.mipt.portal.annoucementContent.media;
 
-import org.springframework.boot.SpringApplication;
+import com.mipt.portal.annoucementContent.MediaManager;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
-import java.io.File;
+
 import java.io.IOException;
-import java.nio.file.Files;
 import java.sql.SQLException;
 
 @SpringBootApplication

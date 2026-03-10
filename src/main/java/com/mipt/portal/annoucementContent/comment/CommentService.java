@@ -1,4 +1,4 @@
-package com.mipt.portal.annoucementContent;
+package com.mipt.portal.annoucementContent.comment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,19 +11,18 @@ import java.time.LocalDateTime;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CommentManager {
+public class CommentService {
 
-  private final DataSource dataSource;
+  //private final DataSource dataSource;
 
   @Transactional
-  public Comment create(Long advertisementId, String text) throws SQLException {
+  public Comment createComment(Long advertisementId, Long userId, String text) throws SQLException {
         /*
         String sql = "INSERT INTO comments (ad_id, user_id, user_name, content) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            Long userId = getUserIdFromAd(advertisementId);
             String author = getAuthorFromUserId(userId);
 
             pstmt.setLong(1, advertisementId);
@@ -38,18 +37,25 @@ public class CommentManager {
 
             log.info("✅ Комментарий создан: ID={}, adId={}", generatedCommentId, advertisementId);
 
-            return new Comment(generatedCommentId, author, text, LocalDateTime.now(), advertisementId);
+            return new Comment(generatedCommentId, author, text, LocalDateTime.now(), advertisementId, userId);
         } catch (SQLException e) {
             log.error("❌ Ошибка создания комментария: {}", e.getMessage());
             throw e;
         }
         */
-    log.info("✅ Комментарий создан (заглушка): adId={}", advertisementId);
-    return new Comment(1L, "Test Author", text, LocalDateTime.now(), advertisementId);
+    log.info("✅ Комментарий создан (заглушка): adId={}, userId={}", advertisementId, userId);
+    Comment comment = new Comment();
+    comment.setId(1L);
+    comment.setAdvertisementId(advertisementId);
+    comment.setUserId(userId);
+    comment.setAuthor("Test Author");
+    comment.setText(text);
+    comment.setCreatedAt(LocalDateTime.now());
+    return comment;
   }
 
   @Transactional(readOnly = true)
-  public Comment read(Long commentId) throws SQLException {
+  public Comment getComment(Long commentId) throws SQLException {
         /*
         String sql = "SELECT * FROM comments WHERE id = ?";
 
@@ -68,7 +74,8 @@ public class CommentManager {
                     author,
                     rs.getString("content"),
                     rs.getTimestamp("created_at").toLocalDateTime(),
-                    rs.getLong("ad_id")
+                    rs.getLong("ad_id"),
+                    rs.getLong("user_id")
                 );
             } else {
                 log.warn("⚠️ Комментарий не найден: ID={}", commentId);
@@ -80,11 +87,18 @@ public class CommentManager {
         }
         */
     log.info("✅ Комментарий найден (заглушка): ID={}", commentId);
-    return new Comment(commentId, "Test Author", "Test content", LocalDateTime.now(), 1L);
+    Comment comment = new Comment();
+    comment.setId(commentId);
+    comment.setAdvertisementId(1L);
+    comment.setUserId(1L);
+    comment.setAuthor("Test Author");
+    comment.setText("Test content");
+    comment.setCreatedAt(LocalDateTime.now());
+    return comment;
   }
 
   @Transactional
-  public void update(Long commentId, String newText) throws SQLException {
+  public void updateComment(Long commentId, String newText) throws SQLException {
         /*
         String sql = "UPDATE comments SET content = ? WHERE id = ?";
 
@@ -110,7 +124,7 @@ public class CommentManager {
   }
 
   @Transactional
-  public boolean delete(Long commentId) throws SQLException {
+  public boolean deleteComment(Long commentId) throws SQLException {
         /*
         String sql = "DELETE FROM comments WHERE id = ?";
 
@@ -134,26 +148,6 @@ public class CommentManager {
         */
     log.info("✅ Комментарий удален (заглушка): ID={}", commentId);
     return true;
-  }
-
-  private Long getUserIdFromAd(Long advertisementId) throws SQLException {
-        /*
-        String sql = "SELECT user_id FROM ads WHERE id = ?";
-
-        try (Connection conn = dataSource.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setLong(1, advertisementId);
-            ResultSet rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                return rs.getLong("user_id");
-            } else {
-                throw new SQLException("Объявление не найдено: ID=" + advertisementId);
-            }
-        }
-        */
-    return 1L;
   }
 
   private String getAuthorFromUserId(Long userId) throws SQLException {

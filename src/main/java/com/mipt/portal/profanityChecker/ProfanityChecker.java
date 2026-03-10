@@ -1,4 +1,4 @@
-package com.mipt.portal.annoucementContent;
+package com.mipt.portal.profanityChecker;
 
 import org.springframework.stereotype.Service;
 import java.net.*;
@@ -24,7 +24,6 @@ public class ProfanityChecker {
   ));
 
   public boolean containsProfanity(String text) {
-    /*
     if (text == null || text.trim().isEmpty()) {
       return false;
     }
@@ -34,14 +33,9 @@ public class ProfanityChecker {
       return true;
     }
     return localProfanityCheck(text);
-    */
-
-    // ВРЕМЕННАЯ ЗАГЛУШКА
-    return false;
   }
 
   private boolean checkWithAPI(String text) {
-    /*
     try {
       String encodedText = URLEncoder.encode(text, "UTF-8");
       String url = "https://www.purgomalum.com/service/containsprofanity?text=" + encodedText;
@@ -57,14 +51,9 @@ public class ProfanityChecker {
     } catch (Exception e) {
       return false;
     }
-    */
-
-    // ВРЕМЕННАЯ ЗАГЛУШКА
-    return false;
   }
 
   private boolean localProfanityCheck(String text) {
-    /*
     String lowerText = text.toLowerCase();
 
     String cleanText = lowerText.replaceAll("[^\\p{L}\\s]", " ");
@@ -82,10 +71,6 @@ public class ProfanityChecker {
       }
     }
 
-    return false;
-    */
-
-    // ВРЕМЕННАЯ ЗАГЛУШКА
     return false;
   }
 }
