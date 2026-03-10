@@ -1,18 +1,19 @@
 ##############################
-## Java
+## Java & Compiled
 ##############################
-.mtj.tmp/
 *.class
 *.jar
 *.war
 *.ear
 *.nar
 hs_err_pid*
+/target/
+/build/
+.mtj.tmp/
 
 ##############################
 ## Maven
 ##############################
-target/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -22,63 +23,65 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
-.mvn/wrapper/maven-wrapper.jar
 
 ##############################
-## Gradle
+## IDE: IntelliJ IDEA
 ##############################
-bin/
-build/
-.gradle
-.gradletasknamecache
-gradle-app.setting
-!gradle-wrapper.jar
-
-##############################
-## IntelliJ
-##############################
-out/
 .idea/
-.idea_modules/
 *.iml
-*.ipr
 *.iws
+*.ipr
+out/
 
 ##############################
-## Eclipse
+## IDE: Eclipse / VS Code / NetBeans
 ##############################
 .settings/
-bin/
-tmp/
-.metadata
 .classpath
 .project
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.loadpath
 .factorypath
-
-##############################
-## NetBeans
-##############################
+.vscode/
+.code-workspace
 nbproject/private/
-build/
 nbbuild/
-dist/
 nbdist/
 nbactions.xml
 nb-configuration.xml
 
 ##############################
-## Visual Studio Code
+## Spring Boot & Logs
 ##############################
-.vscode/
-.code-workspace
+*.log
+logs/
+spring.log
+spring-*.log
 
 ##############################
-## OS X
+## Databases & Secrets
+##############################
+*.db
+*.mv.db
+*.trace.db
+
+.env
+.env.local
+.env.*.local
+application-local.yml
+application-local.properties
+
+##############################
+## OS specific (Mac / Windows)
 ##############################
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+##############################
+## Project specific (User Uploads)
+##############################
+# Если вы решите сделать загрузку картинок в объявлении в локальную папку
+uploads/
