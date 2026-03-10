@@ -60,6 +60,10 @@ public class Announcement {
   private Instant updatedAt;
 
 
+  @Column(columnDefinition = "bytea")
+  private byte[] photo;
+
+
   public void sendToModeration() {
     this.status = AdStatus.UNDER_MODERATION;
   }
