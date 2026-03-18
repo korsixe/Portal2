@@ -1,5 +1,8 @@
-package com.mipt.portal.announcement;
+package com.mipt.portal.announcement.entity;
 
+import com.mipt.portal.announcement.enums.AdStatus;
+import com.mipt.portal.announcement.enums.Category;
+import com.mipt.portal.announcement.enums.Condition;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;

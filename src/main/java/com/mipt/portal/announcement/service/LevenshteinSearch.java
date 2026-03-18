@@ -1,4 +1,4 @@
-package com.mipt.portal.announcement;
+package com.mipt.portal.announcement.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
