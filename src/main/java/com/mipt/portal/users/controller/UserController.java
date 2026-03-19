@@ -1,6 +1,10 @@
-package com.mipt.portal.user;
+package com.mipt.portal.users.controller;
 
 import com.mipt.portal.address.Address;
+import com.mipt.portal.users.LoginRequest;
+import com.mipt.portal.users.RegisterRequest;
+import com.mipt.portal.users.User;
+import com.mipt.portal.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

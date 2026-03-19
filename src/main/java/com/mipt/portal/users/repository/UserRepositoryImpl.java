@@ -1,5 +1,6 @@
-package com.mipt.portal.user;
+package com.mipt.portal.users.repository;
 
+import com.mipt.portal.users.User;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
