@@ -2,6 +2,7 @@ package com.mipt.portal.announcement;
 
 import com.mipt.portal.announcement.dto.AnnouncementCreateDto;
 import com.mipt.portal.announcement.dto.AnnouncementFilterDto;
+import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -57,5 +58,9 @@ public class AnnouncementService {
       ad.setStatus(newStatus);
       return repository.save(ad);
     });
+  }
+
+  public Long getUserIdByEmail(String email) {
+    return 0L;
   }
 }

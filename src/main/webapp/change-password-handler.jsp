@@ -33,6 +33,7 @@
                 message = "❌ Пароль должен содержать минимум 8 символов";
                 messageType = "error";
             } else {
+              /*
                 // Проверяем текущий пароль
                 UserService userService = new UserService();
                 OperationResult<User> loginResult = userService.loginUser(user.getEmail(), currentPassword);
@@ -55,6 +56,7 @@
                     message = "❌ Неверный текущий пароль";
                     messageType = "error";
                 }
+                */
             }
         } catch (Exception e) {
             message = "❌ Ошибка при изменении пароля: " + e.getMessage();

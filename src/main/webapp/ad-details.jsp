@@ -1,7 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.mipt.portal.announcement.Announcement" %>
 <%@ page import="com.mipt.portal.annoucementContent.comment.Comment" %>
-<%@ page import="com.mipt.portal.annoucementContent.comment.CommentManager" %>
 <%@ page import="com.mipt.portal.users.User" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
@@ -19,7 +18,7 @@
     List<Comment> comments = new ArrayList<>();
     String authorName = "Неизвестный пользователь";
     int photoCount = 0;
-    AdsService adsService = new AdsService();
+    AnnouncementService adsService = new AnnouncementService();
 
     if (adIdParam != null && !adIdParam.trim().isEmpty()) {
         try {
@@ -44,7 +43,7 @@
                     announcement.setCondition(com.mipt.portal.announcement.Condition.values()[rs.getInt("condition")]);
                     announcement.setPrice(rs.getInt("price"));
                     announcement.setLocation(rs.getString("location"));
-                    announcement.setUserId(rs.getLong("user_id"));
+                    //announcement.setUserId(rs.getLong("user_id"));
                     announcement.setViewCount(rs.getInt("view_count"));
                     announcement.setCreatedAt(rs.getTimestamp("created_at").toInstant());
                     announcement.setUpdatedAt(rs.getTimestamp("updated_at").toInstant());
@@ -100,7 +99,7 @@
 
                     announcement.setTags(tags);
 
-
+                    /*
                     // Получаем количество фото через AdsService
                     try {
                         List<byte[]> photos = adsService.getAdPhotosBytes(adId);
@@ -117,9 +116,12 @@
                         updateStmt.setLong(1, adId);
                         updateStmt.executeUpdate();
                     }
+                    */
+
                 }
             }
 
+            /*
             // Загружаем комментарии из БД
             try (Connection conn = getConnection();
                  PreparedStatement stmt = conn.prepareStatement(
@@ -144,6 +146,7 @@
                     comments.add(comment);
                 }
             }
+            */
 
         } catch (NumberFormatException e) {
             System.err.println("Неверный формат ID объявления: " + adIdParam);
@@ -171,6 +174,10 @@
                 request.setAttribute("error", "Комментарий не может быть пустым");
             } else {
                 // Проверка на мат
+
+                /*
+
+
                 com.mipt.portal.announcementContent.ProfanityChecker profanityChecker =
                         new com.mipt.portal.announcementContent.ProfanityChecker();
                 boolean hasProfanity = profanityChecker.containsProfanity(commentText);
@@ -226,6 +233,8 @@
                         request.setAttribute("error", "Ошибка при сохранении комментария: " + e.getMessage());
                     }
                 }
+
+                 */
             }
         }
     }

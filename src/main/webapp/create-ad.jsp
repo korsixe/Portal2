@@ -23,8 +23,8 @@
     // Загружаем теги если они еще не загружены
     if (request.getAttribute("availableTags") == null) {
         try {
-            com.mipt.portal.announcementContent.tags.TagSelector tagSelector =
-                    new com.mipt.portal.announcementContent.tags.TagSelector();
+            com.mipt.portal.annoucementContent.tag.TagSelector tagSelector =
+                    new com.mipt.portal.annoucementContent.tag.TagSelector();
             java.util.List<java.util.Map<String, Object>> availableTags = tagSelector.getTagsWithValues();
             request.setAttribute("availableTags", availableTags);
         } catch (Exception e) {
@@ -465,8 +465,8 @@
                         <%
                             // Получаем категории из БД
                             try {
-                                com.mipt.portal.announcementContent.tags.CategorySelector categorySelector =
-                                        new com.mipt.portal.announcementContent.tags.CategorySelector();
+                                com.mipt.portal.annoucementContent.tag.CategorySelector categorySelector =
+                                        new com.mipt.portal.annoucementContent.tag.CategorySelector();
                                 java.util.List<java.util.Map<String, Object>> categories = categorySelector.getAllCategories();
 
                                 String currentCategoryParam = request.getParameter("category");
@@ -504,8 +504,8 @@
                         } else {
                             try {
                                 // Загружаем категории и находим ID выбранной
-                                com.mipt.portal.announcementContent.tags.CategorySelector categorySelector =
-                                        new com.mipt.portal.announcementContent.tags.CategorySelector();
+                                com.mipt.portal.annoucementContent.tag.CategorySelector categorySelector =
+                                        new com.mipt.portal.annoucementContent.tag.CategorySelector();
                                 java.util.List<java.util.Map<String, Object>> allCategories = categorySelector.getAllCategories();
                                 Long categoryId = null;
 
@@ -523,8 +523,8 @@
 
                                 if (categoryId != null) {
                                     // Загружаем подкатегории
-                                    com.mipt.portal.announcementContent.tags.SubcategorySelector subcategorySelector =
-                                            new com.mipt.portal.announcementContent.tags.SubcategorySelector();
+                                    com.mipt.portal.annoucementContent.tag.SubcategorySelector subcategorySelector =
+                                            new com.mipt.portal.annoucementContent.tag.SubcategorySelector();
                                     java.util.List<java.util.Map<String, Object>> subcategories =
                                             subcategorySelector.getSubcategoriesByCategory(categoryId);
 
