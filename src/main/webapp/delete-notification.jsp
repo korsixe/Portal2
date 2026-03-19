@@ -1,5 +1,5 @@
 <%@ page contentType="text/plain" %>
-<%@ page import="com.mipt.portal.notifications.NotificationService" %>
+<%@ page import="com.mipt.portal.notification.NotificationService" %>
 <%
 try {
     String notificationIdParam = request.getParameter("notificationId");

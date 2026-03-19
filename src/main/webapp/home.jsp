@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.mipt.portal.users.User" %>
-<%@ page import="com.mipt.portal.announcement.AdsService" %>
+<%@ page import="com.mipt.portal.announcement.AnnouncementService" %>
 <%@ page import="com.mipt.portal.announcement.Announcement" %>
 <%@ page import="com.mipt.portal.announcement.AdsFilter" %>
 <%@ page import="com.mipt.portal.announcement.Category" %>
@@ -34,18 +34,18 @@
     }
 
     // Получаем все активные объявления
-    AdsService adsService = new AdsService();
-    AdsFilter adsFilter = new AdsFilter(adsService.getAdsRepository());
+    AnnouncementService AnnouncementService = new AnnouncementService();
+    AdsFilter adsFilter = new AdsFilter(AnnouncementService.getAdsRepository());
     List<Long> recentAdsIds = null;
     try {
-        recentAdsIds = adsService.getActiveAdIds();
+        recentAdsIds = AnnouncementService.getActiveAdIds();
     } catch (SQLException e) {
         throw new RuntimeException(e);
     }
 
     if (searchQuery != null) {
         try {
-            recentAdsIds = adsService.searchAdsByString(recentAdsIds, searchQuery);
+            recentAdsIds = AnnouncementService.searchAdsByString(recentAdsIds, searchQuery);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -80,7 +80,7 @@
     List<Announcement> recentAds = new ArrayList<>();
 
     for (long idAd : recentAdsIds) {
-        recentAds.add(adsService.getAd(idAd));
+        recentAds.add(AnnouncementService.getAd(idAd));
     }
 %>
 
