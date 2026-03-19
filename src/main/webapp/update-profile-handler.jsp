@@ -54,7 +54,7 @@
 
                 if (message.isEmpty()) {
                     user.setName(name.trim());
-                    user.setAddress(address != null ? address.trim() : "");
+                    //user.setAddress(address != null ? address.trim() : "");
                     user.setStudyProgram(studyProgram);
                     user.setCourse(course);
 
