@@ -1,4 +1,4 @@
-package com.mipt.portal.user;
+package com.mipt.portal.users;
 
 import com.mipt.portal.address.Address;
 import java.util.List;

@@ -1,8 +1,8 @@
 package com.mipt.portal.security;
 
-import com.mipt.portal.user.User;
-import com.mipt.portal.user.UserRepository;
-import com.mipt.portal.user.Role;
+import com.mipt.portal.users.User;
+import com.mipt.portal.users.repository.UserRepository;
+import com.mipt.portal.users.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;

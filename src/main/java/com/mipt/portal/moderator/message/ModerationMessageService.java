@@ -1,8 +1,8 @@
 package com.mipt.portal.moderator.message;
 
 import com.mipt.portal.moderator.ModerationService;
-import com.mipt.portal.user.User;
-import com.mipt.portal.user.UserService;
+import com.mipt.portal.users.User;
+import com.mipt.portal.users.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
