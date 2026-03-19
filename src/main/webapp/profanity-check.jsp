@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.announcementContent.ProfanityChecker" %>
+<%@ page import="com.mipt.portal.annoucementContent.ProfanityChecker" %>
 
 <%!
     // Объявление метода с использованием декларации JSP

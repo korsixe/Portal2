@@ -2,6 +2,7 @@
 <%@ page import="com.mipt.portal.users.User" %>
 <%@ page import="com.mipt.portal.users.service.UserService" %>
 <%@ page import="com.mipt.portal.users.service.OperationResult" %>
+<%@ page import="java.util.Optional" %>
 <%
     User user = (User) session.getAttribute("user");
     if (user == null) {
@@ -58,18 +59,18 @@
                     user.setCourse(course);
 
                     UserService userService = new UserService();
-                    OperationResult<User> updateResult = userService.updateUser(user);
+                    Optional<User> updateResult = userService.updateUser(user);
 
-                    if (updateResult.isSuccess()) {
-                        session.setAttribute("user", updateResult.getData());
+                    if (updateResult.isPresent()) {
+                        User updatedUser = updateResult.get();
+                        session.setAttribute("user", updatedUser);
                         session.removeAttribute("canEditProfile");
 
-                        // ВАЖНОЕ ИЗМЕНЕНИЕ: редирект на dashboard с сообщением об успехе
                         session.setAttribute("successMessage", "✅ Профиль успешно обновлен!");
                         response.sendRedirect("dashboard.jsp");
-                        return; // Важно: завершаем выполнение после редиректа
+                        return;
                     } else {
-                        message = updateResult.getMessage();
+                        message = "Failed to update profile. Please try again.";
                         messageType = "error";
                     }
                 }

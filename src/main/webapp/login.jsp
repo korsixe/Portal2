@@ -3,6 +3,7 @@
 <%@ page import="com.mipt.portal.users.service.UserService" %>
 <%@ page import="com.mipt.portal.users.service.OperationResult" %>
 <%@ page import="com.mipt.portal.users.User" %>
+<%@ page import="java.util.Optional" %>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -226,21 +227,20 @@
             String password = request.getParameter("password");
 
             UserService userService = new UserService();
-            OperationResult<User> result = userService.loginUser(email, password);
+            Optional<User> result = userService.loginUser(email, password);
 
-            if (result.isSuccess()) {
-                message = result.getMessage();
+            if (result.isPresent()) {
+                loggedInUser = result.get();
+                message = "Login successful! Welcome, " + loggedInUser.getName() + "!";
                 messageType = "success";
                 loginSuccess = true;
-                loggedInUser = result.getData();
 
-                // Сохраняем пользователя в сессию
                 session.setAttribute("user", loggedInUser);
                 session.setAttribute("userId", loggedInUser.getId());
                 session.setAttribute("userName", loggedInUser.getName());
                 session.setAttribute("userEmail", loggedInUser.getEmail());
             } else {
-                message = result.getMessage();
+                message = "Invalid email or password. Please try again.";
                 messageType = "error";
             }
         }

@@ -1,5 +1,5 @@
 <%@ page contentType="text/plain;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.announcementContent.ProfanityChecker" %>
+<%@ page import="com.mipt.portal.annoucementContent.ProfanityChecker" %>
 <%
     // Handler for AJAX profanity check requests
     if ("POST".equalsIgnoreCase(request.getMethod())) {

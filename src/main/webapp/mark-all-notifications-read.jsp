@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.notifications.NotificationService" %>
+<%@ page import="com.mipt.portal.notification.NotificationService" %>
 <%
     try {
         String userIdStr = request.getParameter("userId");

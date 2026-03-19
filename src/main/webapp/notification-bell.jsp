@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.notifications.NotificationService" %>
+<%@ page import="com.mipt.portal.notification.NotificationService" %>
 <%@ page import="com.mipt.portal.moderator.message.ModerationMessage" %>
-<%@ page import="com.mipt.portal.announcement.AdsService" %>
+<%@ page import="com.mipt.portal.announcement.AnnouncementService" %>
 <%@ page import="com.mipt.portal.announcement.Announcement" %>
 <%@ page import="java.util.List" %>
 <%@ page import="com.mipt.portal.users.User" %>
@@ -47,7 +47,7 @@
             </div>
             <% } else { %>
             <% for (ModerationMessage notification : userNotifications) {
-                AdsService adService = new AdsService();
+                AnnouncementService adService = new AnnouncementService();
                 Announcement ad = adService.getAd(notification.getAdId());
                 String adTitle = (ad != null) ? ad.getTitle() : "Объявление";
                 String notificationClass = Boolean.TRUE.equals(notification.getIsRead()) ? "notification-item read" : "notification-item unread";
