@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.mipt.portal.users.User" %>
-<%@ page import="com.mipt.portal.announcement.AdsService" %>
+<%@ page import="com.mipt.portal.announcement.AnnouncementService" %>
 <%@ page import="com.mipt.portal.announcement.Announcement" %>
 <%@ page import="com.mipt.portal.announcement.Category" %>
 <%@ page import="com.mipt.portal.announcement.Condition" %>
@@ -8,7 +8,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="com.mipt.portal.users.service.UserService" %>
-<%@ page import="com.mipt.portal.notifications.NotificationService" %>
+<%@ page import="com.mipt.portal.notification.NotificationService" %>
 <%@ page import="com.mipt.portal.moderator.message.ModerationMessage" %>
 <%
     User user = (User) session.getAttribute("user");
@@ -23,6 +23,8 @@
         session.removeAttribute("successMessage"); // Удаляем после показа
     }
 
+    List<Announcement> userAnnouncements = new ArrayList<>();
+    /*
     // Обновляем данные пользователя
     UserService userService = new UserService();
     User freshUser = userService.findUserById(user.getId()).getData();
@@ -30,8 +32,8 @@
     user = freshUser; // Обновляем локальную переменную
 
     // Загружаем объявления пользователя
-    AdsService adsService = new AdsService();
-    List<Announcement> userAnnouncements = new ArrayList<>();
+    AnnouncementService adsService = new AnnouncementService();
+
 
     if (user.getAdList() != null && !user.getAdList().isEmpty()) {
         for (Long adId : user.getAdList()) {
@@ -46,10 +48,13 @@
         }
     }
 
+
     // Загружаем уведомления пользователя
     NotificationService notificationService = new NotificationService();
     List<ModerationMessage> userNotifications = notificationService.getUserNotifications(user.getId());
     int unreadCount = notificationService.getUnreadCount(user.getId());
+
+     */
 %>
 <!DOCTYPE html>
 <html lang="ru">
@@ -1086,7 +1091,7 @@
             </div>
             <div class="info-item">
                 <span class="info-label">Адрес:</span>
-                <span class="info-value"><%= user.getAddress() != null && !user.getAddress().isEmpty() ? user.getAddress() : "Не указан" %></span>
+                <span class="info-value"><%= user.getAddress() != null && user.getAddress() == null ? user.getAddress() : "Не указан" %></span>
             </div>
         </div>
 
