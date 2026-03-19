@@ -1,9 +1,7 @@
 package com.mipt.portal.database;
 
 import com.mipt.portal.announcement.*;
-import com.mipt.portal.annoucementContent.*;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;

@@ -27,8 +27,8 @@
     // Загружаем теги для редактирования
     if (request.getAttribute("availableTags") == null || request.getAttribute("currentTags") == null) {
         try {
-            com.mipt.portal.annoucementContent.tag.TagSelector tagSelector =
-                    new com.mipt.portal.annoucementContent.tag.TagSelector();
+            com.mipt.portal.announcementContent.tag.TagSelector tagSelector =
+                    new com.mipt.portal.announcementContent.tag.TagSelector();
             java.util.List<java.util.Map<String, Object>> availableTags = tagSelector.getTagsWithValues();
             request.setAttribute("availableTags", availableTags);
 
@@ -758,8 +758,8 @@
                         <option value="">Выберите категорию</option>
                         <%
                             try {
-                                com.mipt.portal.annoucementContent.tag.CategorySelector categorySelector =
-                                        new com.mipt.portal.annoucementContent.tag.CategorySelector();
+                                com.mipt.portal.announcementContent.tag.CategorySelector categorySelector =
+                                        new com.mipt.portal.announcementContent.tag.CategorySelector();
                                 java.util.List<java.util.Map<String, Object>> categories = categorySelector.getAllCategories();
 
                                 for (java.util.Map<String, Object> category : categories) {
@@ -803,8 +803,8 @@
                                 System.out.println("🔍 Ищем категорию в БД: '" + currentCategoryValue + "'");
 
                                 // Загружаем категории и находим ID выбранной
-                                com.mipt.portal.annoucementContent.tag.CategorySelector categorySelector =
-                                        new com.mipt.portal.annoucementContent.tag.CategorySelector();
+                                com.mipt.portal.announcementContent.tag.CategorySelector categorySelector =
+                                        new com.mipt.portal.announcementContent.tag.CategorySelector();
                                 java.util.List<java.util.Map<String, Object>> allCategories = categorySelector.getAllCategories();
 
                                 System.out.println("📊 Всего категорий в БД: " + allCategories.size());
@@ -832,8 +832,8 @@
                                 if (categoryId != null) {
 
                                     // Загружаем подкатегории
-                                    com.mipt.portal.annoucementContent.tag.SubcategorySelector subcategorySelector =
-                                            new com.mipt.portal.annoucementContent.tag.SubcategorySelector();
+                                    com.mipt.portal.announcementContent.tag.SubcategorySelector subcategorySelector =
+                                            new com.mipt.portal.announcementContent.tag.SubcategorySelector();
                                     java.util.List<java.util.Map<String, Object>> subcategories =
                                             subcategorySelector.getSubcategoriesByCategory(categoryId);
 

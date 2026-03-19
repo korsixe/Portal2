@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.mipt.portal.announcement.Announcement" %>
-<%@ page import="com.mipt.portal.annoucementContent.comment.Comment" %>
+<%@ page import="com.mipt.portal.announcementContent.comment.Comment" %>
 <%@ page import="com.mipt.portal.users.User" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>

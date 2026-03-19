@@ -1,4 +1,4 @@
-package com.mipt.portal.annoucementContent.comment;
+package com.mipt.portal.announcementContent.comment;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

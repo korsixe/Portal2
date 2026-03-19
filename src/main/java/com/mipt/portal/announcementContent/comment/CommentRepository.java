@@ -1,14 +1,8 @@
-package com.mipt.portal.annoucementContent.comment;
+package com.mipt.portal.announcementContent.comment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 

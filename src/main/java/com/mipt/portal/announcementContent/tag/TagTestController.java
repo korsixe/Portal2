@@ -1,10 +1,9 @@
-package com.mipt.portal.annoucementContent.tag;
+package com.mipt.portal.announcementContent.tag;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;

@@ -1,11 +1,7 @@
-package com.mipt.portal.annoucementContent.tag;
+package com.mipt.portal.announcementContent.tag;
 
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
 
 @SpringBootApplication
 public class TagsTest {

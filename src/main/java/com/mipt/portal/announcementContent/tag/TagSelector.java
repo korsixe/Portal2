@@ -1,4 +1,4 @@
-package com.mipt.portal.annoucementContent.tag;
+package com.mipt.portal.announcementContent.tag;
 
 import lombok.RequiredArgsConstructor;
 import java.sql.*;

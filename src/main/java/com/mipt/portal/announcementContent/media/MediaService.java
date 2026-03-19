@@ -1,6 +1,5 @@
-package com.mipt.portal.annoucementContent.media;
+package com.mipt.portal.announcementContent.media;
 
-import com.mipt.portal.announcement.Announcement;
 //import com.mipt.portal.announcement.AnnouncementRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

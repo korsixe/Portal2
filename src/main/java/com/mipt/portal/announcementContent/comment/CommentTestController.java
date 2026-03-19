@@ -1,10 +1,9 @@
-package com.mipt.portal.annoucementContent.comment;
+package com.mipt.portal.announcementContent.comment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-import java.util.List;
 
 @Slf4j
 @RestController
