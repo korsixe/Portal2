@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -24,10 +25,23 @@ public class SecurityConfig {
     http
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(authz -> authz
-            .requestMatchers("/", "/index.jsp", "/login.jsp", "/register.jsp", "/home.jsp").permitAll()
-            .requestMatchers("/*.jsp").permitAll()
-            .requestMatchers("/dashboard.jsp", "/edit-profile.jsp", "/create-ad.jsp",
-                "/edit-ad.jsp", "/delete-account-handler.jsp").authenticated()
+            // Публичные страницы
+            .requestMatchers(
+                new AntPathRequestMatcher("/"),
+                new AntPathRequestMatcher("/index.jsp"),
+                new AntPathRequestMatcher("/login.jsp"),
+                new AntPathRequestMatcher("/register.jsp"),
+                new AntPathRequestMatcher("/home.jsp"),
+                new AntPathRequestMatcher("/*.jsp")
+            ).permitAll()
+            // Защищенные страницы (требуют аутентификации)
+            .requestMatchers(
+                new AntPathRequestMatcher("/dashboard.jsp"),
+                new AntPathRequestMatcher("/edit-profile.jsp"),
+                new AntPathRequestMatcher("/create-ad.jsp"),
+                new AntPathRequestMatcher("/edit-ad.jsp"),
+                new AntPathRequestMatcher("/delete-account-handler.jsp")
+            ).authenticated()
             .anyRequest().permitAll()
         )
         .formLogin(form -> form
