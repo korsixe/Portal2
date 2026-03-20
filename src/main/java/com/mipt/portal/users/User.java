@@ -8,28 +8,55 @@ import java.util.HashSet;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import jakarta.persistence.*; // для бд
+import jakarta.persistence.*;
 
 @Data
 @NoArgsConstructor
 @Entity
-@Table(name = "users")  /// TODO:: добавить аннотации с колонками для бд
+@Table(name = "users")
 public class User {
 
   @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  @Column(name = "email", nullable = false, unique = true)
   private String email;
-  private String hashPassword; // хэш пароля
-  private String salt; // соль
+
+  @Column(name = "hash_password", nullable = false)
+  private String hashPassword;
+
+  @Column(name = "salt", nullable = false)
+  private String salt;
+
+  @Column(name = "name", nullable = false)
   private String name;
+
   @Embedded
   private Address address;
+
+  @Column(name = "study_program")
   private String studyProgram;
+
+  @Column(name = "course")
   private int course;
-  private double rating;
-  private int coins;
+
+  @Column(name = "rating", columnDefinition = "DOUBLE DEFAULT 3.0")
+  private double rating = 3.0;
+
+  @Column(name = "coins", columnDefinition = "INT DEFAULT 0")
+  private int coins = 0;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "user_ad_list", joinColumns = @JoinColumn(name = "user_id"))
+  @Column(name = "ad_id")
   private List<Long> adList;
-  private Set<Role> roles = new HashSet<>(); // роли пользователя
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+  @Enumerated(EnumType.STRING)
+  @Column(name = "role")
+  private Set<Role> roles = new HashSet<>();
 
   /**
    * Проверяет, есть ли у пользователя определенная роль

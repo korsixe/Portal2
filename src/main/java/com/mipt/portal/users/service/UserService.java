@@ -69,11 +69,7 @@ public class UserService {
       user.setAdList(new ArrayList<>());
       user.addRole(Role.USER); // устанавливаем роль пользователя по умолчанию
 
-      Optional<User> savedUserOpt = userRepository.save(user);
-      if (savedUserOpt.isEmpty()) {
-        return Optional.empty();
-      }
-      User savedUser = savedUserOpt.get();
+      User savedUser = userRepository.save(user);
 
       log.info("User registered successfully with ID: {} and email: {}", savedUser.getId(), email);
 
@@ -153,7 +149,6 @@ public class UserService {
         }
       }
 
-
       try {
         userValidator.validateEmail(user.getEmail());
         userValidator.validateName(user.getName());
@@ -162,13 +157,11 @@ public class UserService {
         return Optional.empty();
       }
 
-
       existing.setEmail(user.getEmail());
       existing.setName(user.getName());
       existing.setAddress(user.getAddress());
       existing.setStudyProgram(user.getStudyProgram());
       existing.setCourse(user.getCourse());
-
 
       if (user.getHashPassword() != null && !user.getHashPassword().isEmpty()) {
         try {
@@ -181,13 +174,8 @@ public class UserService {
         }
       }
 
-      Optional<User> updatedUserOpt = userRepository.save(existing);
-      if (updatedUserOpt.isEmpty()) {
-        return Optional.empty();
-      }
-      User updatedUser = updatedUserOpt.get();
+      User updatedUser = userRepository.save(existing);
       log.info("User updated successfully: {}", user.getEmail());
-
 
       updatedUser.setHashPassword(null);
       updatedUser.setSalt(null);
@@ -327,7 +315,7 @@ public class UserService {
 
       User user = userOpt.get();
       user.setRating(newRating);
-      userRepository.save(user);
+      userRepository.save(user); // save возвращает User, игнорируем
       log.info("User {} rating updated to {}", userId, newRating);
       return Optional.of(true);
 
@@ -433,14 +421,9 @@ public class UserService {
       User user = userOpt.get();
       user.addRole(Role.MODERATOR);
 
-      Optional<User> savedUserOpt = userRepository.save(user);
-      if (savedUserOpt.isPresent()) {
-        log.info("Moderator role assigned successfully to user: {}", userId);
-        return Optional.of(true);
-      }
-
-      log.error("Failed to save user after assigning moderator role: {}", userId);
-      return Optional.of(false);
+      userRepository.save(user);
+      log.info("Moderator role assigned successfully to user: {}", userId);
+      return Optional.of(true);
 
     } catch (Exception e) {
       log.error("Error assigning moderator role to user {}: {}", userId, e.getMessage());
@@ -464,14 +447,9 @@ public class UserService {
       User user = userOpt.get();
       user.removeRole(Role.MODERATOR);
 
-      Optional<User> savedUserOpt = userRepository.save(user);
-      if (savedUserOpt.isPresent()) {
-        log.info("Moderator role revoked successfully from user: {}", userId);
-        return Optional.of(true);
-      }
-
-      log.error("Failed to save user after revoking moderator role: {}", userId);
-      return Optional.of(false);
+      userRepository.save(user);
+      log.info("Moderator role revoked successfully from user: {}", userId);
+      return Optional.of(true);
 
     } catch (Exception e) {
       log.error("Error revoking moderator role from user {}: {}", userId, e.getMessage());
@@ -530,14 +508,9 @@ public class UserService {
       User user = userOpt.get();
       user.addRole(Role.ADMIN);
 
-      Optional<User> savedUserOpt = userRepository.save(user);
-      if (savedUserOpt.isPresent()) {
-        log.info("Admin role assigned successfully to user: {}", userId);
-        return Optional.of(true);
-      }
-
-      log.error("Failed to save user after assigning admin role: {}", userId);
-      return Optional.of(false);
+      userRepository.save(user);
+      log.info("Admin role assigned successfully to user: {}", userId);
+      return Optional.of(true);
 
     } catch (Exception e) {
       log.error("Error assigning admin role to user {}: {}", userId, e.getMessage());
@@ -561,14 +534,9 @@ public class UserService {
       User user = userOpt.get();
       user.removeRole(Role.ADMIN);
 
-      Optional<User> savedUserOpt = userRepository.save(user);
-      if (savedUserOpt.isPresent()) {
-        log.info("Admin role revoked successfully from user: {}", userId);
-        return Optional.of(true);
-      }
-
-      log.error("Failed to save user after revoking admin role: {}", userId);
-      return Optional.of(false);
+      userRepository.save(user);
+      log.info("Admin role revoked successfully from user: {}", userId);
+      return Optional.of(true);
 
     } catch (Exception e) {
       log.error("Error revoking admin role from user {}: {}", userId, e.getMessage());
