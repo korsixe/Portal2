@@ -295,7 +295,7 @@
                 <label for="addressFull">Полный адрес</label>
                 <input type="text" id="addressFull" name="addressFull"
                        value="<%= request.getAttribute("addressFull") != null ? request.getAttribute("addressFull") : "" %>"
-                       placeholder="г. Москва, ул. Примерная, д. 1, кв. 1">
+                       placeholder="г. Москва, ул. Примерная, д. 1">
             </div>
 
             <div class="row">
@@ -324,30 +324,8 @@
                     <label for="addressBuilding">Корпус</label>
                     <input type="text" id="addressBuilding" name="addressBuilding"
                            value="<%= request.getAttribute("addressBuilding") != null ? request.getAttribute("addressBuilding") : "" %>"
-                           placeholder="2">
+                           placeholder="2 (если есть)">
                 </div>
-            </div>
-
-            <div class="row">
-                <div class="form-group">
-                    <label for="addressApartment">Квартира</label>
-                    <input type="text" id="addressApartment" name="addressApartment"
-                           value="<%= request.getAttribute("addressApartment") != null ? request.getAttribute("addressApartment") : "" %>"
-                           placeholder="42">
-                </div>
-                <div class="form-group">
-                    <label for="addressEntrance">Подъезд</label>
-                    <input type="text" id="addressEntrance" name="addressEntrance"
-                           value="<%= request.getAttribute("addressEntrance") != null ? request.getAttribute("addressEntrance") : "" %>"
-                           placeholder="3">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="addressFloor">Этаж</label>
-                <input type="text" id="addressFloor" name="addressFloor"
-                       value="<%= request.getAttribute("addressFloor") != null ? request.getAttribute("addressFloor") : "" %>"
-                       placeholder="5">
             </div>
         </div>
 

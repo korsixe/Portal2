@@ -22,8 +22,12 @@ public class LoginController {
   }
 
   @GetMapping("/login")
-  public String showLoginPage() {
-    return "redirect:/login.jsp";
+  public String showLoginPage(Model model) {
+    if (model.containsAttribute("error")) {
+      model.addAttribute("message", "Неверный email или пароль");
+      model.addAttribute("messageType", "error");
+    }
+    return "login";
   }
 
   @PostMapping("/login")
@@ -43,9 +47,10 @@ public class LoginController {
 
       return "redirect:/dashboard.jsp";
     } else {
-      model.addAttribute("message", "Invalid email or password");
+      model.addAttribute("message", "❌ Неверный email или пароль");
       model.addAttribute("messageType", "error");
-      return "forward:/login.jsp";
+      model.addAttribute("email", email);
+      return "login";
     }
   }
 

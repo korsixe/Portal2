@@ -36,9 +36,6 @@ public class RegistrationController {
       @RequestParam(required = false) String addressStreet,
       @RequestParam(required = false) String addressHouseNumber,
       @RequestParam(required = false) String addressBuilding,
-      @RequestParam(required = false) String addressApartment,
-      @RequestParam(required = false) String addressEntrance,
-      @RequestParam(required = false) String addressFloor,
       @RequestParam String studyProgram,
       @RequestParam(defaultValue = "1") int course,
       Model model) {
@@ -58,15 +55,6 @@ public class RegistrationController {
     if (addressBuilding != null && !addressBuilding.isEmpty()) {
       address.setBuilding(addressBuilding);
     }
-    if (addressApartment != null && !addressApartment.isEmpty()) {
-      address.setApartment(addressApartment);
-    }
-    if (addressEntrance != null && !addressEntrance.isEmpty()) {
-      address.setEntrance(addressEntrance);
-    }
-    if (addressFloor != null && !addressFloor.isEmpty()) {
-      address.setFloor(addressFloor);
-    }
 
     log.info("Registering user with email: {}", email);
 
@@ -75,7 +63,6 @@ public class RegistrationController {
     );
 
     if (result.isPresent()) {
-      User savedUser = result.get();
       model.addAttribute("message", "Регистрация прошла успешно!");
       model.addAttribute("messageType", "success");
       model.addAttribute("registrationSuccess", true);
@@ -83,6 +70,7 @@ public class RegistrationController {
       model.addAttribute("message", "Ошибка при регистрации. Проверьте введенные данные.");
       model.addAttribute("messageType", "error");
       model.addAttribute("registrationSuccess", false);
+      // Возвращаем введенные данные обратно на форму
       model.addAttribute("email", email);
       model.addAttribute("name", name);
       model.addAttribute("addressFull", addressFull);
@@ -90,9 +78,6 @@ public class RegistrationController {
       model.addAttribute("addressStreet", addressStreet);
       model.addAttribute("addressHouseNumber", addressHouseNumber);
       model.addAttribute("addressBuilding", addressBuilding);
-      model.addAttribute("addressApartment", addressApartment);
-      model.addAttribute("addressEntrance", addressEntrance);
-      model.addAttribute("addressFloor", addressFloor);
       model.addAttribute("studyProgram", studyProgram);
       model.addAttribute("course", course);
     }

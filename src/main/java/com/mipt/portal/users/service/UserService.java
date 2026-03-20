@@ -59,8 +59,8 @@ public class UserService {
       User user = new User();
       user.setEmail(email);
       user.setName(name);
-      user.setHashPassword(passwordEncoder.encode(password));
       user.setSalt(UUID.randomUUID().toString().substring(0, 10));
+      user.setHashPassword(passwordEncoder.encode(password + user.getSalt()));
       user.setAddress(address);
       user.setStudyProgram(studyProgram);
       user.setCourse(course);
@@ -72,10 +72,6 @@ public class UserService {
       User savedUser = userRepository.save(user);
 
       log.info("User registered successfully with ID: {} and email: {}", savedUser.getId(), email);
-
-      savedUser.setHashPassword(null);
-      savedUser.setSalt(null);
-
       return Optional.of(savedUser);
 
     } catch (Exception e) {
@@ -112,14 +108,13 @@ public class UserService {
 
       User user = userOpt.get();
 
-      if (!passwordEncoder.matches(password, user.getHashPassword())) {
+      if (!passwordEncoder.matches(password + user.getSalt(), user.getHashPassword())) {
         log.warn("Login failed - invalid password for user: {}", email);
         return Optional.empty();
       }
 
       log.info("User logged in successfully: {}", email);
 
-      // Очищаем чувствительные данные
       user.setHashPassword(null);
       user.setSalt(null);
 
@@ -167,7 +162,8 @@ public class UserService {
         try {
           userValidator.validatePassword(user.getHashPassword());
           userValidator.isPasswordStrong(user.getHashPassword());
-          existing.setHashPassword(passwordEncoder.encode(user.getHashPassword()));
+          existing.setSalt(UUID.randomUUID().toString().substring(0, 10));
+          existing.setHashPassword(passwordEncoder.encode(user.getHashPassword() + existing.getSalt()));
         } catch (IllegalArgumentException e) {
           log.warn("Update failed - invalid password: {}", e.getMessage());
           return Optional.empty();
@@ -176,10 +172,6 @@ public class UserService {
 
       User updatedUser = userRepository.save(existing);
       log.info("User updated successfully: {}", user.getEmail());
-
-      updatedUser.setHashPassword(null);
-      updatedUser.setSalt(null);
-
       return Optional.of(updatedUser);
 
     } catch (Exception e) {

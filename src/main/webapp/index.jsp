@@ -190,8 +190,8 @@
     </div>
 
     <div class="button-group">
-        <a href="${pageContext.request.contextPath}/register" class="btn btn-primary">Зарегистрироваться</a>
-        <a href="${pageContext.request.contextPath}/login" class="btn btn-secondary">Войти</a>
+        <a href="${pageContext.request.contextPath}/register.jsp" class="btn btn-primary">Зарегистрироваться</a>
+        <a href="${pageContext.request.contextPath}/login.jsp" class="btn btn-secondary">Войти</a>
         <a href="${pageContext.request.contextPath}/" class="btn btn-secondary">На главную</a>
     </div>
 </div>

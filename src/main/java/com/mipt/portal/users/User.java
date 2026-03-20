@@ -41,10 +41,10 @@ public class User {
   @Column(name = "course")
   private int course;
 
-  @Column(name = "rating", columnDefinition = "DOUBLE DEFAULT 3.0")
+  @Column(name = "rating", columnDefinition = "FLOAT DEFAULT 3.0")
   private double rating = 3.0;
 
-  @Column(name = "coins", columnDefinition = "INT DEFAULT 0")
+  @Column(name = "coins", columnDefinition = "INTEGER DEFAULT 0")
   private int coins = 0;
 
   @ElementCollection(fetch = FetchType.EAGER)

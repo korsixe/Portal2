@@ -24,22 +24,12 @@ public class Address {
   @Column(name = "building")
   private String building;           // Корпус/строение
 
-  @Column(name = "apartment")
-  private String apartment;
-
   // Координаты для карт
   @Column(name = "latitude")
   private Double latitude;           // Широта
 
   @Column(name = "longitude")
   private Double longitude;          // Долгота
-
-  // Дополнительная информация
-  @Column(name = "entrance")
-  private String entrance;           // Подъезд
-
-  @Column(name = "floor")
-  private String floor;              // Этаж
 
   public Address(String fullAddress) {
     this.fullAddress = fullAddress;
@@ -58,7 +48,6 @@ public class Address {
     if (street != null) addressBuilder.append(", ").append(street);
     if (houseNumber != null) addressBuilder.append(", ").append(houseNumber);
     if (building != null && !building.isEmpty()) addressBuilder.append("/").append(building);
-    if (apartment != null) addressBuilder.append(", кв. ").append(apartment);
 
     String address = addressBuilder.toString();
     if (!address.isEmpty()) {
@@ -89,9 +78,6 @@ public class Address {
     if (street != null) formatted.append(", ул. ").append(street);
     if (houseNumber != null) formatted.append(", д. ").append(houseNumber);
     if (building != null && !building.isEmpty()) formatted.append("/").append(building);
-    if (apartment != null && !apartment.isEmpty()) formatted.append(", кв. ").append(apartment);
-    if (entrance != null && !entrance.isEmpty()) formatted.append(", подъезд ").append(entrance);
-    if (floor != null && !floor.isEmpty()) formatted.append(", этаж ").append(floor);
 
     return formatted.toString();
   }

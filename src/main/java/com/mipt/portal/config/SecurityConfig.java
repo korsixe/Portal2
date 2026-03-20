@@ -32,9 +32,13 @@ public class SecurityConfig {
                 new AntPathRequestMatcher("/login.jsp"),
                 new AntPathRequestMatcher("/register.jsp"),
                 new AntPathRequestMatcher("/home.jsp"),
-                new AntPathRequestMatcher("/*.jsp")
+                new AntPathRequestMatcher("/*.jsp"),
+                // Разрешаем доступ к нашим контроллерам
+                new AntPathRequestMatcher("/users/login"),
+                new AntPathRequestMatcher("/users/register"),
+                new AntPathRequestMatcher("/custom-login")
             ).permitAll()
-            // Защищенные страницы (требуют аутентификации)
+            // Защищенные страницы
             .requestMatchers(
                 new AntPathRequestMatcher("/dashboard.jsp"),
                 new AntPathRequestMatcher("/edit-profile.jsp"),
@@ -44,13 +48,11 @@ public class SecurityConfig {
             ).authenticated()
             .anyRequest().permitAll()
         )
-        .formLogin(form -> form
-            .loginPage("/login.jsp")
-            .loginProcessingUrl("/users/login")
-            .defaultSuccessUrl("/dashboard.jsp", true)
-            .failureUrl("/login.jsp?error=true")
-            .permitAll()
-        )
+        // Отключаем стандартную форму логина Spring Security
+        .formLogin(form -> form.disable())
+        // Отключаем HTTP Basic аутентификацию
+        .httpBasic(basic -> basic.disable())
+        // Настраиваем logout
         .logout(logout -> logout
             .logoutUrl("/logout")
             .logoutSuccessUrl("/")

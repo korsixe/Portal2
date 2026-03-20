@@ -1,7 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.mipt.portal.users.User" %>
 <%@ page import="com.mipt.portal.users.service.UserService" %>
-<%@ page import="com.mipt.portal.users.service.OperationResult" %>
+<%@ page import="com.mipt.portal.address.Address" %>
+<%@ page import="org.springframework.web.context.WebApplicationContext" %>
+<%@ page import="org.springframework.web.context.support.WebApplicationContextUtils" %>
 <%@ page import="java.util.Optional" %>
 <%
     User user = (User) session.getAttribute("user");
@@ -22,7 +24,11 @@
     if ("POST".equalsIgnoreCase(request.getMethod()) && "update".equals(request.getParameter("action"))) {
         try {
             String name = request.getParameter("name");
-            String address = request.getParameter("address");
+            String addressFull = request.getParameter("addressFull");
+            String addressCity = request.getParameter("addressCity");
+            String addressStreet = request.getParameter("addressStreet");
+            String addressHouseNumber = request.getParameter("addressHouseNumber");
+            String addressBuilding = request.getParameter("addressBuilding");
             String studyProgram = request.getParameter("studyProgram");
             String courseStr = request.getParameter("course");
             String newPassword = request.getParameter("newPassword");
@@ -40,6 +46,7 @@
             } else {
                 int course = Integer.parseInt(courseStr);
 
+                // Проверка пароля
                 if (newPassword != null && !newPassword.trim().isEmpty()) {
                     if (!newPassword.equals(confirmPassword)) {
                         message = "❌ Новые пароли не совпадают";
@@ -48,30 +55,60 @@
                         message = "❌ Пароль должен содержать минимум 8 символов";
                         messageType = "error";
                     } else {
-                        user.setPassword(newPassword);
+                        user.setHashPassword(newPassword);
                     }
                 }
 
                 if (message.isEmpty()) {
+                    Address address = new Address(addressFull);
+                    if (addressCity != null && !addressCity.isEmpty()) {
+                        address.setCity(addressCity);
+                    }
+                    if (addressStreet != null && !addressStreet.isEmpty()) {
+                        address.setStreet(addressStreet);
+                    }
+                    if (addressHouseNumber != null && !addressHouseNumber.isEmpty()) {
+                        address.setHouseNumber(addressHouseNumber);
+                    }
+                    if (addressBuilding != null && !addressBuilding.isEmpty()) {
+                        address.setBuilding(addressBuilding);
+                    }
+
+                    // Обновляем данные
                     user.setName(name.trim());
-                    //user.setAddress(address != null ? address.trim() : "");
+                    user.setAddress(address);
                     user.setStudyProgram(studyProgram);
                     user.setCourse(course);
 
-                    UserService userService = new UserService();
-                    Optional<User> updateResult = userService.updateUser(user);
+                    // Получаем Spring контекст и бин UserService
+                    ServletContext servletContext = request.getServletContext();
+                    WebApplicationContext springContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
 
-                    if (updateResult.isPresent()) {
-                        User updatedUser = updateResult.get();
-                        session.setAttribute("user", updatedUser);
-                        session.removeAttribute("canEditProfile");
-
-                        session.setAttribute("successMessage", "✅ Профиль успешно обновлен!");
-                        response.sendRedirect("dashboard.jsp");
-                        return;
-                    } else {
-                        message = "Failed to update profile. Please try again.";
+                    if (springContext == null) {
+                        message = "❌ Ошибка инициализации приложения";
                         messageType = "error";
+                    } else {
+                        UserService userService = springContext.getBean(UserService.class);
+
+                        Optional<User> existingUser = userService.findUserById(user.getId());
+                        if (existingUser.isPresent() && (newPassword == null || newPassword.trim().isEmpty())) {
+                            user.setHashPassword(existingUser.get().getHashPassword());
+                            user.setSalt(existingUser.get().getSalt());
+                        }
+
+                        Optional<User> updateResult = userService.updateUser(user);
+
+                        if (updateResult.isPresent()) {
+                            User updatedUser = updateResult.get();
+                            session.setAttribute("user", updatedUser);
+                            session.removeAttribute("canEditProfile");
+                            session.setAttribute("successMessage", "✅ Профиль успешно обновлен!");
+                            response.sendRedirect("dashboard.jsp");
+                            return;
+                        } else {
+                            message = "❌ Ошибка при обновлении профиля. Попробуйте позже.";
+                            messageType = "error";
+                        }
                     }
                 }
             }
@@ -84,8 +121,6 @@
         }
     }
 
-    // Сохраняем сообщения об ошибках и редиректим обратно на edit-profile.jsp
-    // (только в случае ошибки)
     if (!message.isEmpty()) {
         session.setAttribute("updateMessage", message);
         session.setAttribute("updateMessageType", messageType);
