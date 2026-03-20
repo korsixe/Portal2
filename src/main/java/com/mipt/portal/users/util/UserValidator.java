@@ -3,7 +3,7 @@ package com.mipt.portal.users.util;
 import org.springframework.stereotype.Component;
 import java.util.List;
 
-@Component  // Добавил @Component, чтобы Spring мог внедрять его в сервис
+@Component
 public class UserValidator {
 
   private static final List<String> STRENGTH_CRITERIA = List.of("!", "?", "@", "#", "$", "%", "&",
