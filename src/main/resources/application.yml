@@ -1,4 +1,9 @@
 spring:
+  mvc:
+    view:
+      suffix: .jsp
+    expose-context-beans-as-attributes: true
+
   datasource:
     url: jdbc:postgresql://localhost:5432/myproject
     username: myuser

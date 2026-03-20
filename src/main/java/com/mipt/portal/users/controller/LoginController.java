@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +19,11 @@ public class LoginController {
 
   public LoginController(UserService userService) {
     this.userService = userService;
+  }
+
+  @GetMapping("/login")
+  public String showLoginPage() {
+    return "redirect:/login.jsp";
   }
 
   @PostMapping("/login")
@@ -35,11 +41,16 @@ public class LoginController {
       session.setAttribute("userName", loggedInUser.getName());
       session.setAttribute("userEmail", loggedInUser.getEmail());
 
-      return "redirect:/dashboard";
+      return "redirect:/dashboard.jsp";
     } else {
       model.addAttribute("message", "Invalid email or password");
       model.addAttribute("messageType", "error");
-      return "login";
+      return "forward:/login.jsp";
     }
+  }
+
+  @GetMapping("/register")
+  public String showRegisterPage() {
+    return "redirect:/register.jsp";
   }
 }

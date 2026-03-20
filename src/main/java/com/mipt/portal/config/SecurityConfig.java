@@ -11,7 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true) // Включаем поддержку @PreAuthorize
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
   @Bean
@@ -24,19 +24,38 @@ public class SecurityConfig {
     http
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(authz -> authz
-            // Публичные эндпоинты
+            // Разрешаем доступ ко всем JSP файлам (для публичных страниц)
+            .requestMatchers("/", "/index.jsp", "/login.jsp", "/register.jsp", "/home.jsp").permitAll()
+            .requestMatchers("/*.jsp").permitAll()
+            // Статические ресурсы если есть
+            .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+            // API эндпоинты
             .requestMatchers("/api/users/register", "/api/users/login").permitAll()
-            // Системные эндпоинты для инициализации
             .requestMatchers("/api/system/**").permitAll()
             // Администраторские эндпоинты
             .requestMatchers("/api/admin/**").hasRole("ADMIN")
             // Модераторские эндпоинты
             .requestMatchers("/api/moderation/**").hasAnyRole("MODERATOR", "ADMIN")
-            // Остальные запросы требуют аутентификации
-            .anyRequest().authenticated()
+            // Страницы, требующие аутентификации (защищенные)
+            .requestMatchers("/dashboard.jsp", "/edit-profile.jsp", "/create-ad.jsp",
+                "/edit-ad.jsp", "/delete-account-handler.jsp").authenticated()
+            // Остальные запросы
+            .anyRequest().permitAll()
         )
-        .formLogin(form -> form.disable())
-        .httpBasic(basic -> basic.disable());
+        .formLogin(form -> form
+            .loginPage("/login.jsp")
+            .loginProcessingUrl("/users/login")
+            .defaultSuccessUrl("/dashboard.jsp", true)
+            .failureUrl("/login.jsp?error=true")
+            .permitAll()
+        )
+        .logout(logout -> logout
+            .logoutUrl("/logout")
+            .logoutSuccessUrl("/")
+            .invalidateHttpSession(true)
+            .deleteCookies("JSESSIONID")
+            .permitAll()
+        );
 
     return http.build();
   }
