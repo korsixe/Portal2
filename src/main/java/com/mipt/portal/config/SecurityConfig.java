@@ -24,22 +24,10 @@ public class SecurityConfig {
     http
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(authz -> authz
-            // Разрешаем доступ ко всем JSP файлам (для публичных страниц)
             .requestMatchers("/", "/index.jsp", "/login.jsp", "/register.jsp", "/home.jsp").permitAll()
             .requestMatchers("/*.jsp").permitAll()
-            // Статические ресурсы если есть
-            .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-            // API эндпоинты
-            .requestMatchers("/api/users/register", "/api/users/login").permitAll()
-            .requestMatchers("/api/system/**").permitAll()
-            // Администраторские эндпоинты
-            .requestMatchers("/api/admin/**").hasRole("ADMIN")
-            // Модераторские эндпоинты
-            .requestMatchers("/api/moderation/**").hasAnyRole("MODERATOR", "ADMIN")
-            // Страницы, требующие аутентификации (защищенные)
             .requestMatchers("/dashboard.jsp", "/edit-profile.jsp", "/create-ad.jsp",
                 "/edit-ad.jsp", "/delete-account-handler.jsp").authenticated()
-            // Остальные запросы
             .anyRequest().permitAll()
         )
         .formLogin(form -> form
