@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page import="java.util.*" %>
+<%@ page import="com.mipt.portal.users.User" %>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -7,7 +8,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal - Вход</title>
     <style>
-      /* Стили остаются без изменений - они те же, что и в вашем коде */
       * {
         margin: 0;
         padding: 0;
@@ -154,38 +154,6 @@
         border: 1px solid #f5c6cb;
       }
 
-      .register-link {
-        text-align: center;
-        margin-top: 20px;
-        color: #666;
-      }
-
-      .register-link a {
-        color: #667eea;
-        text-decoration: none;
-        font-weight: 500;
-      }
-
-      .register-link a:hover {
-        text-decoration: underline;
-      }
-
-      .forgot-password {
-        text-align: right;
-        margin-top: -10px;
-        margin-bottom: 20px;
-      }
-
-      .forgot-password a {
-        color: #667eea;
-        text-decoration: none;
-        font-size: 0.9rem;
-      }
-
-      .forgot-password a:hover {
-        text-decoration: underline;
-      }
-
       @media (max-width: 480px) {
         .portal-container {
           padding: 40px 20px;
@@ -212,82 +180,55 @@
     <div class="portal-logo">PORTAL</div>
     <div class="portal-subtitle">Вход</div>
 
-    <%-- Отображаем сообщения из контроллера (через Model) --%>
-    <c:if test="${not empty message}">
-        <div class="message ${messageType}">
-                ${message}
+    <%
+        String message = (String) request.getAttribute("message");
+        String messageType = (String) request.getAttribute("messageType");
+        String email = (String) request.getAttribute("email");
+
+        if (message == null) message = "";
+        if (messageType == null) messageType = "";
+        if (email == null) email = "";
+    %>
+
+    <% if (!message.isEmpty()) { %>
+    <div class="message <%= messageType %>">
+        <%= message %>
+    </div>
+    <% } %>
+
+    <%
+        User user = (User) session.getAttribute("user");
+        if (user != null) {
+    %>
+    <div class="button-group">
+        <a href="${pageContext.request.contextPath}/dashboard.jsp" class="btn btn-primary">Перейти в личный кабинет</a>
+        <a href="${pageContext.request.contextPath}/" class="btn btn-secondary">На главную</a>
+    </div>
+    <%
+    } else {
+    %>
+    <form action="${pageContext.request.contextPath}/users/login" method="post">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email"
+                   value="<%= email %>"
+                   placeholder="ivanov.ii@phystech.edu" required>
         </div>
-    </c:if>
 
-    <%-- Проверяем, залогинен ли пользователь --%>
-    <c:choose>
-        <c:when test="${not empty sessionScope.user}">
-            <%-- Пользователь уже залогинен --%>
-            <div class="button-group">
-                <a href="${pageContext.request.contextPath}/dashboard" class="btn btn-primary">Перейти в личный кабинет</a>
-                <a href="${pageContext.request.contextPath}/" class="btn btn-secondary">На главную</a>
-            </div>
-        </c:when>
-        <c:otherwise>
-            <%-- Форма входа отправляется на контроллер --%>
-            <form action="${pageContext.request.contextPath}/users/login" method="post">
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email"
-                           value="${param.email}"
-                           placeholder="ivanov.ii@phystech.edu" required>
-                </div>
+        <div class="form-group">
+            <label for="password">Пароль</label>
+            <input type="password" id="password" name="password"
+                   placeholder="Введите ваш пароль" required>
+        </div>
 
-                <div class="form-group">
-                    <label for="password">Пароль</label>
-                    <input type="password" id="password" name="password"
-                           placeholder="Введите ваш пароль" required>
-                    <div class="forgot-password">
-                        <a href="${pageContext.request.contextPath}/users/forgot-password">Забыли пароль?</a>
-                    </div>
-                </div>
-
-                <div class="button-group">
-                    <button type="submit" class="btn btn-primary">Войти</button>
-                    <a href="${pageContext.request.contextPath}/users/register" class="btn btn-secondary">Регистрация</a>
-                </div>
-            </form>
-        </c:otherwise>
-    </c:choose>
+        <div class="button-group">
+            <button type="submit" class="btn btn-primary">Войти</button>
+            <a href="${pageContext.request.contextPath}/users/register" class="btn btn-secondary">Регистрация</a>
+        </div>
+    </form>
+    <%
+        }
+    %>
 </div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const inputs = document.querySelectorAll('input');
-    inputs.forEach((input, index) => {
-      input.style.animationDelay = (index * 0.1) + 's';
-    });
-  });
-
-  const passwordInput = document.getElementById('password');
-  if (passwordInput) {
-    const togglePassword = document.createElement('span');
-    togglePassword.innerHTML = '👁️';
-    togglePassword.style.position = 'absolute';
-    togglePassword.style.right = '15px';
-    togglePassword.style.top = '50%';
-    togglePassword.style.transform = 'translateY(-50%)';
-    togglePassword.style.cursor = 'pointer';
-
-    passwordInput.style.position = 'relative';
-    passwordInput.parentElement.style.position = 'relative';
-    passwordInput.parentElement.appendChild(togglePassword);
-
-    togglePassword.addEventListener('click', function() {
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        togglePassword.innerHTML = '🔒';
-      } else {
-        passwordInput.type = 'password';
-        togglePassword.innerHTML = '👁️';
-      }
-    });
-  }
-</script>
 </body>
 </html>

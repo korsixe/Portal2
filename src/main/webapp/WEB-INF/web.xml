@@ -5,7 +5,7 @@
                              http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
          version="4.0">
 
-    <!-- Обработка ошибок -->
+    <!-- Обработка ошибок
     <error-page>
         <error-code>404</error-code>
         <location>/error.jsp</location>
@@ -20,7 +20,7 @@
         <exception-type>java.lang.Exception</exception-type>
         <location>/error.jsp</location>
     </error-page>
-
+-->
 
 
     <display-name>Portal</display-name>

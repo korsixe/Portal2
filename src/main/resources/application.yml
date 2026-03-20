@@ -23,6 +23,9 @@ server:
 
 # Логирование
 logging:
+  file:
+    name: logs/application.log
   level:
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
     com.mipt.portal: DEBUG
-    org.springframework.web: INFO
