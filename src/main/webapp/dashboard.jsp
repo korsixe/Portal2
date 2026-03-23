@@ -2,8 +2,8 @@
 <%@ page import="com.mipt.portal.users.User" %>
 <%@ page import="com.mipt.portal.announcement.AnnouncementService" %>
 <%@ page import="com.mipt.portal.announcement.Announcement" %>
-<%@ page import="com.mipt.portal.announcement.Category" %>
-<%@ page import="com.mipt.portal.announcement.Condition" %>
+<%@ page import="com.mipt.portal.announcement.enums.Category" %>
+<%@ page import="com.mipt.portal.announcement.enums.Condition" %>
 <%@ page import="com.mipt.portal.announcement.AdvertisementStatus" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
@@ -1058,6 +1058,17 @@
         </div>
     </div>
 
+    <div class="profile-actions">
+        <!-- Link to Moderator Panel -->
+        <% if (user.isModerator()) { %>
+        <a href="${pageContext.request.contextPath}/moderator/dashboard" class="btn" style="background-color: #ff6b6b; color: white;">Кабинет модератора</a>
+        <% } %>
+        <!-- Link to Admin Panel -->
+        <% if (user.isAdmin()) { %>
+        <a href="${pageContext.request.contextPath}/admin/dashboard" class="btn" style="background-color: #333; color: white;">Админка</a>
+        <% } %>
+    </div>
+
     <div class="stats">
         <div class="stat-card">
             <div class="stat-number"><%= userAnnouncements.size() %></div>
@@ -1337,7 +1348,7 @@
 
 <%!
     // Вспомогательные методы для JSP
-    private String getStatusClass(AdvertisementStatus status) {
+    private String getStatusClass(AdStatus status) {
         switch (status) {
             case ACTIVE: return "status-active";
             case DRAFT: return "status-draft";

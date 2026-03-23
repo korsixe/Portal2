@@ -1,14 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.moderator.ModeratorService" %>
-<%@ page import="com.mipt.portal.moderator.ModeratorRepository" %>
-<%@ page import="com.mipt.portal.announcement.AdsService" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal - Вход для модератора</title>
-    <style>
+...existing code...
         * {
             margin: 0;
             padding: 0;
@@ -220,56 +218,16 @@
     <div class="portal-logo">PORTAL</div>
     <div class="moderator-badge">MODERATOR</div>
 
-    <%
-        String message = "";
-        String messageType = "";
-        boolean loginSuccess = false;
-
-        if ("POST".equalsIgnoreCase(request.getMethod())) {
-            String email = request.getParameter("email");
-            String password = request.getParameter("password");
-
-            try {
-                // Инициализация сервисов для модератора
-                AdsService adsService = new AdsService();
-                ModeratorRepository moderatorRepository = new ModeratorRepository(); // Теперь без параметров
-                ModeratorService moderatorService = new ModeratorService(adsService, moderatorRepository);
-
-                // Попытка входа модератора
-                boolean loginResult = moderatorService.login(email, password);
-
-                if (loginResult) {
-                    message = "Успешный вход в систему модератора";
-                    messageType = "success";
-                    loginSuccess = true;
-
-                    // Сохраняем информацию о модераторе в сессию
-                    session.setAttribute("moderator", "true");
-                    session.setAttribute("moderatorEmail", email);
-                } else {
-                    message = "Неверный email или пароль";
-                    messageType = "error";
-                }
-            } catch (Exception e) {
-                message = "Ошибка при входе в систему: " + e.getMessage();
-                messageType = "error";
-                e.printStackTrace(); // Для отладки
-            }
-        }
-    %>
-
-    <% if (!message.isEmpty()) { %>
-    <div class="message <%= messageType %>">
-        <%= message %>
+    <c:if test="${not empty param.error}">
+    <div class="message error">
+        Ошибка входа. Проверьте данные.
     </div>
-    <% } %>
+    </c:if>
 
-    <% if (!loginSuccess) { %>
-    <form method="POST" action="login-moderator.jsp">
+    <form method="POST" action="${pageContext.request.contextPath}/users/login">
         <div class="form-group">
             <label for="email">Email</label>
             <input type="email" id="email" name="email"
-                   value="<%= request.getParameter("email") != null ? request.getParameter("email") : "" %>"
                    placeholder="moderator@phystech.edu" required>
         </div>
 
@@ -281,15 +239,9 @@
 
         <div class="button-group">
             <button type="submit" class="btn btn-moderator">Войти</button>
-            <a href="http://localhost:8080/portal/home.jsp" class="btn btn-secondary">На главную</a>
+            <a href="${pageContext.request.contextPath}/home.jsp" class="btn btn-secondary">На главную</a>
         </div>
     </form>
-    <% } else { %>
-    <div class="button-group">
-        <a href="moderation-bord.jsp" class="btn btn-moderator">Личный кабинет</a>
-        <a href="http://localhost:8080/portal/home.jsp" class="btn btn-secondary">На главную</a>
-    </div>
-    <% } %>
 </div>
 
 <script>
