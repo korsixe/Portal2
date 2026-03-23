@@ -1,6 +1,6 @@
 package com.mipt.portal.users.service;
 
-import com.mipt.portal.address.Address;
+import com.mipt.portal.entity.Address;
 import com.mipt.portal.users.Role;
 import com.mipt.portal.users.User;
 import com.mipt.portal.users.repository.UserRepository;

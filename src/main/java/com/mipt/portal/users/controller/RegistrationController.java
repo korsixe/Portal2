@@ -1,6 +1,6 @@
 package com.mipt.portal.users.controller;
 
-import com.mipt.portal.address.Address;
+import com.mipt.portal.entity.Address;
 import com.mipt.portal.users.User;
 import com.mipt.portal.users.service.UserService;
 import lombok.RequiredArgsConstructor;

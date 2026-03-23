@@ -2,7 +2,7 @@
 <%@ page import="com.mipt.portal.announcement.AnnouncementService" %>
 <%@ page import="com.mipt.portal.announcement.Announcement" %>
 <%@ page import="com.mipt.portal.announcement.AdvertisementStatus" %>
-<%@ page import="com.mipt.portal.moderator.message.ModerationMessageService" %>
+<%@ page import="com.mipt.portal.service.ModerationMessageService" %>
 <%
     // Проверка авторизации модератора
     if (session.getAttribute("moderator") == null) {

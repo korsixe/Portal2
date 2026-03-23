@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import com.mipt.portal.security.CustomUserDetailsService;
+import com.mipt.portal.service.CustomUserDetailsService;
 import com.mipt.portal.users.Role;
 
 @Controller

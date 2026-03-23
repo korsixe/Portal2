@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import com.mipt.portal.address.Address;
+import com.mipt.portal.entity.Address;
 
 import java.util.UUID;
 

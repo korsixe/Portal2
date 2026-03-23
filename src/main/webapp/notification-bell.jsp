@@ -1,8 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.notification.NotificationService" %>
-<%@ page import="com.mipt.portal.moderator.message.ModerationMessage" %>
-<%@ page import="com.mipt.portal.announcement.entity.Announcement" %>
-<%@ page import="com.mipt.portal.announcement.repository.AnnouncementRepository" %>
+<%@ page import="com.mipt.portal.service.NotificationService" %>
+<%@ page import="com.mipt.portal.entity.ModerationMessage" %>
+<%@ page import="com.mipt.portal.entity.Announcement" %>
+<%@ page import="com.mipt.portal.repository.AnnouncementRepository" %>
 <%@ page import="com.mipt.portal.users.User" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
