@@ -279,7 +279,7 @@
     </div>
 
     <div class="button-group">
-        <a href="home.jsp" class="btn btn-primary">На главную</a>
+        <a href="${pageContext.request.contextPath}/home.jsp" class="btn btn-primary">На главную</a>
         <a href="javascript:history.back()" class="btn btn-secondary">Назад</a>
     </div>
 </div>

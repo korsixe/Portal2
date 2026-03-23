@@ -380,7 +380,7 @@
             <a href="dashboard.jsp" class="btn btn-outline">
                 <span>📋</span> Мои объявления
             </a>
-            <a href="home.jsp" class="btn btn-success">
+            <a href="${pageContext.request.contextPath}/home.jsp" class="btn btn-success">
                 <span>🏠</span> На главную
             </a>
         </div>

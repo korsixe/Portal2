@@ -1,13 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.mipt.portal.users.User" %>
-<%@ page import="com.mipt.portal.announcement.AnnouncementService" %>
-<%@ page import="com.mipt.portal.announcement.Announcement" %>
-<%@ page import="com.mipt.portal.announcement.AdsFilter" %>
-<%@ page import="com.mipt.portal.announcement.Category" %>
-<%@ page import="com.mipt.portal.announcement.Condition" %>
+<%@ page import="com.mipt.portal.announcement.service.AnnouncementService" %>
+<%@ page import="com.mipt.portal.announcement.entity.Announcement" %>
+<%@ page import="com.mipt.portal.announcement.dto.AnnouncementFilterDto" %>
+<%@ page import="com.mipt.portal.announcement.enums.Category" %>
+<%@ page import="com.mipt.portal.announcement.enums.Condition" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="java.sql.SQLException" %>
+<%@ page import="org.springframework.web.context.WebApplicationContext" %>
+<%@ page import="org.springframework.web.context.support.WebApplicationContextUtils" %>
 <%
     // Проверяем авторизацию пользователя
     User user = (User) session.getAttribute("user");
@@ -33,55 +34,34 @@
         // Игнорируем неверные значения
     }
 
-    // Получаем все активные объявления
-    AnnouncementService AnnouncementService = new AnnouncementService();
-    AdsFilter adsFilter = new AdsFilter(AnnouncementService.getAdsRepository());
-    List<Long> recentAdsIds = null;
-    try {
-        recentAdsIds = AnnouncementService.getActiveAdIds();
-    } catch (SQLException e) {
-        throw new RuntimeException(e);
-    }
+    WebApplicationContext appContext =
+        WebApplicationContextUtils.getRequiredWebApplicationContext(application);
+    AnnouncementService announcementService = appContext.getBean(AnnouncementService.class);
 
-    if (searchQuery != null) {
-        try {
-            recentAdsIds = AnnouncementService.searchAdsByString(recentAdsIds, searchQuery);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    AnnouncementFilterDto filter = new AnnouncementFilterDto();
+    filter.setText(searchQuery);
+    filter.setMinPrice(minPrice);
+    filter.setMaxPrice(maxPrice);
+
     if (categoryFilter != null && !categoryFilter.isEmpty()) {
         try {
-            recentAdsIds = adsFilter.filterByCategory(recentAdsIds,
-                    Category.valueOf(categoryFilter));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            filter.setCategory(Category.valueOf(categoryFilter));
+        } catch (IllegalArgumentException ignored) {
+            filter.setCategory(null);
         }
     }
 
     if (conditionFilter != null && !conditionFilter.isEmpty()) {
         try {
-            recentAdsIds = adsFilter.filterByCondition(recentAdsIds,
-                    Condition.valueOf(conditionFilter));
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            filter.setCondition(Condition.valueOf(conditionFilter));
+        } catch (IllegalArgumentException ignored) {
+            filter.setCondition(null);
         }
     }
 
-    minPrice = minPrice == null ? -1 : minPrice;
-    maxPrice = maxPrice == null ? 2000000000 : maxPrice;
-
-    try {
-        recentAdsIds = adsFilter.filterByPrice(recentAdsIds, minPrice, maxPrice);
-    } catch (SQLException e) {
-        throw new RuntimeException(e);
-    }
-
-    List<Announcement> recentAds = new ArrayList<>();
-
-    for (long idAd : recentAdsIds) {
-        recentAds.add(AnnouncementService.getAd(idAd));
-    }
+    List<Announcement> recentAds = new ArrayList<>(
+        announcementService.searchApproved(filter, "createdAt", "DESC")
+    );
 %>
 
 
@@ -696,7 +676,7 @@
         <div class="portal-logo">PORTAL</div>
 
         <div class="search-section">
-            <form class="search-form" method="GET" action="home.jsp" id="searchForm">
+            <form class="search-form" method="GET" action="${pageContext.request.contextPath}/home.jsp" id="searchForm">
                 <input type="text"
                        class="search-input"
                        placeholder="🔍 Поиск объявлений..."

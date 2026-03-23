@@ -37,7 +37,7 @@ public class RegistrationController {
       @RequestParam(required = false) String addressHouseNumber,
       @RequestParam(required = false) String addressBuilding,
       @RequestParam String studyProgram,
-      @RequestParam(defaultValue = "1") int course,
+      @RequestParam(defaultValue = "0") int course,
       Model model) {
 
     // Создаем объект Address

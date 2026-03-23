@@ -350,7 +350,7 @@
         <div class="form-group">
             <label for="course">Курс *</label>
             <select id="course" name="course" required>
-                <option value="Не указывать">Не указывать</option>
+                <option value="0" <%= (request.getAttribute("course") != null && ((Integer) request.getAttribute("course")) == 0) ? "selected" : "" %>>Не указывать</option>
                 <% for (int i = 1; i <= 6; i++) {
                     Integer currentCourse = (Integer) request.getAttribute("course");
                 %>

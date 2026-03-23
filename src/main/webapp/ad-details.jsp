@@ -812,7 +812,7 @@
             <a href="login.jsp" class="btn btn-secondary">Войти</a>
             <a href="register.jsp" class="btn btn-primary">Регистрация</a>
             <% } %>
-            <a href="home.jsp" class="btn btn-secondary">На главную</a>
+            <a href="${pageContext.request.contextPath}/home.jsp" class="btn btn-secondary">На главную</a>
         </div>
     </div>
 
@@ -823,7 +823,7 @@
             <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;">🔍</div>
             <h2 style="color: #333; margin-bottom: 15px;">Объявление не найдено</h2>
             <p style="color: #666; margin-bottom: 30px;">Запрошенное объявление не существует или было удалено.</p>
-            <a href="home.jsp" class="btn btn-primary">Вернуться к объявлениям</a>
+            <a href="${pageContext.request.contextPath}/home.jsp" class="btn btn-primary">Вернуться к объявлениям</a>
         </div>
     </div>
     <% } else { %>
@@ -952,7 +952,7 @@
 
             <!-- Кнопки действий -->
             <div class="action-buttons">
-                <a href="home.jsp" class="btn btn-secondary">← Назад к объявлениям</a>
+                <a href="${pageContext.request.contextPath}/home.jsp" class="btn btn-secondary">← Назад к объявлениям</a>
                 <% if (user != null) { %>
                 <button onclick="contactSeller()" class="btn btn-primary">📞 Связаться с продавцом</button>
                 <% } else { %>

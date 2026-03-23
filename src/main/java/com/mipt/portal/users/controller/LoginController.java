@@ -34,7 +34,7 @@ public class LoginController {
       model.addAttribute("message", "Неверный email или пароль");
       model.addAttribute("messageType", "error");
     }
-    return "login";
+    return "redirect:/login.jsp";
   }
 
   @PostMapping("/login")
@@ -69,7 +69,7 @@ public class LoginController {
       model.addAttribute("message", "❌ Неверный email или пароль");
       model.addAttribute("messageType", "error");
       model.addAttribute("email", email);
-      return "login";
+      return "forward:/login.jsp";
     }
   }
 
