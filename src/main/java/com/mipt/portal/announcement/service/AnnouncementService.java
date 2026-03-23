@@ -62,4 +62,9 @@ public class AnnouncementService {
       return repository.save(ad);
     });
   }
+
+  public Long getUserIdByEmail(String email) {
+    // Тут должна быть логика поиска:
+    return 1L; // Пока заглушка
+  }
 }
