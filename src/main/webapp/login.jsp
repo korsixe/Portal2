@@ -197,7 +197,11 @@
     <% } %>
 
     <%
-        User user = (User) session.getAttribute("user");
+        Object sessionUserObj = session.getAttribute("user");
+        User user = sessionUserObj instanceof User ? (User) sessionUserObj : null;
+        if (sessionUserObj != null && user == null) {
+            session.invalidate();
+        }
         if (user != null) {
     %>
     <div class="button-group">

@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.announcement.Announcement" %>
-<%@ page import="com.mipt.portal.announcement.AdvertisementStatus" %>
+<%@ page import="com.mipt.portal.entity.Announcement" %>
+<%@ page import="com.mipt.portal.enums.AdStatus" %>
 <%
     response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     response.setHeader("Pragma", "no-cache");
@@ -358,12 +358,12 @@
             <h4>Что дальше?</h4>
             <ul>
                 <% if (announcement != null
-                        && announcement.getStatus() == AdvertisementStatus.UNDER_MODERATION) { %>
+                        && announcement.getStatus() == AdStatus.UNDER_MODERATION) { %>
                 <li>Ваше объявление отправлено на модерацию</li>
                 <li>Обычно модерация занимает до 24 часов</li>
                 <li>После одобрения объявление станет активным</li>
                 <% } else if (announcement != null
-                        && announcement.getStatus() == AdvertisementStatus.DRAFT) { %>
+                        && announcement.getStatus() == AdStatus.DRAFT) { %>
                 <li>Объявление сохранено как черновик</li>
                 <li>Вы можете отредактировать его в любое время</li>
                 <li>Чтобы опубликовать, измените статус на "На модерации"</li>

@@ -1,10 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.users.User" %>
+<%@ page import="com.mipt.portal.entity.User" %>
 <%@ page import="com.mipt.portal.service.UserService" %>
-<%@ page import="com.mipt.portal.users.service.OperationResult" %>
 <%
-    // Проверяем авторизацию
-    User user = (User) session.getAttribute("user");
+    Object sessionUserObj = session.getAttribute("user");
+    User user = sessionUserObj instanceof User ? (User) sessionUserObj : null;
+    if (sessionUserObj != null && user == null) {
+        session.invalidate();
+        response.sendRedirect("login.jsp");
+        return;
+    }
     if (user == null) {
         response.sendRedirect("login.jsp");
         return;

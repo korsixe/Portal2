@@ -1,24 +1,30 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.announcement.Announcement" %>
+<%@ page import="com.mipt.portal.entity.Announcement" %>
 <%@ page import="com.mipt.portal.entity.Comment" %>
 <%@ page import="com.mipt.portal.entity.User" %>
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.ArrayList" %>
-<%@ page import="java.sql.*" %>
-<%@ page import="java.util.Base64" %>
-<%@ page import="com.fasterxml.jackson.databind.ObjectMapper" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="com.mipt.portal.announcement.AnnouncementService" %>
+<%@ page import="com.mipt.portal.service.AnnouncementService" %>
+<%@ page import="com.mipt.portal.enums.Category" %>
+<%@ page import="com.mipt.portal.enums.Condition" %>
+<%@ page import="com.mipt.portal.service.ProfanityChecker" %>
+<%@ page import="org.springframework.web.context.WebApplicationContext" %>
+<%@ page import="org.springframework.web.context.support.WebApplicationContextUtils" %>
 
 
 <%
     // Получаем ID объявления из параметра
+    Object sessionUserObj = session.getAttribute("user");
+    User sessionUser = sessionUserObj instanceof User ? (User) sessionUserObj : null;
+    if (sessionUserObj != null && sessionUser == null) {
+        session.invalidate();
+    }
     String adIdParam = request.getParameter("id");
     Announcement announcement = null;
     List<Comment> comments = new ArrayList<>();
     String authorName = "Неизвестный пользователь";
     int photoCount = 0;
-    AnnouncementService adsService = new AnnouncementService();
+    WebApplicationContext appContext =
+        WebApplicationContextUtils.getRequiredWebApplicationContext(application);
+    AnnouncementService adsService = appContext.getBean(AnnouncementService.class);
 
     if (adIdParam != null && !adIdParam.trim().isEmpty()) {
         try {
@@ -38,9 +44,9 @@
                     announcement.setId(rs.getLong("id"));
                     announcement.setTitle(rs.getString("title"));
                     announcement.setDescription(rs.getString("description"));
-                    announcement.setCategory(com.mipt.portal.announcement.Category.values()[rs.getInt("category")]);
+                    announcement.setCategory(Category.values()[rs.getInt("category")]);
                     announcement.setSubcategory(rs.getString("subcategory"));
-                    announcement.setCondition(com.mipt.portal.announcement.Condition.values()[rs.getInt("condition")]);
+                    announcement.setCondition(Condition.values()[rs.getInt("condition")]);
                     announcement.setPrice(rs.getInt("price"));
                     announcement.setLocation(rs.getString("location"));
                     //announcement.setUserId(rs.getLong("user_id"));
@@ -161,7 +167,7 @@
 
     // Обработка добавления нового комментария
     if ("POST".equalsIgnoreCase(request.getMethod()) && "addComment".equals(request.getParameter("action"))) {
-        User user = (User) session.getAttribute("user");
+        User user = sessionUser;
 
         if (user == null) {
             request.setAttribute("error", "Для добавления комментария необходимо авторизоваться");
@@ -178,8 +184,8 @@
                 /*
 
 
-                com.mipt.portal.announcementContent.ProfanityChecker profanityChecker =
-                        new com.mipt.portal.announcementContent.ProfanityChecker();
+                ProfanityChecker profanityChecker =
+                        new ProfanityChecker();
                 boolean hasProfanity = profanityChecker.containsProfanity(commentText);
 
                 if (hasProfanity) {
@@ -803,7 +809,7 @@
         <div class="portal-logo">PORTAL</div>
         <div class="auth-buttons">
             <%
-                User user = (User) session.getAttribute("user");
+                User user = sessionUser;
                 if (user != null) {
             %>
             <a href="dashboard.jsp" class="btn btn-primary">Личный кабинет</a>

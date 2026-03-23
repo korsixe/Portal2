@@ -1,10 +1,17 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.users.User" %>
+<%@ page import="com.mipt.portal.entity.User" %>
 <%@ page import="com.mipt.portal.service.UserService" %>
-<%@ page import="com.mipt.portal.users.service.OperationResult" %>
+<%@ page import="org.springframework.web.context.WebApplicationContext" %>
+<%@ page import="org.springframework.web.context.support.WebApplicationContextUtils" %>
+<%@ page import="java.util.Optional" %>
 <%
-    // Проверяем авторизацию
-    User user = (User) session.getAttribute("user");
+    Object sessionUserObj = session.getAttribute("user");
+    User user = sessionUserObj instanceof User ? (User) sessionUserObj : null;
+    if (sessionUserObj != null && user == null) {
+        session.invalidate();
+        response.sendRedirect("login.jsp");
+        return;
+    }
     if (user == null) {
         response.sendRedirect("login.jsp");
         return;
@@ -21,21 +28,21 @@
                 message = "❌ Введите пароль для подтверждения";
                 messageType = "error";
             } else {
-                // Проверяем пароль
-                UserService userService = new UserService();
-                OperationResult<User> loginResult = userService.loginUser(user.getEmail(), confirmPassword);
+                WebApplicationContext appContext =
+                    WebApplicationContextUtils.getRequiredWebApplicationContext(application);
+                UserService userService = appContext.getBean(UserService.class);
+                Optional<User> loginResult = userService.loginUser(user.getEmail(), confirmPassword);
 
-                if (loginResult.isSuccess()) {
-                    // Удаляем аккаунт
-                    OperationResult<Boolean> deleteResult = userService.deleteUser(user.getId());
+                if (loginResult.isPresent()) {
+                    Optional<Boolean> deleteResult = userService.deleteUser(user.getId());
 
-                    if (deleteResult.isSuccess()) {
+                    if (deleteResult.isPresent() && deleteResult.get()) {
                         // Завершаем сессию и перенаправляем на главную
                         session.invalidate();
                         response.sendRedirect("index.jsp?message=Аккаунт успешно удален");
                         return;
                     } else {
-                        message = deleteResult.getMessage();
+                        message = "❌ Ошибка при удалении аккаунта";
                         messageType = "error";
                     }
                 } else {
