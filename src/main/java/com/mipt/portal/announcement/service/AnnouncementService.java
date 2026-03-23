@@ -1,8 +1,11 @@
-package com.mipt.portal.announcement;
+package com.mipt.portal.announcement.service;
 
+import com.mipt.portal.announcement.specification.AnnouncementSpecification;
 import com.mipt.portal.announcement.dto.AnnouncementCreateDto;
 import com.mipt.portal.announcement.dto.AnnouncementFilterDto;
-import jakarta.validation.constraints.Null;
+import com.mipt.portal.announcement.entity.Announcement;
+import com.mipt.portal.announcement.enums.AdStatus;
+import com.mipt.portal.announcement.repository.AnnouncementRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -58,9 +61,5 @@ public class AnnouncementService {
       ad.setStatus(newStatus);
       return repository.save(ad);
     });
-  }
-
-  public Long getUserIdByEmail(String email) {
-    return 0L;
   }
 }
