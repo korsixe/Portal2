@@ -1,19 +1,18 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.mipt.portal.users.User" %>
-<%@ page import="com.mipt.portal.announcement.AnnouncementService" %>
-<%@ page import="com.mipt.portal.announcement.Announcement" %>
+<%@ page import="com.mipt.portal.announcement.entity.Announcement" %>
 <%@ page import="com.mipt.portal.announcement.enums.Category" %>
 <%@ page import="com.mipt.portal.announcement.enums.Condition" %>
-<%@ page import="com.mipt.portal.announcement.AdvertisementStatus" %>
+<%@ page import="com.mipt.portal.announcement.enums.AdStatus" %>
+<%@ page import="com.mipt.portal.announcement.repository.AnnouncementRepository" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="com.mipt.portal.users.service.UserService" %>
-<%@ page import="com.mipt.portal.notification.NotificationService" %>
-<%@ page import="com.mipt.portal.moderator.message.ModerationMessage" %>
+<%@ page import="org.springframework.web.context.WebApplicationContext" %>
+<%@ page import="org.springframework.web.context.support.WebApplicationContextUtils" %>
 <%
     User user = (User) session.getAttribute("user");
     if (user == null) {
-        response.sendRedirect("login.jsp");
+        response.sendRedirect(request.getContextPath() + "/login.jsp");
         return;
     }
 
@@ -24,37 +23,19 @@
     }
 
     List<Announcement> userAnnouncements = new ArrayList<>();
-    /*
-    // Обновляем данные пользователя
-    UserService userService = new UserService();
-    User freshUser = userService.findUserById(user.getId()).getData();
-    session.setAttribute("user", freshUser);
-    user = freshUser; // Обновляем локальную переменную
-
-    // Загружаем объявления пользователя
-    AnnouncementService adsService = new AnnouncementService();
-
+    WebApplicationContext appContext =
+        WebApplicationContextUtils.getRequiredWebApplicationContext(application);
+    AnnouncementRepository announcementRepository = appContext.getBean(AnnouncementRepository.class);
 
     if (user.getAdList() != null && !user.getAdList().isEmpty()) {
         for (Long adId : user.getAdList()) {
-            try {
-                Announcement ad = adsService.getAd(adId);
-                if (ad != null && !ad.getStatus().isDelete()) {
+            announcementRepository.findById(adId).ifPresent(ad -> {
+                if (ad.getStatus() != AdStatus.DELETED) {
                     userAnnouncements.add(ad);
                 }
-            } catch (Exception e) {
-                System.err.println("Ошибка при загрузке объявления ID " + adId + ": " + e.getMessage());
-            }
+            });
         }
     }
-
-
-    // Загружаем уведомления пользователя
-    NotificationService notificationService = new NotificationService();
-    List<ModerationMessage> userNotifications = notificationService.getUserNotifications(user.getId());
-    int unreadCount = notificationService.getUnreadCount(user.getId());
-
-     */
 %>
 <!DOCTYPE html>
 <html lang="ru">

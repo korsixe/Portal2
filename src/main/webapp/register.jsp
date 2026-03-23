@@ -361,13 +361,13 @@
 
         <div class="button-group">
             <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
-            <a href="/login" class="btn btn-secondary">Войти</a>
+            <a href="${pageContext.request.contextPath}/login.jsp" class="btn btn-secondary">Войти</a>
         </div>
     </form>
     <% } else { %>
     <div class="button-group">
-        <a href="/login" class="btn btn-primary">Войти в аккаунт</a>
-        <a href="/home" class="btn btn-secondary">На главную</a>
+        <a href="${pageContext.request.contextPath}/login.jsp" class="btn btn-primary">Войти в аккаунт</a>
+        <a href="${pageContext.request.contextPath}/home.jsp" class="btn btn-secondary">На главную</a>
     </div>
     <% } %>
 </div>
