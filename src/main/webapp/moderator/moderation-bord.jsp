@@ -1,9 +1,6 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.moderator.ModeratorService" %>
-<%@ page import="com.mipt.portal.moderator.ModeratorRepository" %>
-<%@ page import="com.mipt.portal.announcement.AdsService" %>
-<%@ page import="com.mipt.portal.announcement.Announcement" %>
-<%@ page import="java.util.List" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -744,7 +741,7 @@
 
     <div class="navigation">
         <div class="nav-group">
-            <a href="http://localhost:8080/portal/home.jsp" class="btn btn-primary">На главную</a>
+            <a href="${pageContext.request.contextPath}/home.jsp" class="btn btn-primary">На главную</a>
             <a href="login-moderator.jsp?logout=true" class="btn btn-secondary">Выйти</a>
         </div>
     </div>
@@ -752,143 +749,85 @@
     <div class="content">
         <h2 class="section-title">Панель модерации</h2>
 
-        <%
-            AdsService adsService = new AdsService();
-            List<Long> pendingAds = adsService.getModerAdIds();
-            int pendingCount = pendingAds.size();
-        %>
-
         <div class="stats-cards">
             <div class="stat-card">
-                <div class="stat-number"><%= pendingCount %></div>
+                <div class="stat-number">${ads != null ? ads.size() : 0}</div>
                 <div class="stat-label">Ожидают модерации</div>
             </div>
         </div>
 
         <h3 class="section-title">Объявления на модерации</h3>
 
-        <% if (pendingAds.isEmpty()) { %>
+        <c:if test="${empty ads}">
         <div class="empty-state">
             <div>📋</div>
             <p>Нет объявлений для модерации</p>
             <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.7;">Все объявления проверены и обработаны</p>
         </div>
-        <% } else { %>
+        </c:if>
+
+        <c:if test="${not empty ads}">
         <div class="ads-list">
-            <% for (int i = 0; i < pendingAds.size(); i++) {
-                Long adId = pendingAds.get(i);
-                Announcement ad = adsService.getAd(adId);
-                if (ad != null) {
-                    // Получаем количество фото через AdsService - как в ad-details.jsp
-                    int photoCount = 0;
-                    try {
-                        List<byte[]> photos = adsService.getAdPhotosBytes(adId);
-                        photoCount = photos != null ? photos.size() : 0;
-                    } catch (Exception e) {
-                        photoCount = 0;
-                    }
-            %>
+            <c:forEach var="ad" items="${ads}">
             <div class="ad-card">
                 <div class="ad-photo-section">
                     <div class="ad-photo-container">
-                        <% if (photoCount > 0) { %>
-                        <img src="<%= request.getContextPath() %>/ad-photo?adId=<%= adId %>&photoIndex=0&t=<%= System.currentTimeMillis() %>"
-                             alt="Фото объявления"
-                             class="ad-photo"
-                             onerror="handlePhotoError(this)">
-                        <div class="photo-placeholder" style="display: none;">
-                            <span style="font-size: 3rem;">📷</span>
-                            <span style="font-size: 0.9rem; margin-top: 5px;">Нет фото</span>
-                        </div>
-                        <% if (photoCount > 1) { %>
-                        <div class="photo-counter">+<%= photoCount-1 %></div>
-                        <% } %>
-                        <% } else { %>
+                        <c:if test="${not empty ad.photoUrls}">
+                             <img src="${ad.photoUrls[0]}" class="ad-photo">
+                        </c:if>
+                        <c:if test="${empty ad.photoUrls}">
                         <div class="photo-placeholder">
                             <span style="font-size: 3rem;">📷</span>
                             <span style="font-size: 0.9rem; margin-top: 5px;">Нет фото</span>
                         </div>
-                        <% } %>
+                        </c:if>
                     </div>
                 </div>
 
                 <div class="ad-content">
                     <div class="ad-title">
-                        <%= ad.getTitle() != null ? ad.getTitle() : "Без названия" %>
+                        ${ad.title}
                         <span class="status-badge status-pending">На модерации</span>
                     </div>
 
                     <div class="ad-meta">
-                        <% if (ad.getCategory() != null) { %>
-                        <span>Категория: <%= ad.getCategory().getDisplayName() %></span>
-                        <% } %>
-                        <% if (ad.getSubcategory() != null && !ad.getSubcategory().isEmpty()) { %>
-                        <span>Подкатегория: <%= ad.getSubcategory() %></span>
-                        <% } else { %>
-                        <span>Подкатегория: Не указана</span>
-                        <% } %>
-                        <% if (ad.getCreatedAt() != null) { %>
-                        <span>Дата: <%= formatDate(ad.getCreatedAt()) %></span>
-                        <% } %>
+                        <span>Категория: ${ad.category.displayName}</span>
+                        <span>Подкатегория: ${ad.subcategory}</span>
+                        <span>Дата: <fmt:formatDate value="${ad.createdAt}" pattern="dd.MM.yyyy HH:mm" /></span>
                     </div>
 
                     <div class="ad-price">
-                        <%
-                            int price = ad.getPrice();
-                            if (price == -1) {
-                        %>
-                        Договорная
-                        <% } else if (price == 0) { %>
-                        Бесплатно
-                        <% } else { %>
-                        <%= String.format("%,d руб.", price) %>
-                        <% } %>
+                        ${ad.price} руб.
                     </div>
 
-                    <% if (ad.getLocation() != null && !ad.getLocation().isEmpty()) { %>
                     <div class="ad-location">
-                        <span style="font-size: 1.1rem;">📍</span> <%= ad.getLocation() %>
+                        <span style="font-size: 1.1rem;">📍</span> ${ad.location}
                     </div>
-                    <% } %>
 
-                    <% if (ad.getDescription() != null && !ad.getDescription().isEmpty()) { %>
                     <div class="ad-description">
-                        <%= ad.getDescription() %>
+                        ${ad.description}
                     </div>
-                    <% } else { %>
-                    <div class="ad-description" style="color: #999; font-style: italic;">
-                        Описание отсутствует
-                    </div>
-                    <% } %>
 
                     <div class="ad-footer">
                         <div class="ad-views">
-                            <span style="font-size: 1.1rem;">👁️</span> <%= ad.getViewCount() != null ? ad.getViewCount() : 0 %> просмотров
-                        </div>
-                        <div class="ad-date">
-                            <span style="font-size: 1.1rem;">📅</span> <%= formatDate(ad.getCreatedAt()) %>
+                            <span style="font-size: 1.1rem;">👁️</span> ${ad.viewCount} просмотров
                         </div>
                     </div>
 
                     <div class="moderation-actions">
-                        <button type="button" class="btn btn-approve" data-action="approve" data-ad-id="<%= adId %>" data-ad-title="<%= ad.getTitle() != null ? ad.getTitle() : "Без названия" %>">
+                        <button type="button" class="btn btn-approve" data-action="approve" data-ad-id="${ad.id}" data-ad-title="${ad.title}">
                             Одобрить
                         </button>
 
-                        <button type="button" class="btn btn-reject" data-action="reject" data-ad-id="<%= adId %>" data-ad-title="<%= ad.getTitle() != null ? ad.getTitle() : "Без названия" %>">
+                        <button type="button" class="btn btn-reject" data-action="reject" data-ad-id="${ad.id}" data-ad-title="${ad.title}">
                             Отозвать на доработку
-                        </button>
-
-                        <button type="button" class="btn btn-delete" data-action="delete" data-ad-id="<%= adId %>" data-ad-title="<%= ad.getTitle() != null ? ad.getTitle() : "Без названия" %>">
-                            Удалить
                         </button>
                     </div>
                 </div>
             </div>
-            <% } %>
-            <% } %>
+            </c:forEach>
         </div>
-        <% } %>
+        </c:if>
     </div>
 </div>
 

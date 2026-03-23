@@ -514,10 +514,10 @@
             <% if (announcement != null) { %>
 
             <% } %>
-            <a href="dashboard.jsp" class="btn btn-primary">
+            <a href="${pageContext.request.contextPath}/dashboard.jsp" class="btn btn-primary">
                 <span>📋</span> К моим объявлениям
             </a>
-            <a href="home.jsp" class="btn btn-success">
+            <a href="${pageContext.request.contextPath}/home.jsp" class="btn btn-success">
                 <span></span> На главную
             </a>
         </div>
@@ -527,7 +527,7 @@
 <script>
     // Автоматический редирект на dashboard через 30 секунд
     setTimeout(function () {
-        window.location.href = 'dashboard.jsp';
+        window.location.href = '${pageContext.request.contextPath}/dashboard.jsp';
     }, 30000);
 
     // Сообщение при попытке уйти со страницы

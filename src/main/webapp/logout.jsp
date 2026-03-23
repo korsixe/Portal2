@@ -6,5 +6,5 @@
     }
 
     // Перенаправляем на главную страницу с сообщением
-    response.sendRedirect("home.jsp?message=Вы успешно вышли из аккаунта");
+    response.sendRedirect(request.getContextPath() + "/home.jsp?message=Вы успешно вышли из аккаунта");
 %>

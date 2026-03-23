@@ -1,21 +1,35 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.mipt.portal.notification.NotificationService" %>
 <%@ page import="com.mipt.portal.moderator.message.ModerationMessage" %>
-<%@ page import="com.mipt.portal.announcement.AnnouncementService" %>
-<%@ page import="com.mipt.portal.announcement.Announcement" %>
-<%@ page import="java.util.List" %>
+<%@ page import="com.mipt.portal.announcement.entity.Announcement" %>
+<%@ page import="com.mipt.portal.announcement.repository.AnnouncementRepository" %>
 <%@ page import="com.mipt.portal.users.User" %>
+<%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
+<%@ page import="org.springframework.web.context.WebApplicationContext" %>
+<%@ page import="org.springframework.web.context.support.WebApplicationContextUtils" %>
 <%
     User user = (User) session.getAttribute("user");
     List<ModerationMessage> userNotifications = new ArrayList<>();
     int unreadCount = 0;
 
+    NotificationService notificationService = null;
+    AnnouncementRepository announcementRepository = null;
+    List<Long> adIds = new ArrayList<>();
+
     if (user != null) {
         try {
-            NotificationService notificationService = new NotificationService();
-            userNotifications = notificationService.getUserNotifications(user.getId());
-            unreadCount = notificationService.getUnreadCount(user.getId());
+            WebApplicationContext appContext =
+                WebApplicationContextUtils.getRequiredWebApplicationContext(application);
+            notificationService = appContext.getBean(NotificationService.class);
+            announcementRepository = appContext.getBean(AnnouncementRepository.class);
+
+            if (user.getAdList() != null) {
+                adIds = user.getAdList();
+            }
+
+            userNotifications = notificationService.getUserNotifications(adIds);
+            unreadCount = notificationService.getUnreadCount(adIds);
         } catch (Exception e) {
             System.err.println("Ошибка загрузки уведомлений: " + e.getMessage());
         }
@@ -47,8 +61,9 @@
             </div>
             <% } else { %>
             <% for (ModerationMessage notification : userNotifications) {
-                AnnouncementService adService = new AnnouncementService();
-                Announcement ad = adService.getAd(notification.getAdId());
+                Announcement ad = (announcementRepository != null)
+                    ? announcementRepository.findById(notification.getAdId()).orElse(null)
+                    : null;
                 String adTitle = (ad != null) ? ad.getTitle() : "Объявление";
                 String notificationClass = Boolean.TRUE.equals(notification.getIsRead()) ? "notification-item read" : "notification-item unread";
 
