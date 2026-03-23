@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="com.mipt.portal.users.service.UserService" %>
+<%@ page import="com.mipt.portal.service.UserService" %>
 <%@ page import="com.mipt.portal.users.User" %>
 <%@ page import="java.sql.SQLException" %>
 <%

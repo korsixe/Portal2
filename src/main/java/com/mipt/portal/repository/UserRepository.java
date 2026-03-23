@@ -1,6 +1,6 @@
-package com.mipt.portal.users.repository;
+package com.mipt.portal.repository;
 
-import com.mipt.portal.users.User;
+import com.mipt.portal.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

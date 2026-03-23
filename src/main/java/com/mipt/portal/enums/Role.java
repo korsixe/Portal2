@@ -1,4 +1,4 @@
-package com.mipt.portal.users;
+package com.mipt.portal.enums;
 
 /**
  * Перечисление ролей пользователей в системе.

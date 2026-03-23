@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.*" %>
-<%@ page import="com.mipt.portal.users.User" %>
+<%@ page import="com.mipt.portal.entity.User" %>
 <!DOCTYPE html>
 <html lang="ru">
 <head>

@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.mipt.portal.users.User" %>
-<%@ page import="com.mipt.portal.users.service.UserService" %>
+<%@ page import="com.mipt.portal.service.UserService" %>
 <%@ page import="com.mipt.portal.entity.Address" %>
 <%@ page import="org.springframework.web.context.WebApplicationContext" %>
 <%@ page import="org.springframework.web.context.support.WebApplicationContextUtils" %>

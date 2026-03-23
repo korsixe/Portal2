@@ -6,7 +6,7 @@ import com.mipt.portal.dto.AnnouncementFilterDto;
 import com.mipt.portal.entity.Announcement;
 import com.mipt.portal.enums.AdStatus;
 import com.mipt.portal.repository.AnnouncementRepository;
-import com.mipt.portal.users.repository.UserRepository;
+import com.mipt.portal.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;

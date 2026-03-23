@@ -1,4 +1,4 @@
-package com.mipt.portal.users.util;
+package com.mipt.portal.util;
 
 import org.springframework.stereotype.Component;
 import java.util.List;

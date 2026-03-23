@@ -1,7 +1,7 @@
 package com.mipt.portal.controller;
 
-import com.mipt.portal.users.User;
-import com.mipt.portal.users.service.UserService;
+import com.mipt.portal.entity.User;
+import com.mipt.portal.service.UserService;
 import com.mipt.portal.entity.Address;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

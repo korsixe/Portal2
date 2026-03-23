@@ -1,10 +1,10 @@
-package com.mipt.portal.users.service;
+package com.mipt.portal.service;
 
 import com.mipt.portal.entity.Address;
-import com.mipt.portal.users.Role;
-import com.mipt.portal.users.User;
-import com.mipt.portal.users.repository.UserRepository;
-import com.mipt.portal.users.util.UserValidator;
+import com.mipt.portal.enums.Role;
+import com.mipt.portal.entity.User;
+import com.mipt.portal.repository.UserRepository;
+import com.mipt.portal.util.UserValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;

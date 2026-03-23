@@ -1,7 +1,7 @@
-package com.mipt.portal.users.controller;
+package com.mipt.portal.controller.users;
 
-import com.mipt.portal.users.User;
-import com.mipt.portal.users.service.UserService;
+import com.mipt.portal.entity.User;
+import com.mipt.portal.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.mipt.portal.service.CustomUserDetailsService;
-import com.mipt.portal.users.Role;
+import com.mipt.portal.enums.Role;
 
 @Controller
 @RequestMapping("/users")

@@ -1,6 +1,7 @@
-package com.mipt.portal.users;
+package com.mipt.portal.entity;
 
 import com.mipt.portal.entity.Address;
+import com.mipt.portal.enums.Role;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
