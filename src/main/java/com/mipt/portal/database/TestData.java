@@ -1,6 +1,10 @@
 package com.mipt.portal.database;
 
-import com.mipt.portal.announcement.*;
+import com.mipt.portal.announcement.enums.Category;
+import com.mipt.portal.announcement.enums.Condition;
+import com.mipt.portal.announcement.enums.AdStatus;
+import com.mipt.portal.announcement.repository.AnnouncementRepository;
+import com.mipt.portal.announcement.service.AnnouncementService;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -42,51 +46,51 @@ public class TestData {
       Long userId1 = adsService.getUserIdByEmail("shabunina.ao@phystech.edu");
       if (userId1 != null) {
         testCreateAd(userId1, "MacBook Pro 13\" 2020", "Отличный MacBook в идеальном состоянии",
-            Category.ELECTRONICS, Condition.NEW, 75000, AdvertisementStatus.ACTIVE);
+                Category.ELECTRONICS, Condition.NEW, 75000, AdStatus.ACTIVE);
         testCreateAd(userId1, "Учебник по матану", "Сборник задач за 1 курс", Category.BOOKS,
-            Condition.NEW, 500, AdvertisementStatus.ACTIVE);
+                Condition.NEW, 500, AdStatus.ACTIVE);
         testCreateAd(userId1, "Настольная лампа", "Светодиодная лампа с регулировкой",
-            Category.ELECTRONICS, Condition.USED, 1200, AdvertisementStatus.DRAFT);
+                Category.ELECTRONICS, Condition.USED, 1200, AdStatus.DRAFT);
         testCreateAd(userId1, "Калькулятор Casio", "Инженерный калькулятор", Category.ELECTRONICS,
-            Condition.BROKEN, 800, AdvertisementStatus.UNDER_MODERATION);
+                Condition.BROKEN, 800, AdStatus.UNDER_MODERATION);
       }
 
       // Мария Соколова
       Long userId2 = adsService.getUserIdByEmail("ivanov.ii@phystech.edu");
       if (userId2 != null) {
         testCreateAd(userId2, "Учебник по физике", "Курс общей физики Ландсберга", Category.BOOKS,
-            Condition.USED, 1500, AdvertisementStatus.ACTIVE);
+                Condition.USED, 1500, AdStatus.ACTIVE);
         testCreateAd(userId2, "Микроскоп школьный", "Детский микроскоп для начинающих",
-            Category.CHILDREN,
-            Condition.USED, 2000, AdvertisementStatus.ACTIVE);
+                Category.CHILDREN,
+                Condition.USED, 2000, AdStatus.ACTIVE);
         testCreateAd(userId2, "Рюкзак студенческий", "Вместительный рюкзак для ноутбука",
-            Category.OTHER, Condition.USED, 800, AdvertisementStatus.DRAFT);
+                Category.OTHER, Condition.USED, 800, AdStatus.DRAFT);
       }
 
       // Дмитрий Орлов
       Long userId3 = adsService.getUserIdByEmail("orlov.ka@phystech.edu");
       if (userId3 != null) {
         testCreateAd(userId3, "Игровой компьютер", "Gaming PC для учебы и игр",
-            Category.ELECTRONICS,
-            Condition.USED, 45000, AdvertisementStatus.ACTIVE);
+                Category.ELECTRONICS,
+                Condition.USED, 45000, AdStatus.ACTIVE);
         testCreateAd(userId3, "Клавиатура механическая", "Mechanical keyboard с RGB",
-            Category.ELECTRONICS, Condition.NEW, 3500, AdvertisementStatus.ACTIVE);
+                Category.ELECTRONICS, Condition.NEW, 3500, AdStatus.ACTIVE);
         testCreateAd(userId3, "Стул офисный", "Офисный стул с регулировкой", Category.HOME,
-            Condition.NEW, 2500, AdvertisementStatus.UNDER_MODERATION);
+                Condition.NEW, 2500, AdStatus.UNDER_MODERATION);
         testCreateAd(userId3, "Книги по программированию", "Java, Python, Algorithms",
-            Category.BOOKS,
-            Condition.USED, 1200, AdvertisementStatus.DRAFT);
+                Category.BOOKS,
+                Condition.USED, 1200, AdStatus.DRAFT);
       }
 
       // Валерия Новикова
       Long userId4 = adsService.getUserIdByEmail("novikova.vv@phystech.edu");
       if (userId4 != null) {
         testCreateAd(userId4, "Микроскоп лабораторный", "Профессиональный для исследований",
-            Category.OTHER, Condition.NEW, 15000, AdvertisementStatus.ACTIVE);
+                Category.OTHER, Condition.NEW, 15000, AdStatus.ACTIVE);
         testCreateAd(userId4, "Набор реактивов", "Для студенческих опытов", Category.OTHER,
-            Condition.BROKEN, 3000, AdvertisementStatus.ACTIVE);
+                Condition.BROKEN, 3000, AdStatus.ACTIVE);
         testCreateAd(userId4, "Лабораторный халат", "Белый халат размер M", Category.CLOTHING,
-            Condition.USED, 500, AdvertisementStatus.UNDER_MODERATION);
+                Condition.USED, 500, AdStatus.UNDER_MODERATION);
       }
 
       System.out.println("✅ Тестовые объявления созданы!");
@@ -98,7 +102,7 @@ public class TestData {
   }
 
   static private void testCreateAd(Long userId, String title, String description, Category category,
-      Condition condition, int price, AdvertisementStatus status) throws SQLException {
+                                   Condition condition, int price, AdStatus status) throws SQLException {
     /*
     Announcement ad = new Announcement(title, description, category, condition, price,
         "МФТИ, Долгопрудный", userId);
@@ -111,8 +115,8 @@ public class TestData {
 
   public static void uploadAllPhotos() {
     try (Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/myproject",
-        "myuser",
-        "mypassword")) {
+            "myuser",
+            "mypassword")) {
 
       String basePath = "src/main/resources/jpg/";
 
