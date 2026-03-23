@@ -1,7 +1,7 @@
 package com.mipt.portal.announcement.dto;
 
-import com.mipt.portal.announcement.Category;
-import com.mipt.portal.announcement.Condition;
+import com.mipt.portal.announcement.enums.Category;
+import com.mipt.portal.announcement.enums.Condition;
 import java.time.Instant;
 import lombok.Data;
 

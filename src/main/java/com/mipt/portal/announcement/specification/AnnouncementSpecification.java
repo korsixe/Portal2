@@ -1,6 +1,8 @@
-package com.mipt.portal.announcement;
+package com.mipt.portal.announcement.specification;
 
 import com.mipt.portal.announcement.dto.AnnouncementFilterDto;
+import com.mipt.portal.announcement.entity.Announcement;
+import com.mipt.portal.announcement.enums.AdStatus;
 import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
 

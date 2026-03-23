@@ -1,4 +1,4 @@
-package com.mipt.portal.announcement;
+package com.mipt.portal.announcement.enums;
 
 public enum Category {
   // Категории товаров

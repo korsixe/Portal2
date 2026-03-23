@@ -1,5 +1,7 @@
-package com.mipt.portal.announcement;
+package com.mipt.portal.announcement.repository;
 
+import com.mipt.portal.announcement.entity.Announcement;
+import com.mipt.portal.announcement.enums.AdStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
