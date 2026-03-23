@@ -6,6 +6,7 @@ import com.mipt.portal.announcement.dto.AnnouncementFilterDto;
 import com.mipt.portal.announcement.entity.Announcement;
 import com.mipt.portal.announcement.enums.AdStatus;
 import com.mipt.portal.announcement.repository.AnnouncementRepository;
+import com.mipt.portal.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import java.util.Optional;
 public class AnnouncementService {
 
   private final AnnouncementRepository repository;
-
+  private final UserRepository userRepository;
   @Transactional
   public Announcement create(AnnouncementCreateDto dto) {
     Announcement ad = new Announcement();
@@ -61,5 +62,11 @@ public class AnnouncementService {
       ad.setStatus(newStatus);
       return repository.save(ad);
     });
+  }
+
+  public Long getUserIdByEmail(String email) {
+    return userRepository.findByEmail(email)
+            .map(user -> user.getId())
+            .orElse(null);
   }
 }
