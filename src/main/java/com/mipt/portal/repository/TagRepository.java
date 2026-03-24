@@ -1,20 +1,27 @@
-package com.mipt.portal.announcementContent.tag;
+package com.mipt.portal.repository;
 
-import lombok.RequiredArgsConstructor;
-import java.sql.*;
-import java.util.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mipt.portal.infrastructure.database.DatabaseConnection;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-//import com.mipt.portal.infrastructure.database.DatabaseConnection;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class TagSelector {
+public class TagRepository {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   public List<Map<String, Object>> getTagsWithValues() throws SQLException {
-    /*
+
     List<Map<String, Object>> tags = new ArrayList<>();
 
     String sql = """
@@ -62,43 +69,15 @@ public class TagSelector {
       throw e;
     }
     return tags;
-    */
 
-    // ВРЕМЕННАЯ ЗАГЛУШКА
-    List<Map<String, Object>> tags = new ArrayList<>();
-
-    // Тег "Цвет"
-    Map<String, Object> colorTag = new HashMap<>();
-    colorTag.put("id", 1L);
-    colorTag.put("name", "Цвет");
-    colorTag.put("values", List.of(
-      Map.of("id", 101L, "name", "Красный"),
-      Map.of("id", 102L, "name", "Синий"),
-      Map.of("id", 103L, "name", "Черный")
-    ));
-    tags.add(colorTag);
-
-    // Тег "Размер"
-    Map<String, Object> sizeTag = new HashMap<>();
-    sizeTag.put("id", 2L);
-    sizeTag.put("name", "Размер");
-    sizeTag.put("values", List.of(
-      Map.of("id", 201L, "name", "S"),
-      Map.of("id", 202L, "name", "M"),
-      Map.of("id", 203L, "name", "L")
-    ));
-    tags.add(sizeTag);
-
-    return tags;
   }
 
   public List<Map<String, Object>> getAvailableTagsForSubcategory(String subcategoryName) throws SQLException {
-    // return getTagsWithValues();
     return getTagsWithValues();
   }
 
   public List<Map<String, Object>> getTagsForAd(Long adId) throws SQLException {
-    /*
+
     String sql = "SELECT tags FROM ads WHERE id = ?";
 
     try (Connection conn = DatabaseConnection.getConnection();
@@ -118,22 +97,10 @@ public class TagSelector {
       throw new SQLException("");
     }
     return new ArrayList<>();
-    */
-
-    // ВРЕМЕННАЯ ЗАГЛУШКА
-    List<Map<String, Object>> tags = new ArrayList<>();
-
-    Map<String, Object> tag1 = new HashMap<>();
-    tag1.put("id", 1L);
-    tag1.put("name", "Цвет");
-    tag1.put("value", Map.of("id", 101L, "name", "Красный"));
-    tags.add(tag1);
-
-    return tags;
   }
 
   public void saveAdTags(Long adId, List<Map<String, Object>> tagSelections) throws SQLException {
-    /*
+
     if (adId == null || adId <= 0) {
       throw new IllegalArgumentException("Invalid ad ID");
     }
@@ -144,14 +111,10 @@ public class TagSelector {
 
     saveTagsToAd(adId, tagSelections);
     updateTagsCount(adId, tagSelections.size());
-    */
 
-    // ВРЕМЕННАЯ ЗАГЛУШКА
-    System.out.println("✅ Теги сохранены для объявления ID: " + adId);
   }
 
   private boolean adExists(Long adId) throws SQLException {
-    /*
     String sql = "SELECT COUNT(*) FROM ads WHERE id = ?";
     try (Connection conn = DatabaseConnection.getConnection();
          PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -161,12 +124,9 @@ public class TagSelector {
         return rs.next() && rs.getInt(1) > 0;
       }
     }
-    */
-    return true;
   }
 
   private void saveTagsToAd(Long adId, List<Map<String, Object>> tagSelections) throws SQLException {
-    /*
     String sql = "UPDATE ads SET tags = ?::jsonb, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
 
     try (Connection conn = DatabaseConnection.getConnection();
@@ -183,11 +143,10 @@ public class TagSelector {
     } catch (Exception e) {
       throw new SQLException("Error serializing tags to JSON for ad " + adId, e);
     }
-    */
+
   }
 
   private void updateTagsCount(Long adId, int tagsCount) throws SQLException {
-    /*
     String sql = "UPDATE ads SET tags_count = ? WHERE id = ?";
 
     try (Connection conn = DatabaseConnection.getConnection();
@@ -197,6 +156,5 @@ public class TagSelector {
       stmt.setLong(2, adId);
       stmt.executeUpdate();
     }
-    */
   }
 }
