@@ -722,31 +722,19 @@
         </div>
     </div>
 
-    <%
-        // Проверка авторизации модератора
-        if (session.getAttribute("moderator") == null) {
-            response.sendRedirect("login-moderator.jsp");
-            return;
-        }
-
-        String message = request.getParameter("message");
-        String messageType = request.getParameter("messageType");
-    %>
-
-    <% if (message != null && !message.isEmpty()) { %>
-    <div class="message <%= messageType != null ? messageType : "success" %>">
-        <%= message %>
-    </div>
-    <% } %>
-
-    <div class="navigation">
-        <div class="nav-group">
-            <a href="${pageContext.request.contextPath}/home.jsp" class="btn btn-primary">На главную</a>
-            <a href="login-moderator.jsp?logout=true" class="btn btn-secondary">Выйти</a>
-        </div>
-    </div>
-
     <div class="content">
+        <c:if test="${not empty message}">
+            <div class="notification ${messageType}" style="display:block; margin-bottom: 10px;">${message}</div>
+        </c:if>
+
+        <div class="navigation">
+            <div class="nav-group">
+                <a href="${pageContext.request.contextPath}/home.jsp" class="btn btn-primary">На главную</a>
+                <a href="${pageContext.request.contextPath}/dashboard.jsp" class="btn btn-secondary">Личный кабинет</a>
+                <a href="login-moderator.jsp?logout=true" class="btn btn-secondary">Выйти</a>
+            </div>
+        </div>
+
         <h2 class="section-title">Панель модерации</h2>
 
         <div class="stats-cards">
@@ -754,7 +742,35 @@
                 <div class="stat-number">${ads != null ? ads.size() : 0}</div>
                 <div class="stat-label">Ожидают модерации</div>
             </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #1f2937, #111827);">
+                <div class="stat-number">${stats.totalUsers}</div>
+                <div class="stat-label">Всего пользователей</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #2563eb, #1d4ed8);">
+                <div class="stat-number">${stats.adminCount}</div>
+                <div class="stat-label">Администраторов</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #059669, #047857);">
+                <div class="stat-number">${stats.moderatorCount}</div>
+                <div class="stat-label">Модераторов</div>
+            </div>
         </div>
+
+        <c:if test="${not empty moderator}">
+        <div class="moderator-info" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); margin-bottom: 20px;">
+            <h3 style="margin-bottom: 8px;">Ваш профиль (как у обычного пользователя)</h3>
+            <p style="margin: 4px 0;">${moderator.name} — ${moderator.email}</p>
+            <p style="margin: 4px 0;">Монеты: ${moderator.coins} · Роли:
+                <c:forEach var="role" items="${moderator.roles}">
+                    <span style="padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.15); margin-right: 6px;">${role.displayName}</span>
+                </c:forEach>
+            </p>
+            <div style="margin-top: 8px; display:flex; gap:10px; flex-wrap: wrap;">
+                <a href="${pageContext.request.contextPath}/dashboard.jsp" class="btn btn-home">Открыть личный кабинет</a>
+                <a href="${pageContext.request.contextPath}/home.jsp" class="btn btn-secondary">Лента объявлений</a>
+            </div>
+        </div>
+        </c:if>
 
         <h3 class="section-title">Объявления на модерации</h3>
 
@@ -793,7 +809,7 @@
                     <div class="ad-meta">
                         <span>Категория: ${ad.category.displayName}</span>
                         <span>Подкатегория: ${ad.subcategory}</span>
-                        <span>Дата: <fmt:formatDate value="${ad.createdAt}" pattern="dd.MM.yyyy HH:mm" /></span>
+                        <span>Дата: <fmt:formatDate value="${ad.createdAtDate}" pattern="dd.MM.yyyy HH:mm" /></span>
                     </div>
 
                     <div class="ad-price">
@@ -888,6 +904,10 @@
 <div id="notification" class="notification" style="display: none;"></div>
 
 <script>
+    const basePath = '${pageContext.request.contextPath}';
+    const serverMessage = '<c:out value="${message}" />';
+    const serverMessageType = '<c:out value="${messageType}" />';
+
     // Переменные для хранения текущего действия
     let currentAction = null;
     let currentAdId = null;
@@ -1019,6 +1039,11 @@
                 closeReasonModal();
             }
         });
+
+        // Показываем серверное сообщение, если есть
+        if (serverMessage && serverMessage.trim().length > 0) {
+            showNotification(serverMessage, serverMessageType || 'info');
+        }
     });
 
     // Показать модальное окно подтверждения
@@ -1126,7 +1151,7 @@
         // Создаем и отправляем форму
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = 'moderate-ad.jsp';
+        form.action = basePath + '/moderator/' + action;
         form.style.display = 'none';
 
         const actionInput = document.createElement('input');
@@ -1209,6 +1234,7 @@
 </script>
 </body>
 </html>
+
 <%!
     // Универсальная функция форматирования даты
     private String formatDate(Object dateObj) {

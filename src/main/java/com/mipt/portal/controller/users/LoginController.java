@@ -5,6 +5,7 @@ import com.mipt.portal.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -52,11 +53,14 @@ public class LoginController {
       session.setAttribute("userName", loggedInUser.getName());
       session.setAttribute("userEmail", loggedInUser.getEmail());
 
-      // Set Spring Security Context
+      // Set Spring Security Context and persist to session
       UserDetails userDetails = userDetailsService.loadUserByUsername(email);
       UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
           userDetails, null, userDetails.getAuthorities());
-      SecurityContextHolder.getContext().setAuthentication(auth);
+      SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+      securityContext.setAuthentication(auth);
+      SecurityContextHolder.setContext(securityContext);
+      session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
 
       if (loggedInUser.getRoles().contains(Role.ADMIN)) {
         return "redirect:/admin/dashboard";
