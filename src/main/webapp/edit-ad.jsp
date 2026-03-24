@@ -27,8 +27,8 @@
     // Загружаем теги для редактирования
     if (request.getAttribute("availableTags") == null || request.getAttribute("currentTags") == null) {
         try {
-            com.mipt.portal.announcementContent.tag.TagSelector tagSelector =
-                    new com.mipt.portal.announcementContent.tag.TagSelector();
+            com.mipt.portal.repository.TagRepository tagSelector =
+                    new com.mipt.portal.repository.TagRepository();
             java.util.List<java.util.Map<String, Object>> availableTags = tagSelector.getTagsWithValues();
             request.setAttribute("availableTags", availableTags);
 
@@ -708,15 +708,6 @@
             </div>
         </div>
 
-        <div class="edit-note">
-            <strong>💡 Примечание:</strong>
-            <% if (!announcement.canBeEdited()) { %>
-            Это объявление нельзя редактировать в текущем статусе. Сначала измените статус на "Черновик".
-            <% } else { %>
-            Вы можете редактировать все поля объявления. После сохранения статус может измениться.
-            <% } %>
-        </div>
-
         <!-- Форма редактирования -->
         <form action="edit-ad" method="post" enctype="multipart/form-data">
             <input type="hidden" name="adId" value="<%= announcement.getId() %>">
@@ -734,14 +725,14 @@
                     <input type="text" id="title" name="title" class="form-control"
                            placeholder="Например: iPhone 13 Pro Max 256GB" required
                            value="<%= announcement.getTitle() != null ? announcement.getTitle() : "" %>"
-                        <%= !announcement.canBeEdited() ? "disabled" : "" %>>
+                        >
                 </div>
 
                 <div class="form-group">
                     <label for="description" class="required">Описание</label>
                     <textarea id="description" name="description" class="form-control"
                               placeholder="Подробно опишите ваш товар или услугу..." required
-                            <%= !announcement.canBeEdited() ? "disabled" : "" %>><%= announcement.getDescription() != null ? announcement.getDescription() : "" %></textarea>
+                            ><%= announcement.getDescription() != null ? announcement.getDescription() : "" %></textarea>
                 </div>
             </div>
 
@@ -754,12 +745,12 @@
                 <div class="form-group">
                     <label for="category" class="required">Основная категория</label>
                     <select id="category" name="category" class="form-control" required
-                            <%= !announcement.canBeEdited() ? "disabled" : "" %>>
+                            >
                         <option value="">Выберите категорию</option>
                         <%
                             try {
-                                com.mipt.portal.announcementContent.tag.CategorySelector categorySelector =
-                                        new com.mipt.portal.announcementContent.tag.CategorySelector();
+                                com.mipt.portal.repository.CategoryRepository categorySelector =
+                                        new com.mipt.portal.repository.CategoryRepository();
                                 java.util.List<java.util.Map<String, Object>> categories = categorySelector.getAllCategories();
 
                                 for (java.util.Map<String, Object> category : categories) {
@@ -786,7 +777,7 @@
                 <div class="form-group">
                     <label for="subcategory" class="required">Подкатегория</label>
                     <select id="subcategory" name="subcategory" class="form-control" required
-                            <%= !announcement.canBeEdited() ? "disabled" : "" %>>
+                            >
                         <%
                             // ДЕБАГ 1: Что у нас есть на входе
                             System.out.println("=== DEBUG SUBCATEGORIES START ===");
@@ -802,9 +793,8 @@
                             try {
                                 System.out.println("🔍 Ищем категорию в БД: '" + currentCategoryValue + "'");
 
-                                // Загружаем категории и находим ID выбранной
-                                com.mipt.portal.announcementContent.tag.CategorySelector categorySelector =
-                                        new com.mipt.portal.announcementContent.tag.CategorySelector();
+                                com.mipt.portal.repository.CategoryRepository categorySelector =
+                                        new com.mipt.portal.repository.CategoryRepository();
                                 java.util.List<java.util.Map<String, Object>> allCategories = categorySelector.getAllCategories();
 
                                 System.out.println("📊 Всего категорий в БД: " + allCategories.size());
@@ -812,14 +802,12 @@
                                 Long categoryId = null;
                                 boolean foundExactMatch = false;
 
-                                // ДЕБАГ: Выводим все категории из БД
                                 System.out.println("📋 Категории в БД:");
                                 for (java.util.Map<String, Object> category : allCategories) {
                                     String catName = (String) category.get("name");
                                     Long catId = (Long) category.get("id");
                                     System.out.println("  - '" + catName + "' (ID: " + catId + ")");
 
-                                    // Сравниваем с учетом возможных опечаток и пробелов
                                     if (catName != null && catName.equals(currentCategoryValue)) {
                                         categoryId = catId;
                                         foundExactMatch = true;
@@ -828,12 +816,10 @@
                                     }
                                 }
 
-                                // ДЕБАГ: Проверяем, что нашли
                                 if (categoryId != null) {
 
-                                    // Загружаем подкатегории
-                                    com.mipt.portal.announcementContent.tag.SubcategorySelector subcategorySelector =
-                                            new com.mipt.portal.announcementContent.tag.SubcategorySelector();
+                                    com.mipt.portal.repository.SubcategoryRepository subcategorySelector =
+                                            new com.mipt.portal.repository.SubcategoryRepository();
                                     java.util.List<java.util.Map<String, Object>> subcategories =
                                             subcategorySelector.getSubcategoriesByCategory(categoryId);
 
@@ -901,7 +887,7 @@
                     <input type="text" id="location" name="location" class="form-control"
                            placeholder="Например: Москва, центр" required
                            value="<%= announcement.getLocation() != null ? announcement.getLocation() : "" %>"
-                        <%= !announcement.canBeEdited() ? "disabled" : "" %>>
+                       >
                 </div>
 
                 <div class="form-group">
@@ -912,7 +898,7 @@
                             <input type="radio" name="condition"
                                    value="<%= condition.name() %>" required
                                 <%= announcement.getCondition() == condition ? "checked" : "" %>
-                                <%= !announcement.canBeEdited() ? "disabled" : "" %>>
+                                >
                             <span class="radio-label"><%= condition.getDisplayName() %></span>
                         </label>
                         <% } %>
@@ -932,19 +918,19 @@
                         <label class="radio-item">
                             <input type="radio" name="priceType" value="negotiable"
                                 <%= "negotiable".equals(priceType) ? "checked" : "" %>
-                                <%= !announcement.canBeEdited() ? "disabled" : "" %>>
+                                >
                             <span class="radio-label">Договорная</span>
                         </label>
                         <label class="radio-item">
                             <input type="radio" name="priceType" value="free"
                                 <%= "free".equals(priceType) ? "checked" : "" %>
-                                <%= !announcement.canBeEdited() ? "disabled" : "" %>>
+                                >
                             <span class="radio-label">Бесплатно</span>
                         </label>
                         <label class="radio-item">
                             <input type="radio" name="priceType" value="fixed"
                                 <%= "fixed".equals(priceType) ? "checked" : "" %>
-                                <%= !announcement.canBeEdited() ? "disabled" : "" %>>
+                                >
                             <span class="radio-label">Указать цену</span>
                         </label>
                     </div>
@@ -955,62 +941,58 @@
                     <input type="number" id="price" name="price" class="form-control"
                            min="1" max="1000000000" placeholder="1000"
                            value="<%= price > 0 ? price : "" %>"
-                        <%= !announcement.canBeEdited() ? "disabled" : "" %>>
+                        >
                     <div class="tags-hint">
                         <strong>Напишите цену, если выбрали пункт "Указать цену"</strong>
                     </div>
                 </div>
             </div>
 
-            <!-- Фотографии -->
+            <!-- Фотография -->
             <div class="form-section">
                 <h3 class="section-title">
-                    <span class="icon">📷</span> Фотографии
+                    <span class="icon">📷</span> Фотография
                 </h3>
 
-                <!-- Текущие фотографии -->
-                <% if (announcement.getPhotos() != null && !announcement.getPhotos().isEmpty()) { %>
+                <!-- Текущее фото -->
                 <div class="form-group">
-                    <label>Текущие фотографии:</label>
+                    <label>Текущее фото:</label>
                     <div class="current-photos">
                         <%
-                            int photoCount = announcement.getPhotos() != null ? announcement.getPhotos().size() : 0;
-                            for (int i = 0; i < photoCount; i++) { %>
-                        <div class="photo-item" id="photo-<%= i %>" style="position: relative; display: inline-block; margin: 10px;">
-                            <img src="ad-photo?adId=<%= announcement.getId() %>&photoIndex=<%= i %>"
-                                 alt="Фото <%= i + 1 %>"
-                                 style="width: 120px; height: 120px; object-fit: contain; border-radius: 8px; pointer-events: none;">
-
-                            <!-- Кнопка удаления - кликабельна -->
+                            byte[] photo = announcement.getPhoto();
+                            boolean hasPhoto = photo != null && photo.length > 0;
+                            if (hasPhoto) {
+                        %>
+                        <div class="photo-item" id="current-photo">
+                            <img src="ad-photo?adId=<%= announcement.getId() %>"
+                                 alt="Фото"
+                                 style="width: 200px; height: 200px; object-fit: contain; border-radius: 8px; border: 2px solid var(--border);">
                             <button type="button"
                                     class="photo-remove-btn"
-                                    onclick="removePhoto(<%= announcement.getId() %>, <%= i %>); return false;">
+                                    onclick="removePhoto(<%= announcement.getId() %>); return false;">
                                 ×
                             </button>
-
+                        </div>
+                        <% } else { %>
+                        <div class="no-photo-message" style="padding: 20px; text-align: center; color: var(--gray);">
+                            <span class="icon">📷</span> Нет фото
                         </div>
                         <% } %>
                     </div>
                 </div>
-                <% } %>
 
-                <!-- Добавление новых фотографий -->
+                <!-- Изменение фото -->
                 <div class="form-group">
-                    <label for="photos">Добавить новые фотографии</label>
-                    <input type="file" id="photos" name="photos" class="form-control"
-                           multiple accept="image/*" style="padding: 8px;"
-                        <%= !announcement.canBeEdited() ? "disabled" : "" %>>
+                    <label for="photo">Изменить фотографию</label>
+                    <input type="file" id="photo" name="photo" class="form-control" accept="image/*">
                     <div class="tags-hint">
-                        Добавленные файлы:
+                        Выберите новое фото, чтобы заменить текущее
                     </div>
                 </div>
 
-                <!-- Контейнер для предпросмотра новых фотографий -->
+                <!-- Контейнер для предпросмотра нового фото -->
                 <div id="photoPreview" class="photo-preview-container" style="display: none;">
-                    <div class="preview-note">
-                        <strong>Предпросмотр новых фотографий:</strong> Выбранные фотографии появятся здесь.
-                    </div>
-                    <div id="previewImages" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;"></div>
+                    <div id="previewImage" style="margin-top: 15px;"></div>
                 </div>
             </div>
 
@@ -1064,7 +1046,7 @@
                                 <span class="tag-name"><%= tagName %></span>
                             </div>
                             <select class="tag-select" data-tag-id="<%= tagId %>" data-tag-name="<%= tagName %>"
-                                    <%= !announcement.canBeEdited() ? "disabled" : "" %>>
+                                    >
                                 <option value="">Не выбрано</option>
                                 <%
                                     if (values != null && !values.isEmpty()) {
@@ -1114,8 +1096,6 @@
                 </div>
             </div>
 
-            <!-- Действие после сохранения -->
-            <% if (announcement.canBeEdited()) { %>
             <div class="form-section">
                 <h3 class="section-title">
                     <span class="icon">⚡</span> Действие после сохранения
@@ -1132,7 +1112,7 @@
                     </label>
                 </div>
             </div>
-            <% } %>
+            <% %>
 
             <!-- Кнопки действий -->
             <div class="form-actions">
@@ -1140,15 +1120,13 @@
                     <span class="icon">←</span> Назад к списку
                 </a>
 
-                <% if (announcement.canBeEdited()) { %>
                 <button type="submit" class="btn btn-primary">
                     <span class="icon">💾</span> Сохранить изменения
                 </button>
-                <% } else { %>
+
                 <a href="edit-ad?action=toDraft&adId=<%= announcement.getId() %>" class="btn btn-warning">
                     <span class="icon">📝</span> Сделать черновиком
                 </a>
-                <% } %>
 
                 <a href="delete-ad?adId=<%= announcement.getId() %>" class="btn btn-danger"
                    onclick="return confirm('Вы уверены, что хотите удалить это объявление?')">
@@ -1160,93 +1138,41 @@
 </div>
 <script>
 
-    function removePhoto(adId, photoIndex, event = null) {
-        console.log('Удаление фото:', adId, photoIndex);
-
-        if (event) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-
-        if (!confirm('Удалить это фото?')) {
+    function removePhoto(adId) {
+        if (!confirm('Удалить фото?')) {
             return false;
         }
 
-        let button;
-        if (event) {
-            button = event.target;
-        } else {
-            button = document.querySelector(`[onclick*="removePhoto(${adId}, ${photoIndex})"]`);
-            if (!button) {
-                button = document.getElementById('remove-photo-' + photoIndex);
-            }
-        }
-
-        const originalText = button ? button.innerHTML : '×';
-        if (button) {
-            button.disabled = true;
-            button.innerHTML = '...';
-        }
-
-        // Сохраняем ссылку на элемент ДО отправки запроса
-        const photoElement = document.getElementById('photo-' + photoIndex);
-
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/portal/delete-photo', true);
+        xhr.open('POST', 'delete-photo', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
         xhr.onload = function() {
-            console.log('Статус ответа:', xhr.status);
-            console.log('Ответ:', xhr.responseText);
-
-            if (button) {
-                button.disabled = false;
-                button.innerHTML = originalText;
-            }
-
-            // === ИСПРАВЛЕННАЯ ПРОВЕРКА ===
-            if (xhr.status === 200) {
-                const response = xhr.responseText.trim();
-                console.log('Обработанный ответ:', response);
-
-                if (response === 'success') {
-                    // ✅ MediaManager удалил фото из БД
-                    console.log('✅ Фото удалено из БД, удаляем из DOM');
-
-                    if (photoElement) {
-                        // Плавное исчезновение
-                        photoElement.style.transition = 'opacity 0.3s';
-                        photoElement.style.opacity = '0';
-
-                        setTimeout(() => {
-                            // Удаляем элемент
-                            photoElement.remove();
-                            console.log('✅ Элемент удалён из DOM');
-
-                            // Обновляем UI
-                            updatePhotoIndexes(adId);
-
-                        }, 300);
-                    } else {
-                        console.warn('Элемент не найден, перезагружаем страницу');
-                        setTimeout(() => window.location.reload(), 500);
-                    }
-                } else {
+            if (xhr.status === 200 && xhr.responseText === 'success') {
+                // Удаляем элемент с фото из DOM
+                const photoElement = document.getElementById('current-photo');
+                if (photoElement) {
+                    photoElement.style.transition = 'opacity 0.3s';
+                    photoElement.style.opacity = '0';
+                    setTimeout(() => {
+                        photoElement.remove();
+                        // Показываем сообщение, что фото удалено
+                        const container = document.querySelector('.current-photos');
+                        if (container) {
+                            container.innerHTML = '<div class="no-photo-message" style="padding: 20px; text-align: center; color: var(--gray);"><span class="icon">📷</span> Фото удалено</div>';
+                        }
+                    }, 300);
                 }
             } else {
+                alert('Ошибка при удалении фото');
             }
         };
 
         xhr.onerror = function() {
-            if (button) {
-                button.disabled = false;
-                button.innerHTML = originalText;
-            }
+            alert('Ошибка сети');
         };
 
-        const params = 'adId=' + adId + '&photoIndex=' + photoIndex;
-        console.log('Отправляем:', params);
-        xhr.send(params);
+        xhr.send('adId=' + adId);
 
         return false;
     }
@@ -1485,73 +1411,39 @@
             console.log('💾 Updated hidden fields with:', selectedTags);
         }
 
-        // === ОБРАБОТКА ПРЕДПРОСМОТРА ФОТОГРАФИЙ (НОВЫЕ ФОТО) ===
-        const photoInput = document.getElementById('photos');
+        // === ОБРАБОТКА ПРЕДПРОСМОТРА ФОТОГРАФИИ (ОДНО ФОТО) ===
+        const photoInput = document.getElementById('photo');
         const photoPreview = document.getElementById('photoPreview');
-        const previewImages = document.getElementById('previewImages');
+        const previewImage = document.getElementById('previewImage');
 
         if (photoInput) {
             photoInput.addEventListener('change', function(e) {
-                const files = e.target.files;
-                previewImages.innerHTML = '';
+                const file = e.target.files[0];
 
-                if (files.length > 0) {
-                    photoPreview.style.display = 'block';
+                if (previewImage) {
+                    previewImage.innerHTML = '';
+                }
 
-                    for (let i = 0; i < files.length; i++) {
-                        const file = files[i];
-                        if (file.type.startsWith('image/')) {
-                            const reader = new FileReader();
+                if (file && file.type.startsWith('image/')) {
+                    if (photoPreview) photoPreview.style.display = 'block';
 
-                            reader.onload = function(e) {
-                                const imgContainer = document.createElement('div');
-                                imgContainer.style.position = 'relative';
-                                imgContainer.style.width = '100px';
-                                imgContainer.style.height = '100px';
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.width = '200px';
+                        img.style.height = '200px';
+                        img.style.objectFit = 'contain';
+                        img.style.borderRadius = '8px';
+                        img.style.border = '2px solid var(--border)';
 
-                                const img = document.createElement('img');
-                                img.src = e.target.result;
-                                img.style.width = '100%';
-                                img.style.height = '100%';
-                                img.style.objectFit = 'cover';
-                                img.style.borderRadius = '8px';
-                                img.style.border = '2px solid var(--border)';
-
-                                const removeBtn = document.createElement('button');
-                                removeBtn.type = 'button';
-                                removeBtn.innerHTML = '×';
-                                removeBtn.style.position = 'absolute';
-                                removeBtn.style.top = '-8px';
-                                removeBtn.style.right = '-8px';
-                                removeBtn.style.background = 'var(--danger)';
-                                removeBtn.style.color = 'white';
-                                removeBtn.style.border = 'none';
-                                removeBtn.style.borderRadius = '50%';
-                                removeBtn.style.width = '20px';
-                                removeBtn.style.height = '20px';
-                                removeBtn.style.cursor = 'pointer';
-                                removeBtn.style.fontSize = '12px';
-                                removeBtn.style.fontWeight = 'bold';
-
-                                removeBtn.addEventListener('click', function() {
-                                    imgContainer.remove();
-                                    updateFileInput(files, i);
-
-                                    if (previewImages.children.length === 0) {
-                                        photoPreview.style.display = 'none';
-                                    }
-                                });
-
-                                imgContainer.appendChild(img);
-                                imgContainer.appendChild(removeBtn);
-                                previewImages.appendChild(imgContainer);
-                            };
-
-                            reader.readAsDataURL(file);
+                        if (previewImage) {
+                            previewImage.appendChild(img);
                         }
-                    }
+                    };
+                    reader.readAsDataURL(file);
                 } else {
-                    photoPreview.style.display = 'none';
+                    if (photoPreview) photoPreview.style.display = 'none';
                 }
             });
         }

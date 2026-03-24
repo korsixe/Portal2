@@ -1,8 +1,9 @@
 package com.mipt.portal.controller;
 
-import com.mipt.portal.announcementContent.tag.CategorySelector;
-import com.mipt.portal.announcementContent.tag.SubcategorySelector;
-import com.mipt.portal.announcementContent.tag.TagSelector;
+import com.mipt.portal.repository.CategoryRepository;
+import com.mipt.portal.repository.SubcategoryRepository;
+import com.mipt.portal.repository.TagRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +19,9 @@ import java.util.HashMap;
 @RequiredArgsConstructor
 public class TagTestController {
 
-  private final CategorySelector categorySelector;
-  private final SubcategorySelector subcategorySelector;
-  private final TagSelector tagSelector;
+  private final CategoryRepository categorySelector;
+  private final SubcategoryRepository subcategorySelector;
+  private final TagRepository tagSelector;
 
   @GetMapping("/categories")
   public ResponseEntity<String> testCategories() {

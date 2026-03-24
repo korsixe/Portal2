@@ -23,8 +23,8 @@
     // Загружаем теги если они еще не загружены
     if (request.getAttribute("availableTags") == null) {
         try {
-            com.mipt.portal.announcementContent.tag.TagSelector tagSelector =
-                    new com.mipt.portal.announcementContent.tag.TagSelector();
+            com.mipt.portal.repository.TagRepository tagSelector =
+                    new com.mipt.portal.repository.TagRepository();
             java.util.List<java.util.Map<String, Object>> availableTags = tagSelector.getTagsWithValues();
             request.setAttribute("availableTags", availableTags);
         } catch (Exception e) {
@@ -465,8 +465,8 @@
                         <%
                             // Получаем категории из БД
                             try {
-                                com.mipt.portal.announcementContent.tag.CategorySelector categorySelector =
-                                        new com.mipt.portal.announcementContent.tag.CategorySelector();
+                                com.mipt.portal.repository.CategoryRepository categorySelector =
+                                        new com.mipt.portal.repository.CategoryRepository();
                                 java.util.List<java.util.Map<String, Object>> categories = categorySelector.getAllCategories();
 
                                 String currentCategoryParam = request.getParameter("category");
@@ -504,8 +504,8 @@
                         } else {
                             try {
                                 // Загружаем категории и находим ID выбранной
-                                com.mipt.portal.announcementContent.tag.CategorySelector categorySelector =
-                                        new com.mipt.portal.announcementContent.tag.CategorySelector();
+                                com.mipt.portal.repository.CategoryRepository categorySelector =
+                                        new com.mipt.portal.repository.CategoryRepository();
                                 java.util.List<java.util.Map<String, Object>> allCategories = categorySelector.getAllCategories();
                                 Long categoryId = null;
 
@@ -523,8 +523,8 @@
 
                                 if (categoryId != null) {
                                     // Загружаем подкатегории
-                                    com.mipt.portal.announcementContent.tag.SubcategorySelector subcategorySelector =
-                                            new com.mipt.portal.announcementContent.tag.SubcategorySelector();
+                                    com.mipt.portal.repository.SubcategoryRepository subcategorySelector =
+                                            new com.mipt.portal.repository.SubcategoryRepository();
                                     java.util.List<java.util.Map<String, Object>> subcategories =
                                             subcategorySelector.getSubcategoriesByCategory(categoryId);
 
@@ -640,25 +640,23 @@
                 </div>
             </div>
 
-            <!-- Фотографии -->
+            <!-- Фотография (одно фото) -->
             <div class="form-section">
                 <h3 class="section-title">
-                    <span class="icon">📷</span> Фотографии
+                    <span class="icon">📷</span> Фотография
                 </h3>
 
                 <div class="form-group">
-                    <label for="photos">Добавить фотографии</label>
-                    <input type="file" id="photos" name="photos" class="form-control"
-                           multiple accept="image/*" style="padding: 8px;">
+                    <label for="photo">Добавить фотографию</label>
+                    <input type="file" id="photo" name="photo" class="form-control" accept="image/*">
                     <div class="tags-hint">
-                        Выбранные фотографии:
+                        Добавьте фото товара (необязательно). Поддерживаются форматы: JPG, PNG, GIF.
                     </div>
                 </div>
 
-                <!-- Контейнер для предпросмотра фотографий -->
+                <!-- Контейнер для предпросмотра -->
                 <div id="photoPreview" class="photo-preview-container" style="display: none;">
-
-                    <div id="previewImages" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;"></div>
+                    <div id="previewImage" style="margin-top: 15px;"></div>
                 </div>
             </div>
 
@@ -929,76 +927,43 @@
             hiddenField.value = JSON.stringify(selectedTags);
         }
 
-        // === ОБРАБОТКА ПРЕДПРОСМОТРА ФОТОГРАФИЙ ===
-        const photoInput = document.getElementById('photos');
+        // === ОБРАБОТКА ПРЕДПРОСМОТРА ФОТОГРАФИИ ===
+        const photoInput = document.getElementById('photo');
         const photoPreview = document.getElementById('photoPreview');
-        const previewImages = document.getElementById('previewImages');
+        const previewImage = document.getElementById('previewImage');
 
         if (photoInput) {
             photoInput.addEventListener('change', function(e) {
-                const files = e.target.files;
-                previewImages.innerHTML = '';
+                const file = e.target.files[0];
 
-                if (files.length > 0) {
-                    photoPreview.style.display = 'block';
+                if (previewImage) {
+                    previewImage.innerHTML = '';
+                }
 
-                    for (let i = 0; i < files.length; i++) {
-                        const file = files[i];
-                        if (file.type.startsWith('image/')) {
-                            const reader = new FileReader();
+                if (file && file.type.startsWith('image/')) {
+                    if (photoPreview) photoPreview.style.display = 'block';
 
-                            reader.onload = function(e) {
-                                const imgContainer = document.createElement('div');
-                                imgContainer.style.position = 'relative';
-                                imgContainer.style.width = '100px';
-                                imgContainer.style.height = '100px';
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.width = '200px';
+                        img.style.height = '200px';
+                        img.style.objectFit = 'contain';
+                        img.style.borderRadius = '8px';
+                        img.style.border = '2px solid var(--border)';
 
-                                const img = document.createElement('img');
-                                img.src = e.target.result;
-                                img.style.width = '100%';
-                                img.style.height = '100%';
-                                img.style.objectFit = 'cover';
-                                img.style.borderRadius = '8px';
-                                img.style.border = '2px solid var(--border)';
-
-                                const removeBtn = document.createElement('button');
-                                removeBtn.type = 'button';
-                                removeBtn.innerHTML = '×';
-                                removeBtn.style.position = 'absolute';
-                                removeBtn.style.top = '-8px';
-                                removeBtn.style.right = '-8px';
-                                removeBtn.style.background = 'var(--danger)';
-                                removeBtn.style.color = 'white';
-                                removeBtn.style.border = 'none';
-                                removeBtn.style.borderRadius = '50%';
-                                removeBtn.style.width = '20px';
-                                removeBtn.style.height = '20px';
-                                removeBtn.style.cursor = 'pointer';
-                                removeBtn.style.fontSize = '12px';
-                                removeBtn.style.fontWeight = 'bold';
-
-                                removeBtn.addEventListener('click', function() {
-                                    imgContainer.remove();
-                                    updateFileInput(files, i);
-
-                                    if (previewImages.children.length === 0) {
-                                        photoPreview.style.display = 'none';
-                                    }
-                                });
-
-                                imgContainer.appendChild(img);
-                                imgContainer.appendChild(removeBtn);
-                                previewImages.appendChild(imgContainer);
-                            };
-
-                            reader.readAsDataURL(file);
+                        if (previewImage) {
+                            previewImage.appendChild(img);
                         }
-                    }
+                    };
+                    reader.readAsDataURL(file);
                 } else {
-                    photoPreview.style.display = 'none';
+                    if (photoPreview) photoPreview.style.display = 'none';
                 }
             });
         }
+
 
         function updateFileInput(originalFiles, indexToRemove) {
             const dt = new DataTransfer();
