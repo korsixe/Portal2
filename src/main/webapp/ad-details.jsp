@@ -849,6 +849,20 @@
                     <span class="meta-badge location-badge">📍 <%= announcement.getLocation() %></span>
                     <span class="meta-badge author-badge">👤 <%= authorName %></span>
                 </div>
+
+                <% if (user != null && (user.isModerator() || user.isAdmin())) { %>
+                <div class="action-buttons" style="margin-top: 10px; gap: 10px;">
+                    <form method="post" action="<%= request.getContextPath() %>/moderator/approve">
+                        <input type="hidden" name="adId" value="<%= announcement.getId() %>">
+                        <button type="submit" class="btn btn-primary">✅ Одобрить</button>
+                    </form>
+                    <form method="post" action="<%= request.getContextPath() %>/moderator/reject" style="display: flex; gap: 8px; align-items: center;">
+                        <input type="hidden" name="adId" value="<%= announcement.getId() %>">
+                        <input type="text" name="reason" placeholder="Причина (опционально)" style="padding: 10px; border: 1px solid #e1e5e9; border-radius: 8px;">
+                        <button type="submit" class="btn btn-secondary">↩️ Отозвать на доработку</button>
+                    </form>
+                </div>
+                <% } %>
             </div>
 
             <!-- Фотографии -->
@@ -935,6 +949,14 @@
                         <span class="info-label">Автор</span>
                         <span class="info-value">👤 <%= authorName %></span>
                     </div>
+                    <% if (user != null && (user.isModerator() || user.isAdmin())) { %>
+                    <div class="info-item">
+                        <span class="info-label">Профиль автора</span>
+                        <span class="info-value">
+                            <a href="<%= request.getContextPath() %>/admin/dashboard" class="btn btn-secondary">Открыть в админке</a>
+                        </span>
+                    </div>
+                    <% } %>
                     <div class="info-item">
                         <span class="info-label">Просмотры</span>
                         <span class="info-value">👁️ <%= announcement.getViewCount() %></span>
@@ -1025,6 +1047,12 @@
                     <div class="comment-text">
                         <%= comment.getText() %>
                     </div>
+                    <% if (user != null && (user.isModerator() || user.isAdmin())) { %>
+                    <form method="post" action="<%= request.getContextPath() %>/moderator/comment/delete" style="margin-top: 10px; text-align: right;">
+                        <input type="hidden" name="commentId" value="<%= comment.getId() %>">
+                        <button type="submit" class="btn btn-secondary">🧹 Удалить комментарий</button>
+                    </form>
+                    <% } %>
                 </div>
                 <% } %>
                 <% } %>

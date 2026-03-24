@@ -1,5 +1,6 @@
 package com.mipt.portal.service;
 
+import com.mipt.portal.dto.SystemStats;
 import com.mipt.portal.entity.Address;
 import com.mipt.portal.enums.Role;
 import com.mipt.portal.entity.User;
@@ -328,6 +329,33 @@ public class UserService {
     } catch (Exception e) {
       log.error("Error getting all users: {}", e.getMessage(), e);
       return List.of(); // Возвращаем пустой список в случае ошибки
+    }
+  }
+
+  /**
+   * Собирает агрегированную статистику по ролям без двойного учета администраторов как модераторов.
+   */
+  public SystemStats buildSystemStats() {
+    try {
+      List<User> users = userRepository.findAll();
+
+      long adminCount = users.stream()
+          .filter(user -> user.getRoles().contains(Role.ADMIN))
+          .count();
+
+      long moderatorCount = users.stream()
+          .filter(user -> user.getRoles().contains(Role.MODERATOR) && !user.getRoles().contains(Role.ADMIN))
+          .count();
+
+      long regularUsers = users.size() - adminCount - moderatorCount;
+      if (regularUsers < 0) {
+        regularUsers = 0; // на случай неконсистентных ролей
+      }
+
+      return new SystemStats(users.size(), adminCount, moderatorCount, regularUsers);
+    } catch (Exception e) {
+      log.error("Error building system stats: {}", e.getMessage(), e);
+      return new SystemStats(0, 0, 0, 0);
     }
   }
 
