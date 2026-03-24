@@ -15,6 +15,10 @@ import com.mipt.portal.enums.Category;
 import com.mipt.portal.enums.Condition;
 import com.mipt.portal.repository.AnnouncementRepository;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,8 +31,11 @@ public class DataInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final AnnouncementRepository announcementRepository;
 
+  private static final String TEST_PHOTO_BASE64 =
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+
     @Override
-    public void run(String... args) {
+    public void run(String... args) throws IOException {
         User admin = createTestUser("admin.test@phystech.edu", "admin", Role.ADMIN);
         User moderator = createTestUser("moderator.test@phystech.edu", "moderator", Role.MODERATOR);
         User user = createTestUser("user.test@phystech.edu", "user", Role.USER);
@@ -63,7 +70,7 @@ public class DataInitializer implements CommandLineRunner {
         return userRepository.findByEmail(email).orElse(null);
     }
 
-    private void createSampleAnnouncements(User admin, User moderator, User regularUser) {
+    private void createSampleAnnouncements(User admin, User moderator, User regularUser) throws IOException {
         if (announcementRepository.count() > 0) {
             return;
         }
@@ -84,21 +91,29 @@ public class DataInitializer implements CommandLineRunner {
         pending.setStatus(AdStatus.UNDER_MODERATION);
         pending.setTags(List.of("macbook", "apple", "m1"));
         pending.setTagsCount(3);
-        pending.setPhotoUrls(List.of("https://placehold.co/640x480"));
+        pending.setPhoto(null);
 
-        Announcement active = new Announcement();
-        active.setTitle("Смартфон Pixel 7a");
-        active.setDescription("Официальная версия, полный комплект. Уже одобрено.");
-        active.setCategory(Category.ELECTRONICS);
-        active.setSubcategory("Смартфоны");
-        active.setCondition(Condition.USED);
-        active.setPrice(32000);
-        active.setLocation("Долгопрудный");
-        active.setAuthorId(moderatorId);
-        active.setStatus(AdStatus.ACTIVE);
-        active.setTags(List.of("google", "pixel"));
-        active.setTagsCount(2);
-        active.setPhotoUrls(List.of("https://placehold.co/600x400"));
+      Announcement active = new Announcement();
+      active.setTitle("Смартфон Pixel 7a");
+      active.setDescription("Официальная версия, полный комплект. Уже одобрено.");
+      active.setCategory(Category.ELECTRONICS);
+      active.setSubcategory("Смартфоны");
+      active.setCondition(Condition.USED);
+      active.setPrice(32000);
+      active.setLocation("Долгопрудный");
+      active.setAuthorId(moderatorId);
+      active.setStatus(AdStatus.ACTIVE);
+      active.setTags(List.of("google", "pixel"));
+      active.setTagsCount(2);
+
+      try {
+        byte[] photoBytes = Base64.getDecoder().decode(TEST_PHOTO_BASE64);
+        active.setPhoto(photoBytes);
+        log.info("✅ Test photo added for active ad, size: {} bytes", photoBytes.length);
+      } catch (Exception e) {
+        log.error("Failed to decode test photo: {}", e.getMessage());
+        active.setPhoto(null);
+      }
 
         Announcement rejected = new Announcement();
         rejected.setTitle("Продам учебники");
@@ -112,8 +127,55 @@ public class DataInitializer implements CommandLineRunner {
         rejected.setStatus(AdStatus.REJECTED);
         rejected.setTags(List.of("книги", "матан"));
         rejected.setTagsCount(2);
-        rejected.setPhotoUrls(List.of("https://placehold.co/500x350"));
+        pending.setPhoto(null);
 
         announcementRepository.saveAll(List.of(pending, active, rejected));
     }
+
+  public static byte[] fileToBytes(String filePath) throws IOException {
+    File file = new File(filePath);
+
+    if (!file.exists()) {
+      throw new IOException("File not found: " + filePath);
+    }
+
+    byte[] bytes = new byte[(int) file.length()];
+
+    try (FileInputStream fis = new FileInputStream(file)) {
+      int bytesRead = fis.read(bytes);
+      if (bytesRead != bytes.length) {
+        throw new IOException("Failed to read complete file");
+      }
+    }
+
+    return bytes;
+  }
+
+  private byte[] loadPhoto() {
+    // Пробуем несколько путей
+    String[] paths = {
+      "src/main/resources/photo/кот.jpg",
+      "src/main/resources/photo/cat.jpg",
+      "src/main/resources/static/images/кот.jpg",
+      "photo/кот.jpg"
+    };
+
+    for (String path : paths) {
+      try {
+        File file = new File(path);
+        log.info("Checking path: {} (exists: {})", file.getAbsolutePath(), file.exists());
+
+        if (file.exists() && file.length() > 0) {
+          byte[] bytes = fileToBytes(path);
+          log.info("✅ Photo loaded from: {}, size: {} bytes", path, bytes.length);
+          return bytes;
+        }
+      } catch (IOException e) {
+        log.debug("Failed to load from {}: {}", path, e.getMessage());
+      }
+    }
+
+    log.error("❌ No photo file found in any of the checked paths");
+    return null;
+  }
 }

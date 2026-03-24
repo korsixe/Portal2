@@ -3,11 +3,6 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.List" %>
 
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.enums.Condition" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.List" %>
-
 <%
     response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     response.setHeader("Pragma", "no-cache");
@@ -19,313 +14,296 @@
     if (priceType == null) {
         priceType = "negotiable"; // значение по умолчанию
     }
-
-    // Загружаем теги если они еще не загружены
-    if (request.getAttribute("availableTags") == null) {
-        try {
-            com.mipt.portal.repository.TagRepository tagSelector =
-                    new com.mipt.portal.repository.TagRepository();
-            java.util.List<java.util.Map<String, Object>> availableTags = tagSelector.getTagsWithValues();
-            request.setAttribute("availableTags", availableTags);
-        } catch (Exception e) {
-            System.err.println("Error loading tags in create-ad.jsp: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
 %>
 
 <html>
 <head>
     <title>Создать объявление • Portal</title>
-    <!-- остальной код -->
-<html>
-<head>
-    <title>Создать объявление • Portal</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-      :root {
-        --primary: #4361ee;
-        --primary-dark: #3a56d4;
-        --secondary: #7209b7;
-        --success: #4cc9f0;
-        --danger: #f72585;
-        --warning: #f8961e;
-        --light: #f8f9fa;
-        --dark: #212529;
-        --gray: #6c757d;
-        --border: #e9ecef;
-        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      }
-
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
-
-      body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        padding: 20px;
-        line-height: 1.6;
-      }
-
-      .container {
-        max-width: 800px;
-        margin: 0 auto;
-      }
-
-      .header {
-        text-align: center;
-        margin-bottom: 30px;
-      }
-
-      .logo {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: white;
-        margin-bottom: 10px;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-      }
-
-      .logo span {
-        color: var(--success);
-      }
-
-      .card {
-        background: white;
-        border-radius: 20px;
-        padding: 40px;
-        box-shadow: var(--shadow-lg);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-      }
-
-      .card-header {
-        text-align: center;
-        margin-bottom: 30px;
-      }
-
-      .card-title {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--dark);
-        margin-bottom: 10px;
-      }
-
-      .card-subtitle {
-        color: var(--gray);
-        font-size: 1.1rem;
-      }
-
-      .form-section {
-        margin-bottom: 30px;
-        padding: 25px;
-        background: var(--light);
-        border-radius: 15px;
-        border-left: 4px solid var(--primary);
-      }
-
-      .section-title {
-        font-size: 1.3rem;
-        font-weight: 600;
-        color: var(--dark);
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .form-group {
-        margin-bottom: 20px;
-      }
-
-      label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: 600;
-        color: var(--dark);
-      }
-
-      .required::after {
-        content: " *";
-        color: var(--danger);
-      }
-
-      .form-control {
-        width: 100%;
-        padding: 12px 16px;
-        border: 2px solid var(--border);
-        border-radius: 10px;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        background: white;
-      }
-
-      .form-control:focus {
-        outline: none;
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-      }
-
-      textarea.form-control {
-        min-height: 120px;
-        resize: vertical;
-      }
-
-      .radio-group {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
-        margin-top: 10px;
-      }
-
-      .radio-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 12px 20px;
-        background: white;
-        border: 2px solid var(--border);
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        flex: 1;
-        min-width: 120px;
-      }
-
-      .radio-item:hover {
-        border-color: var(--primary);
-      }
-
-      .radio-item input[type="radio"] {
-        margin: 0;
-      }
-
-      .radio-label {
-        font-weight: 500;
-        color: var(--dark);
-      }
-
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(-10px);
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --border: #e9ecef;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-        to {
-          opacity: 1;
-          transform: translateY(0);
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-      }
 
-      .btn {
-        padding: 12px 24px;
-        border: none;
-        border-radius: 10px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-      }
-
-      .btn-primary {
-        background: linear-gradient(135deg, var(--primary), var(--secondary));
-        color: white;
-      }
-
-      .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
-      }
-
-      .btn-outline {
-        background: transparent;
-        color: var(--gray);
-        border: 2px solid var(--border);
-      }
-
-      .btn-outline:hover {
-        border-color: var(--primary);
-        color: var(--primary);
-      }
-
-      .form-actions {
-        display: flex;
-        gap: 15px;
-        margin-top: 30px;
-        flex-wrap: wrap;
-      }
-
-      .alert {
-        padding: 15px 20px;
-        border-radius: 10px;
-        margin-bottom: 25px;
-        font-weight: 500;
-      }
-
-      .alert-error {
-        background: rgba(247, 37, 133, 0.1);
-        border: 1px solid var(--danger);
-        color: var(--danger);
-      }
-
-      .alert-success {
-        background: rgba(76, 201, 240, 0.1);
-        border: 1px solid var(--success);
-        color: var(--success);
-      }
-
-      .alert-info {
-        background: rgba(67, 97, 238, 0.1);
-        border: 1px solid var(--primary);
-        color: var(--primary);
-      }
-
-      .tags-hint {
-        font-size: 0.9rem;
-        color: var(--gray);
-        margin-top: 5px;
-      }
-
-      .preview-note {
-        background: #fff3cd;
-        border: 1px solid #ffeaa7;
-        color: #856404;
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        border-left: 4px solid var(--warning);
-      }
-
-      /* Адаптивность */
-      @media (max-width: 768px) {
         body {
-          padding: 10px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo span {
+            color: var(--success);
         }
 
         .card {
-          padding: 25px 20px;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .card-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .card-subtitle {
+            color: var(--gray);
+            font-size: 1.1rem;
         }
 
         .form-section {
-          padding: 20px 15px;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: var(--light);
+            border-radius: 15px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .required::after {
+            content: " *";
+            color: var(--danger);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
         }
 
         .radio-group {
-          flex-direction: column;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .radio-item:hover {
+            border-color: var(--primary);
+        }
+
+        .radio-item input[type="radio"] {
+            margin: 0;
+        }
+
+        .radio-label {
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--gray);
+            border: 2px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
         .form-actions {
-          flex-direction: column;
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
         }
-      }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .alert-error {
+            background: rgba(247, 37, 133, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+
+        .alert-success {
+            background: rgba(76, 201, 240, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .alert-info {
+            background: rgba(67, 97, 238, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .tags-hint {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        .preview-note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--warning);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .card {
+                padding: 25px 20px;
+            }
+
+            .form-section {
+                padding: 20px 15px;
+            }
+
+            .radio-group {
+                flex-direction: column;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
 
         .icon {
             display: inline-block;
@@ -395,13 +373,13 @@
             padding: 10px;
         }
 
-      .photo-preview-container {
-          margin-top: 15px;
-          padding: 15px;
-          background: var(--light);
-          border-radius: 10px;
-          border: 2px dashed var(--border);
-      }
+        .photo-preview-container {
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 10px;
+            border: 2px dashed var(--border);
+        }
     </style>
 </head>
 <body>
@@ -463,15 +441,12 @@
                     <select id="category" name="category" class="form-control" required>
                         <option value="">Выберите категорию</option>
                         <%
-                            // Получаем категории из БД
-                            try {
-                                com.mipt.portal.repository.CategoryRepository categorySelector =
-                                        new com.mipt.portal.repository.CategoryRepository();
-                                java.util.List<java.util.Map<String, Object>> categories = categorySelector.getAllCategories();
+                            // Получаем категории из атрибута request (переданы из контроллера)
+                            List<Map<String, Object>> categories = (List<Map<String, Object>>) request.getAttribute("categories");
+                            String currentCategoryParam = request.getParameter("category");
 
-                                String currentCategoryParam = request.getParameter("category");
-
-                                for (java.util.Map<String, Object> category : categories) {
+                            if (categories != null && !categories.isEmpty()) {
+                                for (Map<String, Object> category : categories) {
                                     String categoryName = (String) category.get("name");
                                     boolean isSelected = categoryName.equals(currentCategoryParam);
                         %>
@@ -480,11 +455,9 @@
                         </option>
                         <%
                             }
-                        } catch (Exception e) {
-                            System.err.println("Error loading categories: " + e.getMessage());
-                            e.printStackTrace();
+                        } else {
                         %>
-                        <option value="">Ошибка загрузки категорий</option>
+                        <option value="">Нет доступных категорий</option>
                         <%
                             }
                         %>
@@ -495,71 +468,29 @@
                     <label for="subcategory" class="required">Подкатегория</label>
                     <select id="subcategory" name="subcategory" class="form-control" required>
                         <%
-                            // Используем другое имя переменной чтобы избежать конфликта
                             String chosenCategory = request.getParameter("category");
+                            List<Map<String, Object>> subcategories = (List<Map<String, Object>>) request.getAttribute("subcategories");
+                            String currentSubcategoryParam = request.getParameter("subcategory");
+
                             if (chosenCategory == null || chosenCategory.isEmpty()) {
                         %>
                         <option value="">Сначала выберите категорию</option>
                         <%
+                        } else if (subcategories == null || subcategories.isEmpty()) {
+                        %>
+                        <option value="">Нет доступных подкатегорий</option>
+                        <%
                         } else {
-                            try {
-                                // Загружаем категории и находим ID выбранной
-                                com.mipt.portal.repository.CategoryRepository categorySelector =
-                                        new com.mipt.portal.repository.CategoryRepository();
-                                java.util.List<java.util.Map<String, Object>> allCategories = categorySelector.getAllCategories();
-                                Long categoryId = null;
-
-                                // ДЕБАГ: выводим в консоль
-                                System.out.println("=== LOADING SUBCATEGORIES FOR: " + chosenCategory + " ===");
-
-                                for (java.util.Map<String, Object> category : allCategories) {
-                                    String catName = (String) category.get("name");
-                                    if (catName.equals(chosenCategory)) {
-                                        categoryId = (Long) category.get("id");
-                                        System.out.println("Found category ID: " + categoryId + " for name: " + chosenCategory);
-                                        break;
-                                    }
-                                }
-
-                                if (categoryId != null) {
-                                    // Загружаем подкатегории
-                                    com.mipt.portal.repository.SubcategoryRepository subcategorySelector =
-                                            new com.mipt.portal.repository.SubcategoryRepository();
-                                    java.util.List<java.util.Map<String, Object>> subcategories =
-                                            subcategorySelector.getSubcategoriesByCategory(categoryId);
-
-                                    System.out.println("Loaded " + (subcategories != null ? subcategories.size() : 0) + " subcategories");
-
-                                    String currentSubcategoryParam = request.getParameter("subcategory");
-
-                                    if (subcategories != null && !subcategories.isEmpty()) {
                         %>
                         <option value="">Выберите подкатегорию</option>
                         <%
-                            for (java.util.Map<String, Object> subcategory : subcategories) {
+                            for (Map<String, Object> subcategory : subcategories) {
                                 String subcategoryName = (String) subcategory.get("name");
                                 boolean isSelected = subcategoryName.equals(currentSubcategoryParam);
                         %>
                         <option value="<%= subcategoryName %>" <%= isSelected ? "selected" : "" %>>
                             <%= subcategoryName %>
                         </option>
-                        <%
-                            }
-                        } else {
-                        %>
-                        <option value="">Нет доступных подкатегорий</option>
-                        <%
-                            }
-                        } else {
-                        %>
-                        <option value="">Категория не найдена в БД</option>
-                        <%
-                            }
-                        } catch (Exception e) {
-                            System.err.println("ERROR loading subcategories: " + e.getMessage());
-                            e.printStackTrace();
-                        %>
-                        <option value="">Ошибка загрузки подкатегорий</option>
                         <%
                                 }
                             }
@@ -668,22 +599,19 @@
                 </h3>
 
                 <!-- Скрытое поле для хранения выбранных тегов в JSON -->
-                <input type="hidden" id="selectedTags" name="selectedTags" value="">
-
-
+                <input type="hidden" id="selectedTags" name="selectedTags" value="<%= request.getParameter("selectedTags") != null ? request.getParameter("selectedTags") : "" %>">
 
                 <!-- Контейнер для тегов с выпадающими списками -->
                 <div class="form-group">
                     <label>Доступные теги:</label>
                     <div id="tagsContainer" class="tags-container">
                         <%
-                            if (request.getAttribute("availableTags") != null) {
-                                List<Map<String, Object>> availableTags = (List<Map<String, Object>>) request.getAttribute("availableTags");
-                                if (availableTags != null && !availableTags.isEmpty()) {
-                                    for (Map<String, Object> tag : availableTags) {
-                                        String tagName = (String) tag.get("name");
-                                        Long tagId = (Long) tag.get("id");
-                                        List<Map<String, Object>> values = (List<Map<String, Object>>) tag.get("values");
+                            List<Map<String, Object>> availableTags = (List<Map<String, Object>>) request.getAttribute("tags");
+                            if (availableTags != null && !availableTags.isEmpty()) {
+                                for (Map<String, Object> tag : availableTags) {
+                                    String tagName = (String) tag.get("name");
+                                    Long tagId = ((Number) tag.get("id")).longValue();
+                                    List<Map<String, Object>> values = (List<Map<String, Object>>) tag.get("values");
                         %>
                         <div class="tag-row" data-tag-id="<%= tagId %>">
                             <div class="tag-header">
@@ -695,17 +623,13 @@
                                     if (values != null && !values.isEmpty()) {
                                         for (Map<String, Object> value : values) {
                                             String valueName = (String) value.get("name");
-                                            Long valueId = (Long) value.get("id");
+                                            Long valueId = ((Number) value.get("id")).longValue();
                                 %>
                                 <option value="<%= valueId %>" data-value-name="<%= valueName %>">
                                     <%= valueName %>
                                 </option>
                                 <%
-                                    }
-                                } else {
-                                %>
-                                <option value="">Нет доступных значений</option>
-                                <%
+                                        }
                                     }
                                 %>
                             </select>
@@ -714,12 +638,7 @@
                             }
                         } else {
                         %>
-                        <div class="no-tags-message">Нет доступных тегов в базе данных</div>
-                        <%
-                            }
-                        } else {
-                        %>
-                        <div class="no-tags-message">Теги не загружены (availableTags = null)</div>
+                        <div class="no-tags-message">Нет доступных тегов</div>
                         <%
                             }
                         %>
@@ -772,7 +691,7 @@
             // Создаем временную форму для отправки данных
             const form = document.createElement('form');
             form.method = 'GET';
-            form.action = '<%= request.getRequestURI() %>';
+            form.action = '/create-ad';
 
             // Добавляем выбранную категорию
             addHiddenField(form, 'category', categoryValue);
@@ -844,7 +763,6 @@
             try {
                 selectedTags = JSON.parse(hiddenTagsField.value);
                 restoreSelectedTags();
-                updateSelectedTagsDisplay();
             } catch (e) {
                 console.error('Error parsing saved tags:', e);
             }
@@ -888,7 +806,6 @@
                     }
                 }
 
-                updateSelectedTagsDisplay();
                 updateHiddenFields();
             });
         });
@@ -902,24 +819,6 @@
                 }
             });
         }
-
-        // Удаление выбранного тега
-        function removeSelectedTag(tagId) {
-            const index = selectedTags.findIndex(tag => tag.tagId == tagId);
-            if (index !== -1) {
-                selectedTags.splice(index, 1);
-
-                // Сбрасываем соответствующий выпадающий список
-                const select = document.querySelector(`.tag-select[data-tag-id="${tagId}"]`);
-                if (select) {
-                    select.value = '';
-                }
-
-                updateSelectedTagsDisplay();
-                updateHiddenFields();
-            }
-        }
-
 
         // Обновление скрытых полей
         function updateHiddenFields() {
@@ -964,7 +863,6 @@
             });
         }
 
-
         function updateFileInput(originalFiles, indexToRemove) {
             const dt = new DataTransfer();
 
@@ -976,10 +874,6 @@
 
             photoInput.files = dt.files;
         }
-        // === КОНЕЦ ОБРАБОТКИ ФОТОГРАФИЙ ===
-
-        // Делаем функцию глобальной для использования в onclick
-        window.removeSelectedTag = removeSelectedTag;
     });
 </script>
 </body>

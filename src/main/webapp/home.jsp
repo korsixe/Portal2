@@ -793,7 +793,7 @@
             <h3>Объявлений не найдено</h3>
             <p><em>Попробуйте изменить параметры фильтрации или сбросить фильтры</em></p>
             <% if (user != null) { %>
-            <a href="create-ad.jsp" class="btn btn-primary" style="margin-top: 20px;">
+            <a href="<%= request.getContextPath() %>/create-ad" class="btn btn-primary" style="margin-top: 20px;">
                 + Создать объявление
             </a>
             <% } else { %>
