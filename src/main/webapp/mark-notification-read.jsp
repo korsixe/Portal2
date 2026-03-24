@@ -1,5 +1,5 @@
 <%@ page contentType="text/plain" %>
-<%@ page import="com.mipt.portal.notification.NotificationService" %>
+<%@ page import="com.mipt.portal.service.NotificationService" %>
 <%
 System.out.println("📧 ===== ПОМЕТКА УВЕДОМЛЕНИЯ ПРОЧИТАННЫМ =====");
 

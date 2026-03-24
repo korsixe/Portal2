@@ -5,7 +5,7 @@ import java.sql.*;
 import java.util.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
-//import com.mipt.portal.database.DatabaseConnection;
+//import com.mipt.portal.infrastructure.database.DatabaseConnection;
 
 @Service
 @RequiredArgsConstructor

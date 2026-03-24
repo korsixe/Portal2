@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.announcement.Announcement" %>
-<%@ page import="com.mipt.portal.announcement.AdvertisementStatus" %>
+<%@ page import="com.mipt.portal.entity.Announcement" %>
+<%@ page import="com.mipt.portal.enums.AdStatus" %>
 <%
     response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     response.setHeader("Pragma", "no-cache");
@@ -377,23 +377,23 @@
 
         <!-- Сообщение об изменении статуса -->
         <% if ("statusChange".equals(action) && announcement != null) { %>
-        <div class="status-change-message <%= announcement.getStatus() == AdvertisementStatus.UNDER_MODERATION ? "warning" : "" %>">
+        <div class="status-change-message <%= announcement.getStatus() == AdStatus.UNDER_MODERATION ? "warning" : "" %>">
             <span style="font-size: 1.5rem;">
-                <% if (announcement.getStatus() == AdvertisementStatus.UNDER_MODERATION) { %>
+                <% if (announcement.getStatus() == AdStatus.UNDER_MODERATION) { %>
                 ⏳
-                <% } else if (announcement.getStatus() == AdvertisementStatus.ACTIVE) { %>
+                <% } else if (announcement.getStatus() == AdStatus.ACTIVE) { %>
                 🎉
-                <% } else if (announcement.getStatus() == AdvertisementStatus.DRAFT) { %>
+                <% } else if (announcement.getStatus() == AdStatus.DRAFT) { %>
                 📝
                 <% } %>
             </span>
             <div>
                 <strong>
-                    <% if (announcement.getStatus() == AdvertisementStatus.UNDER_MODERATION) { %>
+                    <% if (announcement.getStatus() == AdStatus.UNDER_MODERATION) { %>
                     Объявление отправлено на модерацию
-                    <% } else if (announcement.getStatus() == AdvertisementStatus.ACTIVE) { %>
+                    <% } else if (announcement.getStatus() == AdStatus.ACTIVE) { %>
                     Объявление теперь активно и видно всем пользователям
-                    <% } else if (announcement.getStatus() == AdvertisementStatus.DRAFT) { %>
+                    <% } else if (announcement.getStatus() == AdStatus.DRAFT) { %>
                     Объявление сохранено как черновик
                     <% } %>
                 </strong>
@@ -487,23 +487,23 @@
             <h4>Что дальше?</h4>
             <ul>
                 <% if (announcement != null) {
-                    if (announcement.getStatus() == AdvertisementStatus.UNDER_MODERATION) {
+                    if (announcement.getStatus() == AdStatus.UNDER_MODERATION) {
                 %>
                 <li>Объявление отправлено на проверку модератору</li>
                 <li>Обычно модерация занимает до 24 часов</li>
                 <li>После одобрения объявление станет активным</li>
-                <% } else if (announcement.getStatus() == AdvertisementStatus.ACTIVE) { %>
+                <% } else if (announcement.getStatus() == AdStatus.ACTIVE) { %>
                 <li>Объявление теперь видно всем пользователям</li>
                 <li>Следите за откликами и сообщениями</li>
                 <li>Вы можете редактировать объявление в любое время</li>
-                <% } else if (announcement.getStatus() == AdvertisementStatus.DRAFT) { %>
+                <% } else if (announcement.getStatus() == AdStatus.DRAFT) { %>
                 <li>Объявление сохранено как черновик</li>
                 <li>Оно не видно другим пользователям</li>
                 <li>Вы можете продолжить редактирование или опубликовать</li>
                 <% } %>
                 <li>Просматривайте статистику в личном кабинете</li>
                 <li>Обновляйте информацию по мере необходимости</li>
-                <% if (announcement != null && announcement.getStatus() != AdvertisementStatus.ACTIVE) { %>
+                <% if (announcement != null && announcement.getStatus() != AdStatus.ACTIVE) { %>
                 <li>Для публикации измените статус на "На модерации"</li>
                 <% } %>
                 <% } %>

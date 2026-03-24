@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.sql.*;
 import java.util.*;
-//import com.mipt.portal.database.DatabaseConnection;
+//import com.mipt.portal.infrastructure.database.DatabaseConnection;
 
 @Service
 @RequiredArgsConstructor

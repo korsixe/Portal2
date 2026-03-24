@@ -1,6 +1,6 @@
 <%-- autocomplete.jsp --%>
 <%@ page contentType="application/json;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.database.DatabaseConnection" %>
+<%@ page import="com.mipt.portal.infrastructure.database.DatabaseConnection" %>
 <%@ page import="java.sql.Connection" %>
 <%@ page import="java.sql.PreparedStatement" %>
 <%@ page import="java.sql.ResultSet" %>

@@ -1,17 +1,21 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.users.User" %>
-<%@ page import="com.mipt.portal.announcement.service.AnnouncementService" %>
-<%@ page import="com.mipt.portal.announcement.entity.Announcement" %>
-<%@ page import="com.mipt.portal.announcement.dto.AnnouncementFilterDto" %>
-<%@ page import="com.mipt.portal.announcement.enums.Category" %>
-<%@ page import="com.mipt.portal.announcement.enums.Condition" %>
+<%@ page import="com.mipt.portal.entity.User" %>
+<%@ page import="com.mipt.portal.service.AnnouncementService" %>
+<%@ page import="com.mipt.portal.entity.Announcement" %>
+<%@ page import="com.mipt.portal.dto.AnnouncementFilterDto" %>
+<%@ page import="com.mipt.portal.enums.Category" %>
+<%@ page import="com.mipt.portal.enums.Condition" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="org.springframework.web.context.WebApplicationContext" %>
 <%@ page import="org.springframework.web.context.support.WebApplicationContextUtils" %>
 <%
     // Проверяем авторизацию пользователя
-    User user = (User) session.getAttribute("user");
+    Object sessionUserObj = session.getAttribute("user");
+    User user = sessionUserObj instanceof User ? (User) sessionUserObj : null;
+    if (sessionUserObj != null && user == null) {
+        session.invalidate();
+    }
 
     // Получаем параметры фильтрации
     String categoryFilter = request.getParameter("category");
@@ -890,7 +894,7 @@
             // Создаем новый AJAX запрос
             currentRequest = new XMLHttpRequest();
 
-            // ВАЖНО: Добавляем timestamp для избежания кэширования
+            // ВАЖНО: Добавляем timestamp для избеждения кэширования
             const url = 'autocomplete.jsp?query=' + encodeURIComponent(query) + '&t=' + Date.now();
             console.log('Request URL:', url);
 

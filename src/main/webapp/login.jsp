@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.*" %>
-<%@ page import="com.mipt.portal.users.User" %>
+<%@ page import="com.mipt.portal.entity.User" %>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -197,7 +197,11 @@
     <% } %>
 
     <%
-        User user = (User) session.getAttribute("user");
+        Object sessionUserObj = session.getAttribute("user");
+        User user = sessionUserObj instanceof User ? (User) sessionUserObj : null;
+        if (sessionUserObj != null && user == null) {
+            session.invalidate();
+        }
         if (user != null) {
     %>
     <div class="button-group">

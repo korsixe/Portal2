@@ -1,8 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.announcement.Announcement" %>
-<%@ page import="com.mipt.portal.announcement.Category" %>
-<%@ page import="com.mipt.portal.announcement.Condition" %>
-<%@ page import="com.mipt.portal.announcement.AdvertisementStatus" %>
+<%@ page import="com.mipt.portal.entity.Announcement" %>
+<%@ page import="com.mipt.portal.enums.Category" %>
+<%@ page import="com.mipt.portal.enums.Condition" %>
+<%@ page import="com.mipt.portal.enums.AdStatus" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.List" %>
 

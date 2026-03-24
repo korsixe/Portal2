@@ -1,8 +1,11 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.announcement.AnnouncementService" %>
-<%@ page import="com.mipt.portal.announcement.Announcement" %>
-<%@ page import="com.mipt.portal.announcement.AdvertisementStatus" %>
-<%@ page import="com.mipt.portal.moderator.message.ModerationMessageService" %>
+<%@ page import="com.mipt.portal.entity.Announcement" %>
+<%@ page import="com.mipt.portal.enums.AdStatus" %>
+<%@ page import="com.mipt.portal.service.AnnouncementService" %>
+<%@ page import="com.mipt.portal.service.NotificationService" %>
+<%@ page import="org.springframework.web.context.WebApplicationContext" %>
+<%@ page import="org.springframework.web.context.support.WebApplicationContextUtils" %>
+<%@ page import="java.util.Optional" %>
 <%
     // Проверка авторизации модератора
     if (session.getAttribute("moderator") == null) {
@@ -20,52 +23,51 @@
     if (action != null && adIdParam != null) {
         try {
             Long adId = Long.parseLong(adIdParam);
-            AnnouncementService adsService = new AnnouncementService();
-            Announcement ad = adsService.getAd(adId);
 
-            if (ad != null) {
-                if ("approve".equals(action) && (reason == null || reason.trim().isEmpty())) {
-                    // Создаем уведомление об одобрении без причины
-                    Long messageId = ModerationMessageService.createApprovalNotification(adId, moderatorEmail);
-                    ad.setMessageId(messageId);
-                    message = "Объявление одобрено";
-                } else {
-                    // Для остальных действий используем обычную логику
-                    Long messageId = ModerationMessageService.logModerationAction(
+            if (("reject".equals(action) || "delete".equals(action))
+                && (reason == null || reason.trim().isEmpty())) {
+                message = "Укажите причину";
+                messageType = "error";
+            } else {
+                WebApplicationContext appContext =
+                    WebApplicationContextUtils.getRequiredWebApplicationContext(application);
+                AnnouncementService adsService = appContext.getBean(AnnouncementService.class);
+                NotificationService notificationService = appContext.getBean(NotificationService.class);
+
+                AdStatus newStatus;
+                switch (action) {
+                    case "approve":
+                        newStatus = AdStatus.ACTIVE;
+                        message = "Объявление одобрено";
+                        break;
+                    case "reject":
+                        newStatus = AdStatus.REJECTED;
+                        message = "Объявление отправлено на доработку";
+                        break;
+                    case "delete":
+                        newStatus = AdStatus.DELETED;
+                        message = "Объявление удалено";
+                        break;
+                    default:
+                        newStatus = null;
+                        message = "Неизвестное действие";
+                        messageType = "error";
+                }
+
+                if (newStatus != null) {
+                    Optional<Announcement> updated = adsService.changeStatus(adId, newStatus);
+                    if (updated.isPresent()) {
+                        notificationService.createNotification(
                             adId,
                             action,
                             reason,
-                            moderatorEmail
-                    );
-                    ad.setMessageId(messageId);
-
-                    switch (action) {
-                        case "reject":
-                            message = "Объявление отправлено на доработку";
-                            break;
-                        case "delete":
-                            message = "Объявление удалено";
-                            break;
+                            moderatorEmail != null ? moderatorEmail : ""
+                        );
+                    } else {
+                        message = "Объявление не найдено";
+                        messageType = "error";
                     }
                 }
-
-                // Обновляем статус объявления
-                switch (action) {
-                    case "approve":
-                        ad.setStatus(AdvertisementStatus.ACTIVE);
-                        break;
-                    case "reject":
-                        ad.setStatus(AdvertisementStatus.DRAFT);
-                        break;
-                    case "delete":
-                        ad.setStatus(AdvertisementStatus.DELETED);
-                        break;
-                }
-
-                adsService.editAd(ad);
-            } else {
-                message = "Объявление не найдено";
-                messageType = "error";
             }
         } catch (Exception e) {
             message = "Произошла ошибка: " + e.getMessage();

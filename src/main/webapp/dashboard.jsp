@@ -1,16 +1,22 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.mipt.portal.users.User" %>
-<%@ page import="com.mipt.portal.announcement.entity.Announcement" %>
-<%@ page import="com.mipt.portal.announcement.enums.Category" %>
-<%@ page import="com.mipt.portal.announcement.enums.Condition" %>
-<%@ page import="com.mipt.portal.announcement.enums.AdStatus" %>
-<%@ page import="com.mipt.portal.announcement.repository.AnnouncementRepository" %>
+<%@ page import="com.mipt.portal.entity.User" %>
+<%@ page import="com.mipt.portal.entity.Announcement" %>
+<%@ page import="com.mipt.portal.enums.Category" %>
+<%@ page import="com.mipt.portal.enums.Condition" %>
+<%@ page import="com.mipt.portal.enums.AdStatus" %>
+<%@ page import="com.mipt.portal.repository.AnnouncementRepository" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="org.springframework.web.context.WebApplicationContext" %>
 <%@ page import="org.springframework.web.context.support.WebApplicationContextUtils" %>
 <%
-    User user = (User) session.getAttribute("user");
+    Object sessionUserObj = session.getAttribute("user");
+    User user = sessionUserObj instanceof User ? (User) sessionUserObj : null;
+    if (sessionUserObj != null && user == null) {
+        session.invalidate();
+        response.sendRedirect(request.getContextPath() + "/login.jsp");
+        return;
+    }
     if (user == null) {
         response.sendRedirect(request.getContextPath() + "/login.jsp");
         return;

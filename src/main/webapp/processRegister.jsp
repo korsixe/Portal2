@@ -1,7 +1,10 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="com.mipt.portal.users.service.UserService" %>
-<%@ page import="com.mipt.portal.users.User" %>
-<%@ page import="java.sql.SQLException" %>
+<%@ page import="com.mipt.portal.service.UserService" %>
+<%@ page import="com.mipt.portal.entity.User" %>
+<%@ page import="com.mipt.portal.entity.Address" %>
+<%@ page import="org.springframework.web.context.WebApplicationContext" %>
+<%@ page import="org.springframework.web.context.support.WebApplicationContextUtils" %>
+<%@ page import="java.util.Optional" %>
 <%
     // Получаем данные из формы
     String email = request.getParameter("email");
@@ -40,12 +43,27 @@
     }
 
     try {
-        UserService userService = new UserService();
-        User user = userService.registerUser(email, name, password, passwordAgain, address, studyProgram, course).getData();
+        WebApplicationContext appContext =
+            WebApplicationContextUtils.getRequiredWebApplicationContext(application);
+        UserService userService = appContext.getBean(UserService.class);
+        Address addressObj = new Address(address);
+        Optional<User> userOpt = userService.registerUser(
+            email,
+            name,
+            password,
+            passwordAgain,
+            addressObj,
+            studyProgram,
+            course
+        );
 
-        session.setAttribute("user", user);
-
-        response.sendRedirect("index.jsp?success=Регистрация прошла успешно! Добро пожаловать, " + name + "!");
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            session.setAttribute("user", user);
+            response.sendRedirect("index.jsp?success=Регистрация прошла успешно! Добро пожаловать, " + name + "!");
+        } else {
+            response.sendRedirect("register.jsp?error=Ошибка регистрации. Проверьте введенные данные");
+        }
 
     } catch (IllegalArgumentException e) {
         e.printStackTrace();
