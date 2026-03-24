@@ -1,6 +1,6 @@
 package com.mipt.portal.service;
 
-import com.mipt.portal.specification.AnnouncementSpecification;
+import com.mipt.portal.entity.User;
 import com.mipt.portal.dto.AnnouncementCreateDto;
 import com.mipt.portal.dto.AnnouncementFilterDto;
 import com.mipt.portal.entity.Announcement;
@@ -8,10 +8,10 @@ import com.mipt.portal.enums.AdStatus;
 import com.mipt.portal.repository.AnnouncementRepository;
 import com.mipt.portal.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +21,7 @@ public class AnnouncementService {
 
   private final AnnouncementRepository repository;
   private final UserRepository userRepository;
+
   @Transactional
   public Announcement create(AnnouncementCreateDto dto) {
     Announcement ad = new Announcement();
@@ -34,13 +35,15 @@ public class AnnouncementService {
     }
 
     ad.setStatus(AdStatus.DRAFT);
+    ad.setCreatedAt(Instant.now());
+    ad.setUpdatedAt(Instant.now());
+
     return repository.save(ad);
   }
 
   @Transactional(readOnly = true)
   public List<Announcement> searchApproved(AnnouncementFilterDto filter, String sortBy, String direction) {
-    Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
-    return repository.findAll(AnnouncementSpecification.build(filter, AdStatus.ACTIVE), sort);
+    return repository.searchApproved(filter, sortBy, direction);
   }
 
   @Transactional(readOnly = true)
@@ -52,6 +55,7 @@ public class AnnouncementService {
   public void sendToModeration(Long id) {
     repository.findById(id).ifPresent(ad -> {
       ad.sendToModeration();
+      ad.setUpdatedAt(Instant.now());
       repository.save(ad);
     });
   }
@@ -60,13 +64,26 @@ public class AnnouncementService {
   public Optional<Announcement> changeStatus(Long id, AdStatus newStatus) {
     return repository.findById(id).map(ad -> {
       ad.setStatus(newStatus);
+      ad.setUpdatedAt(Instant.now());
       return repository.save(ad);
     });
   }
 
+  @Transactional(readOnly = true)
   public Long getUserIdByEmail(String email) {
     return userRepository.findByEmail(email)
-            .map(user -> user.getId())
+            .map(User::getId)
             .orElse(null);
+  }
+
+  @Transactional(readOnly = true)
+  public Announcement findById(Long id) {
+    return repository.findById(id).orElse(null);
+  }
+
+  @Transactional
+  public Announcement save(Announcement ad) {
+    ad.setUpdatedAt(java.time.Instant.now());
+    return repository.save(ad);
   }
 }
