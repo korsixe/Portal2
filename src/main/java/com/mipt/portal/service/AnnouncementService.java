@@ -1,12 +1,16 @@
 package com.mipt.portal.service;
 
-import com.mipt.portal.specification.AnnouncementSpecification;
 import com.mipt.portal.dto.AnnouncementCreateDto;
 import com.mipt.portal.dto.AnnouncementFilterDto;
 import com.mipt.portal.entity.Announcement;
 import com.mipt.portal.enums.AdStatus;
+import com.mipt.portal.enums.AdminActionType;
+import com.mipt.portal.enums.AuditTargetType;
 import com.mipt.portal.repository.AnnouncementRepository;
 import com.mipt.portal.repository.UserRepository;
+import com.mipt.portal.specification.AnnouncementSpecification;
+import com.mipt.portal.service.AuditService;
+import com.mipt.portal.service.ModerationHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -21,6 +25,8 @@ public class AnnouncementService {
 
   private final AnnouncementRepository repository;
   private final UserRepository userRepository;
+  private final ModerationHistoryService moderationHistoryService;
+  private final AuditService auditService;
   @Transactional
   public Announcement create(AnnouncementCreateDto dto) {
     Announcement ad = new Announcement();
@@ -57,10 +63,15 @@ public class AnnouncementService {
   }
 
   @Transactional
-  public Optional<Announcement> changeStatus(Long id, AdStatus newStatus) {
+  public Optional<Announcement> changeStatus(Long id, AdStatus newStatus, Long moderatorId, String reason) {
     return repository.findById(id).map(ad -> {
+      AdStatus previous = ad.getStatus();
       ad.setStatus(newStatus);
-      return repository.save(ad);
+      Announcement saved = repository.save(ad);
+      moderationHistoryService.record(id, moderatorId, previous, newStatus, reason);
+      auditService.logAdminAction(moderatorId, null, AdminActionType.AD_STATUS_CHANGE, AuditTargetType.ANNOUNCEMENT, id,
+              "Статус " + previous + " -> " + newStatus + (reason != null ? (". Причина: " + reason) : ""));
+      return saved;
     });
   }
 

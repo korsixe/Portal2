@@ -1049,10 +1049,12 @@
         <!-- Link to Moderator Panel -->
         <% if (user.isModerator()) { %>
         <a href="${pageContext.request.contextPath}/moderator/dashboard" class="btn" style="background-color: #ff6b6b; color: white;">Кабинет модератора</a>
+        <a href="${pageContext.request.contextPath}/moderator/history" class="btn" style="background-color: #6b7280; color: white;">История модерации</a>
         <% } %>
         <!-- Link to Admin Panel -->
         <% if (user.isAdmin()) { %>
         <a href="${pageContext.request.contextPath}/admin/dashboard" class="btn" style="background-color: #333; color: white;">Админка</a>
+        <a href="${pageContext.request.contextPath}/moderator/history" class="btn" style="background-color: #4b5563; color: white;">История модерации</a>
         <% } %>
     </div>
 

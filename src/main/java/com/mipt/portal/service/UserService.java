@@ -109,6 +109,16 @@ public class UserService {
 
       User user = userOpt.get();
 
+      if (user.isBanned()) {
+        log.warn("Login failed - user banned: {}", email);
+        return Optional.empty();
+      }
+
+      if (user.isFrozen()) {
+        log.warn("Login failed - user frozen until {}: {}", user.getFrozenUntil(), email);
+        return Optional.empty();
+      }
+
       if (!passwordEncoder.matches(password + user.getSalt(), user.getHashPassword())) {
         log.warn("Login failed - invalid password for user: {}", email);
         return Optional.empty();

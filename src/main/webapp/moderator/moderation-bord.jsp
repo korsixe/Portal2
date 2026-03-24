@@ -260,6 +260,30 @@
             border-top: 1px solid #e1e5e9;
         }
 
+        .history-box {
+            margin-top: 15px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px;
+            display: none;
+        }
+
+        .history-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.95rem;
+        }
+
+        .history-entry:last-child {
+            border-bottom: none;
+        }
+
+        .history-meta {
+            color: #6b7280;
+            font-size: 0.85rem;
+        }
+
         .ad-views {
             color: #666;
             font-size: 0.9rem; 
@@ -838,7 +862,13 @@
                         <button type="button" class="btn btn-reject" data-action="reject" data-ad-id="${ad.id}" data-ad-title="${ad.title}">
                             Отозвать на доработку
                         </button>
+
+                        <button type="button" class="btn" style="margin-left: auto" data-history="${ad.id}">
+                            История модерации
+                        </button>
                     </div>
+
+                    <div id="history-${ad.id}" class="history-box"></div>
                 </div>
             </div>
             </c:forEach>
@@ -983,6 +1013,38 @@
                     // Для отзыва и удаления показываем окно выбора причины
                     showReasonModal(currentAction, currentAdTitle);
                 }
+            });
+        });
+
+        // История модерации
+        document.querySelectorAll('[data-history]').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const adId = this.getAttribute('data-history');
+                const box = document.getElementById(`history-${adId}`);
+                if (box.style.display === 'block') {
+                    box.style.display = 'none';
+                    return;
+                }
+                box.innerHTML = '<div class="history-entry">Загружаем...</div>';
+                box.style.display = 'block';
+                fetch(`${basePath}/api/announcements/${adId}/history`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (!data || data.length === 0) {
+                            box.innerHTML = '<div class="history-entry">Пока нет записей</div>';
+                            return;
+                        }
+                        box.innerHTML = data.map(item => {
+                            const created = item.createdAt ? new Date(item.createdAt).toLocaleString('ru-RU') : '';
+                            const fromStatus = item.fromStatus ? item.fromStatus : '—';
+                            const reason = item.reason ? `<div>${item.reason}</div>` : '';
+                            const moderator = item.moderatorId ? `Модератор: ${item.moderatorId}` : '';
+                            return `<div class="history-entry"><div><strong>${fromStatus}</strong> → <strong>${item.toStatus}</strong></div><div class="history-meta">${created} ${moderator}</div>${reason}</div>`;
+                        }).join('');
+                    })
+                    .catch(() => {
+                        box.innerHTML = '<div class="history-entry">Не удалось загрузить историю</div>';
+                    });
             });
         });
 

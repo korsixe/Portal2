@@ -1,9 +1,12 @@
 package com.mipt.portal.service;
 
 import com.mipt.portal.entity.User;
+import com.mipt.portal.enums.AdminActionType;
+import com.mipt.portal.enums.AuditTargetType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +22,8 @@ public class AdminService {
 
     private final UserService userService;
     private final ModerationService moderationService;
+    private final SanctionService sanctionService;
+    private final AuditService auditService;
 
     /**
      * Проверяет, является ли пользователь администратором
@@ -91,6 +96,7 @@ public class AdminService {
             Optional<Boolean> result = userService.deleteUser(userId);
             if (result.isPresent() && result.get()) {
                 log.info("User {} deleted by admin {}", userId, adminUserId);
+                auditAction(adminUserId, AdminActionType.USER_DELETE, AuditTargetType.USER, userId, "Удаление пользователя админом");
                 return Optional.of(true);
             }
 
@@ -139,6 +145,7 @@ public class AdminService {
             Optional<Boolean> result = userService.addCoins(userId, coins);
             if (result.isPresent() && result.get()) {
                 log.info("Admin {} added {} coins to user {}", adminUserId, coins, userId);
+                auditAction(adminUserId, AdminActionType.COINS_CHANGE, AuditTargetType.COINS, userId, "Добавлено " + coins + " монет");
                 return Optional.of(true);
             }
 
@@ -163,6 +170,7 @@ public class AdminService {
             Optional<Boolean> result = userService.deductCoins(userId, coins);
             if (result.isPresent() && result.get()) {
                 log.info("Admin {} deducted {} coins from user {}", adminUserId, coins, userId);
+                auditAction(adminUserId, AdminActionType.COINS_CHANGE, AuditTargetType.COINS, userId, "Списано " + coins + " монет");
                 return Optional.of(true);
             }
 
@@ -189,6 +197,7 @@ public class AdminService {
             Optional<Boolean> result = userService.assignModeratorRole(userId);
             if (result.isPresent() && result.get()) {
                 log.info("User {} promoted to moderator by admin {}", userId, adminUserId);
+                auditAction(adminUserId, AdminActionType.ROLE_CHANGE, AuditTargetType.ROLE, userId, "Назначен модератор");
                 return Optional.of(true);
             }
 
@@ -213,6 +222,7 @@ public class AdminService {
             Optional<Boolean> result = userService.revokeModeratorRole(userId);
             if (result.isPresent() && result.get()) {
                 log.info("User {} demoted from moderator by admin {}", userId, adminUserId);
+                auditAction(adminUserId, AdminActionType.ROLE_CHANGE, AuditTargetType.ROLE, userId, "Снята роль модератора");
                 return Optional.of(true);
             }
 
@@ -242,6 +252,7 @@ public class AdminService {
             Optional<Boolean> result = userService.assignAdminRole(userId);
             if (result.isPresent() && result.get()) {
                 log.info("User {} promoted to admin by admin {}", userId, adminUserId);
+                auditAction(adminUserId, AdminActionType.ROLE_CHANGE, AuditTargetType.ROLE, userId, "Назначен админ");
                 return Optional.of(true);
             }
 
@@ -272,6 +283,7 @@ public class AdminService {
             Optional<Boolean> result = userService.revokeAdminRole(userId);
             if (result.isPresent() && result.get()) {
                 log.info("User {} demoted from admin by admin {}", userId, adminUserId);
+                auditAction(adminUserId, AdminActionType.ROLE_CHANGE, AuditTargetType.ROLE, userId, "Снята роль админа");
                 return Optional.of(true);
             }
 
@@ -363,5 +375,46 @@ public class AdminService {
 
         public long getAdmins() { return admins; }
         public void setAdmins(long admins) { this.admins = admins; }
+    }
+
+    @Transactional
+    public Optional<Boolean> freezeUser(Long adminUserId, Long targetUserId, String reason, int hours) {
+        if (!isUserAdmin(adminUserId)) {
+            log.warn("Freeze user failed - user {} is not an admin", adminUserId);
+            return Optional.of(false);
+        }
+        Optional<Boolean> result = sanctionService.freezeUser(adminUserId, targetUserId, reason, hours);
+        result.filter(Boolean::booleanValue).ifPresent(ok -> auditAction(adminUserId, AdminActionType.USER_SANCTION, AuditTargetType.USER, targetUserId, "Заморозка на " + hours + " часов. Причина: " + reason));
+        return result;
+    }
+
+    @Transactional
+    public Optional<Boolean> banUser(Long adminUserId, Long targetUserId, String reason, int days) {
+        if (!isUserAdmin(adminUserId)) {
+            log.warn("Ban user failed - user {} is not an admin", adminUserId);
+            return Optional.of(false);
+        }
+        Optional<Boolean> result = sanctionService.banUser(adminUserId, targetUserId, reason, days);
+        result.filter(Boolean::booleanValue).ifPresent(ok -> auditAction(adminUserId, AdminActionType.USER_SANCTION, AuditTargetType.USER, targetUserId, "Бан на " + days + " дней. Причина: " + reason));
+        return result;
+    }
+
+    @Transactional
+    public Optional<Boolean> liftSanctions(Long adminUserId, Long targetUserId) {
+        if (!isUserAdmin(adminUserId)) {
+            log.warn("Lift sanctions failed - user {} is not an admin", adminUserId);
+            return Optional.of(false);
+        }
+        Optional<Boolean> result = sanctionService.liftSanctions(targetUserId);
+        result.filter(Boolean::booleanValue).ifPresent(ok -> auditAction(adminUserId, AdminActionType.USER_SANCTION, AuditTargetType.USER, targetUserId, "Санкции сняты"));
+        return result;
+    }
+
+    private void auditAction(Long adminUserId, AdminActionType actionType, AuditTargetType targetType, Long targetId, String details) {
+        auditService.logAdminAction(adminUserId, resolveEmail(adminUserId), actionType, targetType, targetId, details);
+    }
+
+    private String resolveEmail(Long userId) {
+        return userService.findUserById(userId).map(User::getEmail).orElse(null);
     }
 }
