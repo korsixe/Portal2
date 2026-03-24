@@ -28,6 +28,7 @@
     <div class="nav">
         <a class="btn" href="${pageContext.request.contextPath}/home.jsp">На главную</a>
         <a class="btn btn-primary" href="${pageContext.request.contextPath}/dashboard.jsp">Личный кабинет</a>
+        <a class="btn" href="${pageContext.request.contextPath}/moderator/history">История модерации</a>
         <a class="btn" href="${pageContext.request.contextPath}/logout">Выйти</a>
     </div>
 

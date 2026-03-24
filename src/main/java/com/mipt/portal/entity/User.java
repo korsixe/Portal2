@@ -2,9 +2,10 @@ package com.mipt.portal.entity;
 
 import com.mipt.portal.entity.Address;
 import com.mipt.portal.enums.Role;
+import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.HashSet;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -47,6 +48,18 @@ public class User {
 
   @Column(name = "coins", columnDefinition = "INTEGER DEFAULT 0")
   private int coins = 0;
+
+  @Column(name = "frozen_until")
+  private Instant frozenUntil;
+
+  @Column(name = "frozen_reason")
+  private String frozenReason;
+
+  @Column(name = "banned_until")
+  private Instant bannedUntil;
+
+  @Column(name = "ban_reason")
+  private String banReason;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "user_ad_list", joinColumns = @JoinColumn(name = "user_id"))
@@ -120,5 +133,13 @@ public class User {
     }
     this.coins -= amount;
     return true;
+  }
+
+  public boolean isFrozen() {
+    return frozenUntil != null && Instant.now().isBefore(frozenUntil);
+  }
+
+  public boolean isBanned() {
+    return bannedUntil != null && Instant.now().isBefore(bannedUntil);
   }
 }
