@@ -16,12 +16,10 @@ public class CategoryService {
   private final CategoryRepository categoryRepository;
   private final TagRepository tagRepository;
 
-  // Методы из CategorySelector
   public List<Map<String, Object>> getAllCategories() {
     return categoryRepository.getAllCategories();
   }
 
-  // Методы из SubcategorySelector
   public List<Map<String, Object>> getSubcategoriesByCategory(Long categoryId) {
     return categoryRepository.getSubcategoriesByCategory(categoryId);
   }
@@ -38,7 +36,7 @@ public class CategoryService {
     return categoryRepository.getSubcategoryWithParent(subcategoryName);
   }
 
-  // Методы из TagSelector
+
   public List<Map<String, Object>> getTagsWithValues() {
     return tagRepository.getTagsWithValues();
   }
