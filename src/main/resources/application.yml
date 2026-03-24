@@ -4,7 +4,7 @@ spring:
       suffix: .jsp
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/myproject
+    url: jdbc:postgresql://localhost:5433/myproject
     username: myuser
     password: ${DB_PASSWORD:mypassword}
     driver-class-name: org.postgresql.Driver
