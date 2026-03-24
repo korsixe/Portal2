@@ -5,9 +5,14 @@
 <%@ page import="com.mipt.portal.announcement.AdsFilter" %>
 <%@ page import="com.mipt.portal.announcement.Category" %>
 <%@ page import="com.mipt.portal.announcement.Condition" %>
+<%@ page import="com.mipt.portal.announcement.entity.Announcement" %>
+<%@ page import="com.mipt.portal.announcement.enums.Category" %>
+<%@ page import="com.mipt.portal.announcement.enums.Condition" %>
+<%@ page import="com.mipt.portal.announcement.enums.AdStatus" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.sql.SQLException" %>
+
 <%
     // Проверяем авторизацию пользователя
     User user = (User) session.getAttribute("user");

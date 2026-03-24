@@ -2,7 +2,10 @@
 <%@ page import="com.mipt.portal.announcement.Condition" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.List" %>
-
+<%@ page import="com.mipt.portal.announcement.entity.Announcement" %>
+<%@ page import="com.mipt.portal.announcement.enums.Category" %>
+<%@ page import="com.mipt.portal.announcement.enums.Condition" %>
+<%@ page import="com.mipt.portal.announcement.enums.AdStatus" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.mipt.portal.announcement.Condition" %>
 <%@ page import="java.util.Map" %>
