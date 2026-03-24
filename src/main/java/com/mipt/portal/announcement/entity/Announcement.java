@@ -5,12 +5,9 @@ import com.mipt.portal.announcement.enums.Category;
 import com.mipt.portal.announcement.enums.Condition;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,18 +51,18 @@ public class Announcement {
   @Column(name = "tags_count")
   private Integer tagsCount = 0;
 
-  @CreationTimestamp
-  @Column(name = "created_at", updatable = false)
-  private Instant createdAt;
+  @Column(name = "created_at")
+  private java.time.Instant createdAt;
 
-  @UpdateTimestamp
   @Column(name = "updated_at")
-  private Instant updatedAt;
-
+  private java.time.Instant updatedAt;
 
   @Column(columnDefinition = "bytea")
   private byte[] photo;
 
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "photo_urls")
+  private List<String> photoUrls = new ArrayList<>();
 
   public void sendToModeration() {
     this.status = AdStatus.UNDER_MODERATION;
@@ -82,9 +79,4 @@ public class Announcement {
   public void reject() {
     this.status = AdStatus.REJECTED;
   }
-
-  @ElementCollection
-  @CollectionTable(name = "announcement_photos", joinColumns = @JoinColumn(name = "announcement_id"))
-  @Column(name = "photo_url")
-  private List<String> photoUrls = new ArrayList<>();
 }
