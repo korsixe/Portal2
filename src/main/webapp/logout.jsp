@@ -5,6 +5,6 @@
         session.invalidate();
     }
 
-    // Перенаправляем на главную страницу с сообщением
-    response.sendRedirect(request.getContextPath() + "/home.jsp?message=Вы успешно вышли из аккаунта");
+    // Перенаправляем на страницу успешного выхода
+    request.getRequestDispatcher("/logout-success.jsp").forward(request, response);
 %>

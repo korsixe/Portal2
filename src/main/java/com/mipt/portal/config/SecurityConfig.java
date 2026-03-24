@@ -66,11 +66,12 @@ public class SecurityConfig {
         // Настраиваем logout
         .logout(logout -> logout
             .logoutUrl("/logout")
-            .logoutSuccessUrl("/")
+            .logoutSuccessUrl("/logout-success.jsp")
             .invalidateHttpSession(true)
             .deleteCookies("JSESSIONID")
             .permitAll()
-        );
+        )
+        .exceptionHandling(ex -> ex.accessDeniedPage("/access-denied.jsp"));
 
     return http.build();
   }

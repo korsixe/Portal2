@@ -1177,7 +1177,7 @@
     <!-- Кнопки навигации -->
     <div class="action-buttons">
         <a href="${pageContext.request.contextPath}/home.jsp" class="btn btn-primary">На главную</a>
-        <a href="logout.jsp" class="btn btn-secondary">Выйти</a>
+        <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary">Выйти</a>
     </div>
 </div>
 
