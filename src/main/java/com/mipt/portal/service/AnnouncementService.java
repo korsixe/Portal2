@@ -1,5 +1,6 @@
 package com.mipt.portal.service;
 
+import com.mipt.portal.entity.Comment;
 import com.mipt.portal.entity.User;
 import com.mipt.portal.dto.AnnouncementCreateDto;
 import com.mipt.portal.dto.AnnouncementFilterDto;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -21,6 +23,8 @@ public class AnnouncementService {
 
   private final AnnouncementRepository repository;
   private final UserRepository userRepository;
+  private final CategoryService categoryService;
+  private final CommentService commentService;
 
   @Transactional
   public Announcement create(AnnouncementCreateDto dto) {
@@ -30,9 +34,6 @@ public class AnnouncementService {
     ad.setPrice(dto.getPrice());
     ad.setAuthorId(dto.getAuthorId());
 
-    if (dto.getPhotoUrls() != null) {
-      ad.setPhotoUrls(dto.getPhotoUrls());
-    }
 
     ad.setStatus(AdStatus.DRAFT);
     ad.setCreatedAt(Instant.now());
@@ -85,5 +86,52 @@ public class AnnouncementService {
   public Announcement save(Announcement ad) {
     ad.setUpdatedAt(java.time.Instant.now());
     return repository.save(ad);
+  }
+
+
+  public List<Map<String, Object>> getAllCategories() {
+    return categoryService.getAllCategories();
+  }
+
+  public List<Map<String, Object>> getSubcategoriesByCategory(Long categoryId) {
+    return categoryService.getSubcategoriesByCategory(categoryId);
+  }
+
+  public List<Map<String, Object>> getTagsWithValues() {
+    return categoryService.getTagsWithValues();
+  }
+
+  public List<Map<String, Object>> getTagsForAd(Long adId) {
+    return categoryService.getTagsForAd(adId);
+  }
+
+  public void saveAdTags(Long adId, List<Map<String, Object>> selectedTags) {
+    categoryService.saveAdTags(adId, selectedTags);
+  }
+
+  @Transactional
+  public void addComment(Long adId, Long userId, String userName, String content) {
+    commentService.createComment(adId, userId, userName, content);
+  }
+
+  @Transactional(readOnly = true)
+  public List<Comment> getCommentsByAdId(Long adId) {
+    return commentService.getCommentsByAdId(adId);
+  }
+
+  @Transactional(readOnly = true)
+  public String getAuthorName(Long authorId) {
+    return userRepository.findById(authorId)
+      .map(User::getName)
+      .orElse("Неизвестный пользователь");
+  }
+
+
+
+  public int getPhotoCount(Long adId) {
+    Announcement ad = findById(adId);
+    if (ad == null) return 0;
+
+    return (ad.getPhoto() != null && ad.getPhoto().length > 0) ? 1 : 0;
   }
 }
