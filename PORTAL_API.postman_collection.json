@@ -1,0 +1,3676 @@
+{
+  "info": {
+    "_postman_id": "2b223c7b-42d2-4892-9afe-eb2387f1f9c7",
+    "name": "PORTAL_API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53422357",
+    "_collection_link": "https://go.postman.co/collection/53422357-2b223c7b-42d2-4892-9afe-eb2387f1f9c7?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "api",
+      "item": [
+        {
+          "name": "v1",
+          "item": [
+            {
+              "name": "bookings",
+              "item": [
+                {
+                  "name": "{adId}",
+                  "item": [
+                    {
+                      "name": "book Ad",
+                      "request": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/bookings/:adId?buyerId=1203",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "bookings",
+                            ":adId"
+                          ],
+                          "query": [
+                            {
+                              "key": "buyerId",
+                              "value": "1203"
+                            }
+                          ],
+                          "variable": [
+                            {
+                              "key": "adId",
+                              "value": "1203"
+                            }
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/bookings/:adId?buyerId=1203",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "bookings",
+                                ":adId"
+                              ],
+                              "query": [
+                                {
+                                  "key": "buyerId",
+                                  "value": "1203"
+                                }
+                              ],
+                              "variable": [
+                                {
+                                  "key": "adId",
+                                  "value": "1203"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{}"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "users",
+          "item": [
+            {
+              "name": "register",
+              "item": [
+                {
+                  "name": "register",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"string\",\n  \"name\": \"string\",\n  \"password\": \"string\",\n  \"passwordAgain\": \"string\",\n  \"address\": \"string\",\n  \"studyProgram\": \"string\",\n  \"course\": 6862\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/users/register",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "users",
+                        "register"
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"email\": \"string\",\n  \"name\": \"string\",\n  \"password\": \"string\",\n  \"passwordAgain\": \"string\",\n  \"address\": \"string\",\n  \"studyProgram\": \"string\",\n  \"course\": 6862\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/users/register",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "users",
+                            "register"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"id\": 745,\n  \"email\": \"string\",\n  \"hashPassword\": \"string\",\n  \"salt\": \"string\",\n  \"name\": \"string\",\n  \"address\": {\n    \"fullAddress\": \"string\",\n    \"city\": \"string\",\n    \"street\": \"string\",\n    \"houseNumber\": \"string\",\n    \"building\": \"string\",\n    \"latitude\": 4582.717854572434,\n    \"longitude\": 9539.569182501855,\n    \"yandexMapsUrlWithCoordinates\": \"string\",\n    \"yandexMapsUrl\": \"string\",\n    \"formattedAddress\": \"string\"\n  },\n  \"studyProgram\": \"string\",\n  \"course\": 9930,\n  \"rating\": 2461.3541137729735,\n  \"coins\": 5939,\n  \"adList\": [\n    3214,\n    6449\n  ],\n  \"roles\": [\n    \"Администратор\",\n    \"Модератор\"\n  ],\n  \"admin\": true,\n  \"moderator\": true\n}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "login",
+              "item": [
+                {
+                  "name": "login",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"email\": \"string\",\n  \"password\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/users/login",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "users",
+                        "login"
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"email\": \"string\",\n  \"password\": \"string\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/users/login",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "users",
+                            "login"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"id\": 745,\n  \"email\": \"string\",\n  \"hashPassword\": \"string\",\n  \"salt\": \"string\",\n  \"name\": \"string\",\n  \"address\": {\n    \"fullAddress\": \"string\",\n    \"city\": \"string\",\n    \"street\": \"string\",\n    \"houseNumber\": \"string\",\n    \"building\": \"string\",\n    \"latitude\": 4582.717854572434,\n    \"longitude\": 9539.569182501855,\n    \"yandexMapsUrlWithCoordinates\": \"string\",\n    \"yandexMapsUrl\": \"string\",\n    \"formattedAddress\": \"string\"\n  },\n  \"studyProgram\": \"string\",\n  \"course\": 9930,\n  \"rating\": 2461.3541137729735,\n  \"coins\": 5939,\n  \"adList\": [\n    3214,\n    6449\n  ],\n  \"roles\": [\n    \"Администратор\",\n    \"Модератор\"\n  ],\n  \"admin\": true,\n  \"moderator\": true\n}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "{id}",
+              "item": [
+                {
+                  "name": "get User By Id",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/users/:id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "users",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "1203"
+                        }
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/users/:id",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "users",
+                            ":id"
+                          ],
+                          "variable": [
+                            {
+                              "key": "id",
+                              "value": "1203"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"id\": 745,\n  \"email\": \"string\",\n  \"hashPassword\": \"string\",\n  \"salt\": \"string\",\n  \"name\": \"string\",\n  \"address\": {\n    \"fullAddress\": \"string\",\n    \"city\": \"string\",\n    \"street\": \"string\",\n    \"houseNumber\": \"string\",\n    \"building\": \"string\",\n    \"latitude\": 4582.717854572434,\n    \"longitude\": 9539.569182501855,\n    \"yandexMapsUrlWithCoordinates\": \"string\",\n    \"yandexMapsUrl\": \"string\",\n    \"formattedAddress\": \"string\"\n  },\n  \"studyProgram\": \"string\",\n  \"course\": 9930,\n  \"rating\": 2461.3541137729735,\n  \"coins\": 5939,\n  \"adList\": [\n    3214,\n    6449\n  ],\n  \"roles\": [\n    \"Администратор\",\n    \"Модератор\"\n  ],\n  \"admin\": true,\n  \"moderator\": true\n}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "get All Users",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/users",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "users"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "text",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "*/*"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "[\n  {\n    \"id\": 725,\n    \"email\": \"string\",\n    \"hashPassword\": \"string\",\n    \"salt\": \"string\",\n    \"name\": \"string\",\n    \"address\": {\n      \"fullAddress\": \"string\",\n      \"city\": \"string\",\n      \"street\": \"string\",\n      \"houseNumber\": \"string\",\n      \"building\": \"string\",\n      \"latitude\": 9575.867879602718,\n      \"longitude\": 7087.844813726922,\n      \"yandexMapsUrlWithCoordinates\": \"string\",\n      \"yandexMapsUrl\": \"string\",\n      \"formattedAddress\": \"string\"\n    },\n    \"studyProgram\": \"string\",\n    \"course\": 593,\n    \"rating\": 7519.4307695058105,\n    \"coins\": 8853,\n    \"adList\": [\n      2687,\n      4885\n    ],\n    \"roles\": [\n      \"Администратор\",\n      \"Модератор\"\n    ],\n    \"admin\": false,\n    \"moderator\": false\n  },\n  {\n    \"id\": 3142,\n    \"email\": \"string\",\n    \"hashPassword\": \"string\",\n    \"salt\": \"string\",\n    \"name\": \"string\",\n    \"address\": {\n      \"fullAddress\": \"string\",\n      \"city\": \"string\",\n      \"street\": \"string\",\n      \"houseNumber\": \"string\",\n      \"building\": \"string\",\n      \"latitude\": 9781.953051166945,\n      \"longitude\": 3569.168694146656,\n      \"yandexMapsUrlWithCoordinates\": \"string\",\n      \"yandexMapsUrl\": \"string\",\n      \"formattedAddress\": \"string\"\n    },\n    \"studyProgram\": \"string\",\n    \"course\": 4486,\n    \"rating\": 6056.122046124732,\n    \"coins\": 269,\n    \"adList\": [\n      1827,\n      3038\n    ],\n    \"roles\": [\n      \"Администратор\",\n      \"Модератор\"\n    ],\n    \"admin\": false,\n    \"moderator\": true\n  }\n]"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "test",
+          "item": [
+            {
+              "name": "tags",
+              "item": [
+                {
+                  "name": "tags",
+                  "item": [
+                    {
+                      "name": "save",
+                      "item": [
+                        {
+                          "name": "{adId}",
+                          "item": [
+                            {
+                              "name": "test Save Tags",
+                              "request": {
+                                "method": "POST",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/test/tags/tags/save/:adId",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "test",
+                                    "tags",
+                                    "tags",
+                                    "save",
+                                    ":adId"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "adId",
+                                      "value": "1203"
+                                    }
+                                  ]
+                                }
+                              },
+                              "response": [
+                                {
+                                  "name": "OK",
+                                  "originalRequest": {
+                                    "method": "POST",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "*/*"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/api/test/tags/tags/save/:adId",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "api",
+                                        "test",
+                                        "tags",
+                                        "tags",
+                                        "save",
+                                        ":adId"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "adId",
+                                          "value": "1203"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "OK",
+                                  "code": 200,
+                                  "_postman_previewlanguage": "text",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "*/*"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "body": "string"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "available",
+                      "item": [
+                        {
+                          "name": "test Available Tags",
+                          "request": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/tags/tags/available?subcategory=string",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "tags",
+                                "tags",
+                                "available"
+                              ],
+                              "query": [
+                                {
+                                  "key": "subcategory",
+                                  "value": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "response": [
+                            {
+                              "name": "OK",
+                              "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/test/tags/tags/available?subcategory=string",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "test",
+                                    "tags",
+                                    "tags",
+                                    "available"
+                                  ],
+                                  "query": [
+                                    {
+                                      "key": "subcategory",
+                                      "value": "string"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "text",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "*/*"
+                                }
+                              ],
+                              "cookie": [],
+                              "body": "string"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "ad",
+                      "item": [
+                        {
+                          "name": "{adId}",
+                          "item": [
+                            {
+                              "name": "test Tags For Ad",
+                              "request": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/test/tags/tags/ad/:adId",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "test",
+                                    "tags",
+                                    "tags",
+                                    "ad",
+                                    ":adId"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "adId",
+                                      "value": "1203"
+                                    }
+                                  ]
+                                }
+                              },
+                              "response": [
+                                {
+                                  "name": "OK",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "*/*"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/api/test/tags/tags/ad/:adId",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "api",
+                                        "test",
+                                        "tags",
+                                        "tags",
+                                        "ad",
+                                        ":adId"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "adId",
+                                          "value": "1203"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "OK",
+                                  "code": 200,
+                                  "_postman_previewlanguage": "text",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "*/*"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "body": "string"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "test Tags",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/test/tags/tags",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "test",
+                            "tags",
+                            "tags"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/tags/tags",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "tags",
+                                "tags"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "string"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "subcategories",
+                  "item": [
+                    {
+                      "name": "with-parent",
+                      "item": [
+                        {
+                          "name": "test Subcategory With Parent",
+                          "request": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/tags/subcategories/with-parent?name=string",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "tags",
+                                "subcategories",
+                                "with-parent"
+                              ],
+                              "query": [
+                                {
+                                  "key": "name",
+                                  "value": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "response": [
+                            {
+                              "name": "OK",
+                              "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/test/tags/subcategories/with-parent?name=string",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "test",
+                                    "tags",
+                                    "subcategories",
+                                    "with-parent"
+                                  ],
+                                  "query": [
+                                    {
+                                      "key": "name",
+                                      "value": "string"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "text",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "*/*"
+                                }
+                              ],
+                              "cookie": [],
+                              "body": "string"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "service",
+                      "item": [
+                        {
+                          "name": "{id}",
+                          "item": [
+                            {
+                              "name": "test Is Service",
+                              "request": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/test/tags/subcategories/service/:id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "test",
+                                    "tags",
+                                    "subcategories",
+                                    "service",
+                                    ":id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "id",
+                                      "value": "1203"
+                                    }
+                                  ]
+                                }
+                              },
+                              "response": [
+                                {
+                                  "name": "OK",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "*/*"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/api/test/tags/subcategories/service/:id",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "api",
+                                        "test",
+                                        "tags",
+                                        "subcategories",
+                                        "service",
+                                        ":id"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "id",
+                                          "value": "1203"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "OK",
+                                  "code": 200,
+                                  "_postman_previewlanguage": "text",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "*/*"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "body": "string"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "parent",
+                      "item": [
+                        {
+                          "name": "test Get Parent",
+                          "request": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/tags/subcategories/parent?name=string",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "tags",
+                                "subcategories",
+                                "parent"
+                              ],
+                              "query": [
+                                {
+                                  "key": "name",
+                                  "value": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "response": [
+                            {
+                              "name": "OK",
+                              "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/test/tags/subcategories/parent?name=string",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "test",
+                                    "tags",
+                                    "subcategories",
+                                    "parent"
+                                  ],
+                                  "query": [
+                                    {
+                                      "key": "name",
+                                      "value": "string"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "text",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "*/*"
+                                }
+                              ],
+                              "cookie": [],
+                              "body": "string"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "test Subcategories",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/test/tags/subcategories?categoryId=1",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "test",
+                            "tags",
+                            "subcategories"
+                          ],
+                          "query": [
+                            {
+                              "key": "categoryId",
+                              "value": "1"
+                            }
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/tags/subcategories?categoryId=1",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "tags",
+                                "subcategories"
+                              ],
+                              "query": [
+                                {
+                                  "key": "categoryId",
+                                  "value": "1"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "string"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "categories",
+                  "item": [
+                    {
+                      "name": "test Categories",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/test/tags/categories",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "test",
+                            "tags",
+                            "categories"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/tags/categories",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "tags",
+                                "categories"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "string"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "all",
+                  "item": [
+                    {
+                      "name": "test All",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/test/tags/all",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "test",
+                            "tags",
+                            "all"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/tags/all",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "tags",
+                                "all"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "string"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "notifications",
+              "item": [
+                {
+                  "name": "user",
+                  "item": [
+                    {
+                      "name": "get User Notifications 1",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/test/notifications/user?adIds=1,2",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "test",
+                            "notifications",
+                            "user"
+                          ],
+                          "query": [
+                            {
+                              "key": "adIds",
+                              "value": "1,2"
+                            }
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/notifications/user?adIds=1,2",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "notifications",
+                                "user"
+                              ],
+                              "query": [
+                                {
+                                  "key": "adIds",
+                                  "value": "1,2"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "string"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "unread-count",
+                  "item": [
+                    {
+                      "name": "get Unread Count 1",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/test/notifications/unread-count?adIds=1,2",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "test",
+                            "notifications",
+                            "unread-count"
+                          ],
+                          "query": [
+                            {
+                              "key": "adIds",
+                              "value": "1,2"
+                            }
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/notifications/unread-count?adIds=1,2",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "notifications",
+                                "unread-count"
+                              ],
+                              "query": [
+                                {
+                                  "key": "adIds",
+                                  "value": "1,2"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "string"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "setup",
+                  "item": [
+                    {
+                      "name": "setup Test Data",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/test/notifications/setup",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "test",
+                            "notifications",
+                            "setup"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/notifications/setup",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "notifications",
+                                "setup"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "string"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "read",
+                  "item": [
+                    {
+                      "name": "{id}",
+                      "item": [
+                        {
+                          "name": "mark As Read 1",
+                          "request": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/notifications/read/:id",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "notifications",
+                                "read",
+                                ":id"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "id",
+                                  "value": "1203"
+                                }
+                              ]
+                            }
+                          },
+                          "response": [
+                            {
+                              "name": "OK",
+                              "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/test/notifications/read/:id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "test",
+                                    "notifications",
+                                    "read",
+                                    ":id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "id",
+                                      "value": "1203"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "text",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "*/*"
+                                }
+                              ],
+                              "cookie": [],
+                              "body": "string"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "full-test",
+                  "item": [
+                    {
+                      "name": "full Test",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/test/notifications/full-test",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "test",
+                            "notifications",
+                            "full-test"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/notifications/full-test",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "notifications",
+                                "full-test"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "string"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "delete",
+                  "item": [
+                    {
+                      "name": "{id}",
+                      "item": [
+                        {
+                          "name": "delete Notification",
+                          "request": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/notifications/delete/:id",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "notifications",
+                                "delete",
+                                ":id"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "id",
+                                  "value": "1203"
+                                }
+                              ]
+                            }
+                          },
+                          "response": [
+                            {
+                              "name": "OK",
+                              "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/test/notifications/delete/:id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "test",
+                                    "notifications",
+                                    "delete",
+                                    ":id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "id",
+                                      "value": "1203"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "text",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "*/*"
+                                }
+                              ],
+                              "cookie": [],
+                              "body": "string"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "delete-all",
+                  "item": [
+                    {
+                      "name": "delete All Notifications",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/test/notifications/delete-all?adIds=1,2",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "test",
+                            "notifications",
+                            "delete-all"
+                          ],
+                          "query": [
+                            {
+                              "key": "adIds",
+                              "value": "1,2"
+                            }
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/notifications/delete-all?adIds=1,2",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "notifications",
+                                "delete-all"
+                              ],
+                              "query": [
+                                {
+                                  "key": "adIds",
+                                  "value": "1,2"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "string"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "all",
+                  "item": [
+                    {
+                      "name": "show All Notifications",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/test/notifications/all",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "test",
+                            "notifications",
+                            "all"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/notifications/all",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "notifications",
+                                "all"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "string"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "comments",
+              "item": [
+                {
+                  "name": "service",
+                  "item": [
+                    {
+                      "name": "get",
+                      "item": [
+                        {
+                          "name": "{id}",
+                          "item": [
+                            {
+                              "name": "test Service Get",
+                              "request": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/test/comments/service/get/:id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "test",
+                                    "comments",
+                                    "service",
+                                    "get",
+                                    ":id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "id",
+                                      "value": "1203"
+                                    }
+                                  ]
+                                }
+                              },
+                              "response": [
+                                {
+                                  "name": "OK",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "*/*"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/api/test/comments/service/get/:id",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "api",
+                                        "test",
+                                        "comments",
+                                        "service",
+                                        "get",
+                                        ":id"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "id",
+                                          "value": "1203"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "OK",
+                                  "code": 200,
+                                  "_postman_previewlanguage": "text",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "*/*"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "body": "string"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "create",
+                      "item": [
+                        {
+                          "name": "test Service Create",
+                          "request": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/comments/service/create",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "comments",
+                                "service",
+                                "create"
+                              ]
+                            }
+                          },
+                          "response": [
+                            {
+                              "name": "OK",
+                              "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/test/comments/service/create",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "test",
+                                    "comments",
+                                    "service",
+                                    "create"
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "text",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "*/*"
+                                }
+                              ],
+                              "cookie": [],
+                              "body": "string"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "repository",
+                  "item": [
+                    {
+                      "name": "save",
+                      "item": [
+                        {
+                          "name": "test Repository Save",
+                          "request": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/comments/repository/save",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "comments",
+                                "repository",
+                                "save"
+                              ]
+                            }
+                          },
+                          "response": [
+                            {
+                              "name": "OK",
+                              "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/test/comments/repository/save",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "test",
+                                    "comments",
+                                    "repository",
+                                    "save"
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "text",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "*/*"
+                                }
+                              ],
+                              "cookie": [],
+                              "body": "string"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "find",
+                      "item": [
+                        {
+                          "name": "{id}",
+                          "item": [
+                            {
+                              "name": "test Repository Find",
+                              "request": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/test/comments/repository/find/:id",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "test",
+                                    "comments",
+                                    "repository",
+                                    "find",
+                                    ":id"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "id",
+                                      "value": "1203"
+                                    }
+                                  ]
+                                }
+                              },
+                              "response": [
+                                {
+                                  "name": "OK",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "*/*"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/api/test/comments/repository/find/:id",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "api",
+                                        "test",
+                                        "comments",
+                                        "repository",
+                                        "find",
+                                        ":id"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "id",
+                                          "value": "1203"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "OK",
+                                  "code": 200,
+                                  "_postman_previewlanguage": "text",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "*/*"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "body": "string"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "all",
+                  "item": [
+                    {
+                      "name": "test All 1",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/test/comments/all",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "test",
+                            "comments",
+                            "all"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/test/comments/all",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "test",
+                                "comments",
+                                "all"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "string"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "system",
+          "item": [
+            {
+              "name": "init-admin",
+              "item": [
+                {
+                  "name": "initialize First Admin",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/system/init-admin?email=string&name=string&password=string&passwordConfirm=string",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "system",
+                        "init-admin"
+                      ],
+                      "query": [
+                        {
+                          "key": "email",
+                          "value": "string"
+                        },
+                        {
+                          "key": "name",
+                          "value": "string"
+                        },
+                        {
+                          "key": "password",
+                          "value": "string"
+                        },
+                        {
+                          "key": "passwordConfirm",
+                          "value": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/system/init-admin?email=string&name=string&password=string&passwordConfirm=string",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "system",
+                            "init-admin"
+                          ],
+                          "query": [
+                            {
+                              "key": "email",
+                              "value": "string"
+                            },
+                            {
+                              "key": "name",
+                              "value": "string"
+                            },
+                            {
+                              "key": "password",
+                              "value": "string"
+                            },
+                            {
+                              "key": "passwordConfirm",
+                              "value": "string"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "string"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "status",
+              "item": [
+                {
+                  "name": "get System Status",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/system/status",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "system",
+                        "status"
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/system/status",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "system",
+                            "status"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "string"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "needs-init",
+              "item": [
+                {
+                  "name": "needs Initialization",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/system/needs-init",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "system",
+                        "needs-init"
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/system/needs-init",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "system",
+                            "needs-init"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "true"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "profanity",
+          "item": [
+            {
+              "name": "check",
+              "item": [
+                {
+                  "name": "check Profanity Get",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/profanity/check?text=string",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "profanity",
+                        "check"
+                      ],
+                      "query": [
+                        {
+                          "key": "text",
+                          "value": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/profanity/check?text=string",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "profanity",
+                            "check"
+                          ],
+                          "query": [
+                            {
+                              "key": "text",
+                              "value": "string"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"hasProfanity\": false\n}"
+                    }
+                  ]
+                },
+                {
+                  "name": "check Profanity",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"text\": \"string\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/profanity/check?text=string",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "profanity",
+                        "check"
+                      ],
+                      "query": [
+                        {
+                          "key": "text",
+                          "value": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"text\": \"string\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/profanity/check?text=string",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "profanity",
+                            "check"
+                          ],
+                          "query": [
+                            {
+                              "key": "text",
+                              "value": "string"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"hasProfanity\": false\n}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "check-form",
+              "item": [
+                {
+                  "name": "check Profanity Form",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/profanity/check-form?text=string",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "profanity",
+                        "check-form"
+                      ],
+                      "query": [
+                        {
+                          "key": "text",
+                          "value": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/profanity/check-form?text=string",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "profanity",
+                            "check-form"
+                          ],
+                          "query": [
+                            {
+                              "key": "text",
+                              "value": "string"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"hasProfanity\": false\n}"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "notifications",
+          "item": [
+            {
+              "name": "{notificationId}",
+              "item": [
+                {
+                  "name": "read",
+                  "item": [
+                    {
+                      "name": "mark As Read",
+                      "request": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/notifications/:notificationId/read",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "notifications",
+                            ":notificationId",
+                            "read"
+                          ],
+                          "variable": [
+                            {
+                              "key": "notificationId",
+                              "value": "1203"
+                            }
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/notifications/:notificationId/read",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "notifications",
+                                ":notificationId",
+                                "read"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "notificationId",
+                                  "value": "1203"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"key_0\": true,\n  \"key_1\": true\n}"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "delete Notification 1",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/notifications/:notificationId",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "notifications",
+                        ":notificationId"
+                      ],
+                      "variable": [
+                        {
+                          "key": "notificationId",
+                          "value": "1203"
+                        }
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "DELETE",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/notifications/:notificationId",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "notifications",
+                            ":notificationId"
+                          ],
+                          "variable": [
+                            {
+                              "key": "notificationId",
+                              "value": "1203"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"key_0\": true,\n  \"key_1\": true\n}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "user",
+              "item": [
+                {
+                  "name": "unread-count",
+                  "item": [
+                    {
+                      "name": "get Unread Count",
+                      "request": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "[\n  982,\n  3772\n]",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/notifications/user/unread-count",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "notifications",
+                            "user",
+                            "unread-count"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "[\n  982,\n  3772\n]",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/api/notifications/user/unread-count",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "notifications",
+                                "user",
+                                "unread-count"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"key_0\": 6469,\n  \"key_1\": 5092,\n  \"key_2\": 8965\n}"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "all",
+                  "item": [
+                    {
+                      "name": "delete All Notifications 1",
+                      "request": {
+                        "method": "DELETE",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "[\n  982,\n  3772\n]",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/notifications/user/all",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "notifications",
+                            "user",
+                            "all"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "DELETE",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "[\n  982,\n  3772\n]",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/api/notifications/user/all",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "notifications",
+                                "user",
+                                "all"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"key_0\": true,\n  \"key_1\": true\n}"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "get User Notifications",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "[\n  982,\n  3772\n]",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/notifications/user",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "notifications",
+                        "user"
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "[\n  982,\n  3772\n]",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/notifications/user",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "notifications",
+                            "user"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "[\n  {\n    \"id\": 1663,\n    \"adId\": 9103,\n    \"moderatorEmail\": \"string\",\n    \"action\": \"string\",\n    \"reason\": \"string\",\n    \"createdAt\": \"1986-02-05T03:40:21.010Z\",\n    \"isRead\": true\n  },\n  {\n    \"id\": 3459,\n    \"adId\": 3332,\n    \"moderatorEmail\": \"string\",\n    \"action\": \"string\",\n    \"reason\": \"string\",\n    \"createdAt\": \"1976-09-30T21:46:16.663Z\",\n    \"isRead\": true\n  }\n]"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "announcements",
+          "item": [
+            {
+              "name": "{id}",
+              "item": [
+                {
+                  "name": "send-to-moderation",
+                  "item": [
+                    {
+                      "name": "send To Moderation",
+                      "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/announcements/:id/send-to-moderation",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "announcements",
+                            ":id",
+                            "send-to-moderation"
+                          ],
+                          "variable": [
+                            {
+                              "key": "id",
+                              "value": "1203"
+                            }
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/announcements/:id/send-to-moderation",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "announcements",
+                                ":id",
+                                "send-to-moderation"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "id",
+                                  "value": "1203"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [],
+                          "cookie": [],
+                          "body": ""
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "approve",
+                  "item": [
+                    {
+                      "name": "approve",
+                      "request": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/announcements/:id/approve",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "announcements",
+                            ":id",
+                            "approve"
+                          ],
+                          "variable": [
+                            {
+                              "key": "id",
+                              "value": "1203"
+                            }
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/announcements/:id/approve",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "announcements",
+                                ":id",
+                                "approve"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "id",
+                                  "value": "1203"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"id\": 9924,\n  \"title\": \"string\",\n  \"description\": \"string\",\n  \"category\": \"HOUSEHOLD_SERVICES\",\n  \"subcategory\": \"string\",\n  \"condition\": \"BROKEN\",\n  \"price\": 8034,\n  \"location\": \"string\",\n  \"authorId\": 5291,\n  \"status\": \"DELETED\",\n  \"viewCount\": 4685,\n  \"tags\": [\n    \"string\",\n    \"string\"\n  ],\n  \"tagsCount\": 7352,\n  \"createdAt\": \"2004-01-08T06:59:04.160Z\",\n  \"updatedAt\": \"1971-10-09T19:57:58.260Z\",\n  \"photo\": [\n    \"string\",\n    \"string\"\n  ],\n  \"photoUrls\": [\n    \"string\",\n    \"string\"\n  ]\n}"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "search",
+              "item": [
+                {
+                  "name": "search",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/announcements/search?text=string&minPrice=6822&maxPrice=7160&category=HOUSEHOLD_SERVICES&subcategory=string&condition=NEW&createdAfter=2020-02-19T19:56:21.026Z&sortBy=string&sortDirection=string&sortBy=createdAt&direction=DESC",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "announcements",
+                        "search"
+                      ],
+                      "query": [
+                        {
+                          "key": "text",
+                          "value": "string"
+                        },
+                        {
+                          "key": "minPrice",
+                          "value": "6822"
+                        },
+                        {
+                          "key": "maxPrice",
+                          "value": "7160"
+                        },
+                        {
+                          "key": "category",
+                          "value": "HOUSEHOLD_SERVICES"
+                        },
+                        {
+                          "key": "subcategory",
+                          "value": "string"
+                        },
+                        {
+                          "key": "condition",
+                          "value": "NEW"
+                        },
+                        {
+                          "key": "createdAfter",
+                          "value": "2020-02-19T19:56:21.026Z"
+                        },
+                        {
+                          "key": "sortBy",
+                          "value": "string"
+                        },
+                        {
+                          "key": "sortDirection",
+                          "value": "string"
+                        },
+                        {
+                          "key": "sortBy",
+                          "value": "createdAt"
+                        },
+                        {
+                          "key": "direction",
+                          "value": "DESC"
+                        }
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/announcements/search?text=string&minPrice=6822&maxPrice=7160&category=HOUSEHOLD_SERVICES&subcategory=string&condition=NEW&createdAfter=2020-02-19T19:56:21.026Z&sortBy=createdAt&sortDirection=string&direction=DESC",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "announcements",
+                            "search"
+                          ],
+                          "query": [
+                            {
+                              "key": "text",
+                              "value": "string"
+                            },
+                            {
+                              "key": "minPrice",
+                              "value": "6822"
+                            },
+                            {
+                              "key": "maxPrice",
+                              "value": "7160"
+                            },
+                            {
+                              "key": "category",
+                              "value": "HOUSEHOLD_SERVICES"
+                            },
+                            {
+                              "key": "subcategory",
+                              "value": "string"
+                            },
+                            {
+                              "key": "condition",
+                              "value": "NEW"
+                            },
+                            {
+                              "key": "createdAfter",
+                              "value": "2020-02-19T19:56:21.026Z"
+                            },
+                            {
+                              "key": "sortBy",
+                              "value": "createdAt"
+                            },
+                            {
+                              "key": "sortDirection",
+                              "value": "string"
+                            },
+                            {
+                              "key": "direction",
+                              "value": "DESC"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "[\n  {\n    \"id\": 4143,\n    \"title\": \"string\",\n    \"description\": \"string\",\n    \"category\": \"AUTO\",\n    \"subcategory\": \"string\",\n    \"condition\": \"NEW\",\n    \"price\": 5584,\n    \"location\": \"string\",\n    \"authorId\": 9171,\n    \"status\": \"ARCHIVED\",\n    \"viewCount\": 4759,\n    \"tags\": [\n      \"string\",\n      \"string\"\n    ],\n    \"tagsCount\": 3816,\n    \"createdAt\": \"1967-04-21T02:31:56.645Z\",\n    \"updatedAt\": \"1952-12-29T13:19:59.780Z\",\n    \"photo\": [\n      \"string\",\n      \"string\"\n    ],\n    \"photoUrls\": [\n      \"string\",\n      \"string\"\n    ]\n  },\n  {\n    \"id\": 1205,\n    \"title\": \"string\",\n    \"description\": \"string\",\n    \"category\": \"BOOKS\",\n    \"subcategory\": \"string\",\n    \"condition\": \"NEW\",\n    \"price\": 862,\n    \"location\": \"string\",\n    \"authorId\": 3014,\n    \"status\": \"REJECTED\",\n    \"viewCount\": 5755,\n    \"tags\": [\n      \"string\",\n      \"string\"\n    ],\n    \"tagsCount\": 8609,\n    \"createdAt\": \"1946-09-29T09:37:38.347Z\",\n    \"updatedAt\": \"1957-05-03T20:49:07.306Z\",\n    \"photo\": [\n      \"string\",\n      \"string\"\n    ],\n    \"photoUrls\": [\n      \"string\",\n      \"string\"\n    ]\n  }\n]"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "moderator",
+              "item": [
+                {
+                  "name": "pending",
+                  "item": [
+                    {
+                      "name": "get Pending",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/announcements/moderator/pending",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "announcements",
+                            "moderator",
+                            "pending"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/announcements/moderator/pending",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "announcements",
+                                "moderator",
+                                "pending"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "[\n  {\n    \"id\": 4143,\n    \"title\": \"string\",\n    \"description\": \"string\",\n    \"category\": \"AUTO\",\n    \"subcategory\": \"string\",\n    \"condition\": \"NEW\",\n    \"price\": 5584,\n    \"location\": \"string\",\n    \"authorId\": 9171,\n    \"status\": \"ARCHIVED\",\n    \"viewCount\": 4759,\n    \"tags\": [\n      \"string\",\n      \"string\"\n    ],\n    \"tagsCount\": 3816,\n    \"createdAt\": \"1967-04-21T02:31:56.645Z\",\n    \"updatedAt\": \"1952-12-29T13:19:59.780Z\",\n    \"photo\": [\n      \"string\",\n      \"string\"\n    ],\n    \"photoUrls\": [\n      \"string\",\n      \"string\"\n    ]\n  },\n  {\n    \"id\": 1205,\n    \"title\": \"string\",\n    \"description\": \"string\",\n    \"category\": \"BOOKS\",\n    \"subcategory\": \"string\",\n    \"condition\": \"NEW\",\n    \"price\": 862,\n    \"location\": \"string\",\n    \"authorId\": 3014,\n    \"status\": \"REJECTED\",\n    \"viewCount\": 5755,\n    \"tags\": [\n      \"string\",\n      \"string\"\n    ],\n    \"tagsCount\": 8609,\n    \"createdAt\": \"1946-09-29T09:37:38.347Z\",\n    \"updatedAt\": \"1957-05-03T20:49:07.306Z\",\n    \"photo\": [\n      \"string\",\n      \"string\"\n    ],\n    \"photoUrls\": [\n      \"string\",\n      \"string\"\n    ]\n  }\n]"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "create",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"authorId\": 2498,\n  \"description\": \"string\",\n  \"title\": \"string\",\n  \"price\": 5350,\n  \"photoUrls\": [\n    \"string\",\n    \"string\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/announcements",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "announcements"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"authorId\": 2498,\n  \"description\": \"string\",\n  \"title\": \"string\",\n  \"price\": 5350,\n  \"photoUrls\": [\n    \"string\",\n    \"string\"\n  ]\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/announcements",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "announcements"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "text",
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "*/*"
+                    }
+                  ],
+                  "cookie": [],
+                  "body": "{\n  \"id\": 9924,\n  \"title\": \"string\",\n  \"description\": \"string\",\n  \"category\": \"HOUSEHOLD_SERVICES\",\n  \"subcategory\": \"string\",\n  \"condition\": \"BROKEN\",\n  \"price\": 8034,\n  \"location\": \"string\",\n  \"authorId\": 5291,\n  \"status\": \"DELETED\",\n  \"viewCount\": 4685,\n  \"tags\": [\n    \"string\",\n    \"string\"\n  ],\n  \"tagsCount\": 7352,\n  \"createdAt\": \"2004-01-08T06:59:04.160Z\",\n  \"updatedAt\": \"1971-10-09T19:57:58.260Z\",\n  \"photo\": [\n    \"string\",\n    \"string\"\n  ],\n  \"photoUrls\": [\n    \"string\",\n    \"string\"\n  ]\n}"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "test",
+      "item": [
+        {
+          "name": "test",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/test",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "test"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/test",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "test"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "*/*"
+                }
+              ],
+              "cookie": [],
+              "body": "string"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ]
+}

@@ -29,3 +29,7 @@ logging:
     org.springframework.security: DEBUG
     org.springframework.web: DEBUG
     com.mipt.portal: DEBUG
+
+app:
+  security:
+    pepper: "szfdxghjdakslbnvcxagsftuyidolajskhdhsf123"
