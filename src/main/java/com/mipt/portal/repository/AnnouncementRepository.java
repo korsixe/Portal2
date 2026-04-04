@@ -2,6 +2,7 @@ package com.mipt.portal.repository;
 
 import com.mipt.portal.entity.Announcement;
 import com.mipt.portal.enums.AdStatus;
+import com.mipt.portal.enums.Category;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -14,6 +15,14 @@ import java.util.Optional;
 
 @Repository
 public interface AnnouncementRepository extends JpaRepository<Announcement, Long>, CustomAnnouncementRepository {
+    List<Announcement> findAllByAuthorId(Long authorId);
+
+    List<Announcement> findAllByCategoryAndStatus(Category category, AdStatus status);
+
+    long countByCategoryAndStatus(Category category, AdStatus status);
+
+    void deleteAllByAuthorIdAndStatus(Long authorId, AdStatus status);
+
     List<Announcement> findAllByStatus(AdStatus status);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
