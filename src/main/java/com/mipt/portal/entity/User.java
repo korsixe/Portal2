@@ -121,4 +121,5 @@ public class User {
     this.coins -= amount;
     return true;
   }
+
 }

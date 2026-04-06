@@ -1,10 +1,10 @@
 package com.mipt.portal.controller.users;
 
 import com.mipt.portal.entity.Address;
-import com.mipt.portal.dto.LoginRequest;
-import com.mipt.portal.dto.RegisterRequest;
+import com.mipt.portal.dto.*;
 import com.mipt.portal.entity.User;
 import com.mipt.portal.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -72,5 +72,84 @@ public class UserController {
   @GetMapping
   public List<User> getAllUsers() {
     return userService.getAllUsers();
+  }
+
+  /**
+   * Получить текущего авторизованного пользователя
+   * GET /api/users/me
+   */
+  @GetMapping("/me")
+  public ResponseEntity<User> getCurrentUser(HttpSession session) {
+    User currentUser = (User) session.getAttribute("user");
+    if (currentUser == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    return ResponseEntity.ok(currentUser);
+  }
+
+  /**
+   * Смена пароля
+   * POST /api/users/change-password
+   * Body: { "currentPassword": "old", "newPassword": "new" }
+   */
+  @PostMapping("/change-password")
+  public ResponseEntity<?> changePassword(
+      @RequestBody ChangePasswordRequest request,
+      HttpSession session) {
+
+    User currentUser = (User) session.getAttribute("user");
+    if (currentUser == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Не авторизован");
+    }
+
+    boolean changed = userService.changePassword(
+        currentUser.getId(),
+        request.getCurrentPassword(),
+        request.getNewPassword()
+    );
+
+    if (changed) {
+      log.info("Password changed for user: {}", currentUser.getEmail());
+      return ResponseEntity.ok().body("Пароль успешно изменен");
+    } else {
+      return ResponseEntity.badRequest().body("Неверный текущий пароль");
+    }
+  }
+
+  /**
+   * Удаление аккаунта
+   * DELETE /api/users/delete-account
+   * Body: { "password": "user_password" }
+   */
+  @DeleteMapping("/delete-account")
+  public ResponseEntity<?> deleteAccount(
+      @RequestBody DeleteAccountRequest request,
+      HttpSession session) {
+
+    User currentUser = (User) session.getAttribute("user");
+    if (currentUser == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Не авторизован");
+    }
+
+    boolean deleted = userService.deleteAccount(currentUser.getId(), request.getPassword());
+
+    if (deleted) {
+      session.invalidate();
+      log.info("Account deleted for user: {}", currentUser.getEmail());
+      return ResponseEntity.ok().body("Аккаунт удален");
+    } else {
+      return ResponseEntity.badRequest().body("Неверный пароль");
+    }
+  }
+
+  /**
+   * Выход из системы
+   * POST /api/logout
+   */
+  @PostMapping("/logout")
+  public ResponseEntity<?> logout(HttpSession session) {
+    session.invalidate();
+    log.info("User logged out");
+    return ResponseEntity.ok().body("Выход выполнен");
   }
 }
