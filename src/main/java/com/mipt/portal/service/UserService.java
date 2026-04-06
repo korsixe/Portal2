@@ -643,6 +643,11 @@ public class UserService {
     userRepository.delete(user);
     return true;
   }
+
+  public PasswordEncoder getPasswordEncoder() {
+    return this.passwordEncoder;
+  }
+
 }
 
 

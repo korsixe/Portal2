@@ -1,19 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
+import ChangePasswordModal from './ChangePasswordModal';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [ads, setAds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [activeModal, setActiveModal] = useState(null);
-
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-  const [deletePassword, setDeletePassword] = useState('');
 
   // Загрузка данных
   useEffect(() => {
@@ -25,17 +20,11 @@ const Dashboard = () => {
       const timer = setTimeout(() => setSuccessMessage(''), 3000);
       return () => clearTimeout(timer);
     }
-  }, [successMessage]);
-
-  // Анимация для карточек после загрузки
-  useEffect(() => {
-    if (!loading && user) {
-      const cards = document.querySelectorAll('.statCard, .infoCard, .adItem');
-      cards.forEach((card, index) => {
-        card.style.animationDelay = `${index * 0.1}s`;
-      });
+    if (errorMessage) {
+      const timer = setTimeout(() => setErrorMessage(''), 3000);
+      return () => clearTimeout(timer);
     }
-  }, [loading, user, ads]);
+  }, [successMessage, errorMessage]);
 
   const loadUserData = async () => {
     setLoading(true);
@@ -64,49 +53,59 @@ const Dashboard = () => {
 
       if (adsResponse.ok) {
         const adsData = await adsResponse.json();
-        // Фильтруем удаленные объявления
         const activeAds = adsData.filter(ad => ad.status !== 'DELETED');
         setAds(activeAds);
       }
     } catch (error) {
       console.error('Ошибка загрузки данных:', error);
+      setErrorMessage('Не удалось загрузить данные');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChangePassword = async (e) => {
-    e.preventDefault();
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('❌ Пароли не совпадают!');
-      return;
+  // Обработчик смены пароля (использует ChangePasswordRequest)
+  const handlePasswordChanged = async (currentPassword, newPassword, confirmPassword) => {
+    // Валидация
+    if (newPassword !== confirmPassword) {
+      setErrorMessage('❌ Пароли не совпадают!');
+      return false;
     }
-    if (passwordData.newPassword.length < 8) {
-      alert('❌ Пароль должен содержать минимум 8 символов!');
-      return;
+    if (newPassword.length < 8) {
+      setErrorMessage('❌ Пароль должен содержать минимум 8 символов!');
+      return false;
     }
 
     try {
+      // Отправляем запрос в формате ChangePasswordRequest
       const response = await fetch('http://localhost:8080/api/users/change-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          currentPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+          confirmPassword: confirmPassword
         }),
         credentials: 'include'
       });
 
-      if (response.ok) {
-        setSuccessMessage('Пароль успешно изменен!');
-        closeModals();
-        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setSuccessMessage(data.message || '✅ Пароль успешно изменен!');
+        // Обновляем пользователя в сессии
+        if (data.user) {
+          setUser(data.user);
+        }
+        return true;
       } else {
-        const error = await response.text();
-        alert('Ошибка: ' + error);
+        setErrorMessage(data.message || '❌ Ошибка при смене пароля');
+        return false;
       }
     } catch (error) {
-      alert('Ошибка при смене пароля');
+      console.error('Ошибка:', error);
+      setErrorMessage('❌ Ошибка при смене пароля');
+      return false;
     }
   };
 
@@ -130,10 +129,10 @@ const Dashboard = () => {
         }, 2000);
       } else {
         const error = await response.text();
-        alert('Ошибка: ' + error);
+        setErrorMessage('Ошибка: ' + error);
       }
     } catch (error) {
-      alert('Ошибка при удалении аккаунта');
+      setErrorMessage('Ошибка при удалении аккаунта');
     }
   };
 
@@ -161,12 +160,12 @@ const Dashboard = () => {
 
       if (response.ok) {
         setSuccessMessage('Объявление удалено');
-        loadUserData(); // Обновляем список
+        loadUserData();
       } else {
-        alert('Ошибка при удалении');
+        setErrorMessage('Ошибка при удалении');
       }
     } catch (error) {
-      alert('Ошибка при удалении');
+      setErrorMessage('Ошибка при удалении');
     }
   };
 
@@ -228,11 +227,7 @@ const Dashboard = () => {
   };
 
   const openModal = (modalName) => setActiveModal(modalName);
-  const closeModals = () => {
-    setActiveModal(null);
-    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    setDeletePassword('');
-  };
+  const closeModals = () => setActiveModal(null);
 
   if (loading) {
     return (
@@ -260,6 +255,13 @@ const Dashboard = () => {
             <div className="successMessage">
               <span className="successIcon">🎉</span>
               <span>{successMessage}</span>
+            </div>
+        )}
+
+        {errorMessage && (
+            <div className="errorMessage">
+              <span className="errorIcon">❌</span>
+              <span>{errorMessage}</span>
             </div>
         )}
 
@@ -371,7 +373,7 @@ const Dashboard = () => {
             </div>
             <div className="infoItem">
               <span className="infoLabel">Коины:</span>
-              <span className={`infoValue coins`}>{user.coins || 0} 🪙</span>
+              <span className="infoValue coins">{user.coins || 0} 🪙</span>
             </div>
           </div>
         </div>
@@ -429,6 +431,7 @@ const Dashboard = () => {
           </button>
         </div>
 
+        {/* Модальное окно управления аккаунтом */}
         {activeModal === 'account' && (
             <div className="modal" onClick={(e) => e.target === e.currentTarget && closeModals()}>
               <div className="modalContent">
@@ -446,48 +449,15 @@ const Dashboard = () => {
             </div>
         )}
 
+        {/* Модальное окно смены пароля - используем отдельный компонент */}
         {activeModal === 'password' && (
-            <div className="modal" onClick={(e) => e.target === e.currentTarget && closeModals()}>
-              <div className="modalContent">
-                <span className="close" onClick={closeModals}>&times;</span>
-                <h3>🔐 Изменение пароля</h3>
-                <form onSubmit={handleChangePassword}>
-                  <div className="formGroup">
-                    <label>Текущий пароль</label>
-                    <input
-                        type="password"
-                        required
-                        value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                    />
-                  </div>
-                  <div className="formGroup">
-                    <label>Новый пароль</label>
-                    <input
-                        type="password"
-                        required
-                        value={passwordData.newPassword}
-                        onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                    />
-                  </div>
-                  <div className="formGroup">
-                    <label>Подтверждение нового пароля</label>
-                    <input
-                        type="password"
-                        required
-                        value={passwordData.confirmPassword}
-                        onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                    />
-                  </div>
-                  <div className="buttonGroup">
-                    <button type="submit" className="btnPrimary">Сохранить пароль</button>
-                    <button type="button" onClick={closeModals} className="btnSecondary">Отмена</button>
-                  </div>
-                </form>
-              </div>
-            </div>
+            <ChangePasswordModal
+                onClose={closeModals}
+                onChangePassword={handlePasswordChanged}
+            />
         )}
 
+        {/* Модальное окно удаления аккаунта */}
         {activeModal === 'delete' && (
             <div className="modal" onClick={(e) => e.target === e.currentTarget && closeModals()}>
               <div className="modalContent">
