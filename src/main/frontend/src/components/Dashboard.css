@@ -106,6 +106,7 @@
   justify-content: space-between;
   gap: 20px;
   position: relative;
+  min-height: 120px;
 }
 
 .notificationLeft {
@@ -193,7 +194,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   text-decoration: none;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 10px;
 }
@@ -294,7 +295,6 @@
   text-align: center;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   animation: fadeInUp 0.6s ease-out forwards;
-  opacity: 0;
 }
 
 .statNumber {
@@ -322,7 +322,6 @@
   padding: 25px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   animation: fadeInUp 0.6s ease-out forwards;
-  opacity: 0;
 }
 
 .infoCard h3 {
@@ -391,7 +390,6 @@
   border-left: 4px solid #667eea;
   transition: all 0.3s ease;
   animation: fadeInUp 0.6s ease-out forwards;
-  opacity: 0;
 }
 
 .adItem:hover {

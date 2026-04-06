@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import styles from './Dashboard.css';
+import './Dashboard.css';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -26,6 +26,16 @@ const Dashboard = () => {
       return () => clearTimeout(timer);
     }
   }, [successMessage]);
+
+  // Анимация для карточек после загрузки
+  useEffect(() => {
+    if (!loading && user) {
+      const cards = document.querySelectorAll('.statCard, .infoCard, .adItem');
+      cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+      });
+    }
+  }, [loading, user, ads]);
 
   const loadUserData = async () => {
     setLoading(true);
@@ -54,7 +64,9 @@ const Dashboard = () => {
 
       if (adsResponse.ok) {
         const adsData = await adsResponse.json();
-        setAds(adsData);
+        // Фильтруем удаленные объявления
+        const activeAds = adsData.filter(ad => ad.status !== 'DELETED');
+        setAds(activeAds);
       }
     } catch (error) {
       console.error('Ошибка загрузки данных:', error);
@@ -166,7 +178,7 @@ const Dashboard = () => {
       'ARCHIVED': 'statusArchived',
       'DELETED': 'statusDeleted'
     };
-    return styles[statusMap[status]] || styles.statusDraft;
+    return statusMap[status] || 'statusDraft';
   };
 
   const formatPrice = (price) => {
@@ -224,8 +236,8 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-        <div className={styles.loadingContainer}>
-          <div className={styles.loader}></div>
+        <div className="loadingContainer">
+          <div className="loader"></div>
           <p>Загрузка...</p>
         </div>
     );
@@ -233,9 +245,9 @@ const Dashboard = () => {
 
   if (!user) {
     return (
-        <div className={styles.errorContainer}>
+        <div className="errorContainer">
           <p>Не удалось загрузить данные пользователя</p>
-          <button onClick={() => window.location.href = '/login'} className={styles.btnPrimary}>
+          <button onClick={() => window.location.href = '/login'} className="btnPrimary">
             Войти снова
           </button>
         </div>
@@ -243,113 +255,113 @@ const Dashboard = () => {
   }
 
   return (
-      <div className={styles.dashboardContainer}>
+      <div className="dashboardContainer">
         {successMessage && (
-            <div className={styles.successMessage}>
-              <span className={styles.successIcon}>🎉</span>
+            <div className="successMessage">
+              <span className="successIcon">🎉</span>
               <span>{successMessage}</span>
             </div>
         )}
 
-        <div className={styles.header}>
-          <div className={styles.headerTop}>
-            <div className={styles.portalLogo}>PORTAL</div>
+        <div className="header">
+          <div className="headerTop">
+            <div className="portalLogo">PORTAL</div>
           </div>
         </div>
 
-        <div className={styles.headerBell}>
-          <div className={styles.headerTopBell}>
-            <div className={styles.notificationLeft}>
-              <button className={styles.bellButton}>🔔</button>
+        <div className="headerBell">
+          <div className="headerTopBell">
+            <div className="notificationLeft">
+              <button className="bellButton">🔔</button>
             </div>
 
-            <div className={styles.avatarCenter}>
-              <div className={styles.avatarCircle}>
-                <span className={styles.avatarIcon}>👤</span>
-                <div className={styles.onlineStatus}></div>
+            <div className="avatarCenter">
+              <div className="avatarCircle">
+                <span className="avatarIcon">👤</span>
+                <div className="onlineStatus"></div>
               </div>
             </div>
 
-            <div className={styles.buttonsVertical}>
-              <button onClick={() => window.location.href = '/edit-profile'} className={styles.btnPrimary}>
-                <span className={styles.btnIcon}>✏️</span>
+            <div className="buttonsVertical">
+              <button onClick={() => window.location.href = '/edit-profile'} className="btnPrimary">
+                <span className="btnIcon">✏️</span>
                 Редактировать профиль
               </button>
-              <button onClick={() => openModal('account')} className={styles.btnPrimary}>
-                <span className={styles.btnIcon}>⚙️</span>
+              <button onClick={() => openModal('account')} className="btnPrimary">
+                <span className="btnIcon">⚙️</span>
                 Управление аккаунтом
               </button>
             </div>
           </div>
         </div>
 
-        <div className={styles.profileActions}>
+        <div className="profileActions">
           {user.moderator && (
-              <button onClick={() => window.location.href = '/moderator/dashboard'} className={styles.btnModerator}>
+              <button onClick={() => window.location.href = '/moderator/dashboard'} className="btnModerator">
                 Кабинет модератора
               </button>
           )}
           {user.admin && (
-              <button onClick={() => window.location.href = '/admin/dashboard'} className={styles.btnAdmin}>
+              <button onClick={() => window.location.href = '/admin/dashboard'} className="btnAdmin">
                 Админка
               </button>
           )}
         </div>
 
-        <div className={styles.stats}>
-          <div className={styles.statCard}>
-            <div className={styles.statNumber}>{ads.length}</div>
-            <div className={styles.statLabel}>Объявлений</div>
+        <div className="stats">
+          <div className="statCard">
+            <div className="statNumber">{ads.length}</div>
+            <div className="statLabel">Объявлений</div>
           </div>
-          <div className={styles.statCard}>
-            <div className={styles.statNumber}>{user.rating?.toFixed(1) || '0.0'}</div>
-            <div className={styles.statLabel}>Рейтинг</div>
+          <div className="statCard">
+            <div className="statNumber">{user.rating?.toFixed(1) || '0.0'}</div>
+            <div className="statLabel">Рейтинг</div>
           </div>
-          <div className={styles.statCard}>
-            <div className={styles.statNumber}>{user.coins || 0}</div>
-            <div className={styles.statLabel}>Коинов</div>
+          <div className="statCard">
+            <div className="statNumber">{user.coins || 0}</div>
+            <div className="statLabel">Коинов</div>
           </div>
-          <div className={styles.statCard}>
-            <div className={styles.statNumber}>{user.course || 1}</div>
-            <div className={styles.statLabel}>Курс</div>
+          <div className="statCard">
+            <div className="statNumber">{user.course || 1}</div>
+            <div className="statLabel">Курс</div>
           </div>
         </div>
 
-        <div className={styles.userInfo}>
-          <div className={styles.infoCard}>
+        <div className="userInfo">
+          <div className="infoCard">
             <h3>👤 Основная информация</h3>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Имя:</span>
-              <span className={styles.infoValue}>{user.name || 'Не указано'}</span>
+            <div className="infoItem">
+              <span className="infoLabel">Имя:</span>
+              <span className="infoValue">{user.name || 'Не указано'}</span>
             </div>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Email:</span>
-              <span className={styles.infoValue}>{user.email}</span>
+            <div className="infoItem">
+              <span className="infoLabel">Email:</span>
+              <span className="infoValue">{user.email}</span>
             </div>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Адрес:</span>
-              <span className={styles.infoValue}>{user.address || 'Не указан'}</span>
+            <div className="infoItem">
+              <span className="infoLabel">Адрес:</span>
+              <span className="infoValue">{user.address || 'Не указан'}</span>
             </div>
           </div>
 
-          <div className={styles.infoCard}>
+          <div className="infoCard">
             <h3>🎓 Учебная информация</h3>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Учебная программа:</span>
-              <span className={styles.infoValue}>{user.studyProgram || 'Не указана'}</span>
+            <div className="infoItem">
+              <span className="infoLabel">Учебная программа:</span>
+              <span className="infoValue">{user.studyProgram || 'Не указана'}</span>
             </div>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Курс:</span>
-              <span className={styles.infoValue}>{user.course || 1} курс</span>
+            <div className="infoItem">
+              <span className="infoLabel">Курс:</span>
+              <span className="infoValue">{user.course || 1} курс</span>
             </div>
           </div>
 
-          <div className={styles.infoCard}>
+          <div className="infoCard">
             <h3>⭐ Рейтинг и коины</h3>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Рейтинг:</span>
-              <span className={styles.infoValue}>
-              <span className={styles.ratingStars}>
+            <div className="infoItem">
+              <span className="infoLabel">Рейтинг:</span>
+              <span className="infoValue">
+              <span className="ratingStars">
                 {[...Array(5)].map((_, i) => (
                     <span key={i}>{i < Math.round(user.rating || 0) ? '★' : '☆'}</span>
                 ))}
@@ -357,48 +369,48 @@ const Dashboard = () => {
               ({(user.rating || 0).toFixed(1)})
             </span>
             </div>
-            <div className={styles.infoItem}>
-              <span className={styles.infoLabel}>Коины:</span>
-              <span className={`${styles.infoValue} ${styles.coins}`}>{user.coins || 0} 🪙</span>
+            <div className="infoItem">
+              <span className="infoLabel">Коины:</span>
+              <span className={`infoValue coins`}>{user.coins || 0} 🪙</span>
             </div>
           </div>
         </div>
 
-        <div className={styles.adsSection}>
+        <div className="adsSection">
           <h3>
             📋 Мои объявления
-            <button onClick={() => window.location.href = '/create-ad'} className={styles.btnSuccess}>
+            <button onClick={() => window.location.href = '/create-ad'} className="btnSuccess">
               + Создать объявление
             </button>
           </h3>
 
-          <div className={styles.adList}>
+          <div className="adList">
             {ads.length === 0 ? (
-                <div className={styles.noAds}>
+                <div className="noAds">
                   <h4>У вас пока нет объявлений</h4>
                   <p>Создайте первое объявление, чтобы начать продавать или обмениваться вещами!</p>
                 </div>
             ) : (
                 ads.map(ad => (
-                    <div key={ad.id} className={styles.adItem}>
-                      <div className={styles.adTitle}>{ad.title}</div>
-                      <div className={styles.adMeta}>
-                        <span className={styles.adCategory}>{getCategoryDisplayName(ad.category)}</span>
-                        <span className={styles.adCondition}>{getConditionDisplayName(ad.condition)}</span>
-                        <span className={`${styles.adStatus} ${getStatusClass(ad.status)}`}>
+                    <div key={ad.id} className="adItem">
+                      <div className="adTitle">{ad.title}</div>
+                      <div className="adMeta">
+                        <span className="adCategory">{getCategoryDisplayName(ad.category)}</span>
+                        <span className="adCondition">{getConditionDisplayName(ad.condition)}</span>
+                        <span className={`adStatus ${getStatusClass(ad.status)}`}>
                     {getStatusDisplayName(ad.status)}
                   </span>
                       </div>
-                      <div className={styles.adPrice}>{formatPrice(ad.price)}</div>
-                      <div className={styles.adLocation}>📍 {ad.location || 'Не указано'}</div>
-                      <div className={styles.adDescription}>{ad.description}</div>
-                      <div className={styles.adViews}>👁️ {ad.viewCount || 0} просмотров</div>
-                      <div className={styles.adDate}>📅 {formatDate(ad.createdAt)}</div>
-                      <div className={styles.adActions}>
-                        <button onClick={() => window.location.href = `/edit-ad?id=${ad.id}`} className={styles.btnEdit}>
+                      <div className="adPrice">{formatPrice(ad.price)}</div>
+                      <div className="adLocation">📍 {ad.location || 'Не указано'}</div>
+                      <div className="adDescription">{ad.description}</div>
+                      <div className="adViews">👁️ {ad.viewCount || 0} просмотров</div>
+                      <div className="adDate">📅 {formatDate(ad.createdAt)}</div>
+                      <div className="adActions">
+                        <button onClick={() => window.location.href = `/edit-ad?id=${ad.id}`} className="btnEdit">
                           Редактировать
                         </button>
-                        <button onClick={() => handleDeleteAd(ad.id)} className={styles.btnDanger}>
+                        <button onClick={() => handleDeleteAd(ad.id)} className="btnDanger">
                           Удалить
                         </button>
                       </div>
@@ -408,25 +420,25 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className={styles.actionButtons}>
-          <button onClick={() => window.location.href = '/'} className={styles.btnPrimary}>
+        <div className="actionButtons">
+          <button onClick={() => window.location.href = '/'} className="btnPrimary">
             На главную
           </button>
-          <button onClick={handleLogout} className={styles.btnSecondary}>
+          <button onClick={handleLogout} className="btnSecondary">
             Выйти
           </button>
         </div>
 
         {activeModal === 'account' && (
-            <div className={styles.modal} onClick={(e) => e.target === e.currentTarget && closeModals()}>
-              <div className={styles.modalContent}>
-                <span className={styles.close} onClick={closeModals}>&times;</span>
+            <div className="modal" onClick={(e) => e.target === e.currentTarget && closeModals()}>
+              <div className="modalContent">
+                <span className="close" onClick={closeModals}>&times;</span>
                 <h3>🔧 Управление аккаунтом</h3>
-                <div className={styles.buttonGroup}>
-                  <button onClick={() => openModal('password')} className={styles.btnPrimary}>
+                <div className="buttonGroup">
+                  <button onClick={() => openModal('password')} className="btnPrimary">
                     Изменить пароль
                   </button>
-                  <button onClick={() => openModal('delete')} className={styles.btnDanger}>
+                  <button onClick={() => openModal('delete')} className="btnDanger">
                     Удалить аккаунт
                   </button>
                 </div>
@@ -435,26 +447,41 @@ const Dashboard = () => {
         )}
 
         {activeModal === 'password' && (
-            <div className={styles.modal} onClick={(e) => e.target === e.currentTarget && closeModals()}>
-              <div className={styles.modalContent}>
-                <span className={styles.close} onClick={closeModals}>&times;</span>
+            <div className="modal" onClick={(e) => e.target === e.currentTarget && closeModals()}>
+              <div className="modalContent">
+                <span className="close" onClick={closeModals}>&times;</span>
                 <h3>🔐 Изменение пароля</h3>
                 <form onSubmit={handleChangePassword}>
-                  <div className={styles.formGroup}>
+                  <div className="formGroup">
                     <label>Текущий пароль</label>
-                    <input type="password" required value={passwordData.currentPassword} onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})} />
+                    <input
+                        type="password"
+                        required
+                        value={passwordData.currentPassword}
+                        onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                    />
                   </div>
-                  <div className={styles.formGroup}>
+                  <div className="formGroup">
                     <label>Новый пароль</label>
-                    <input type="password" required value={passwordData.newPassword} onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})} />
+                    <input
+                        type="password"
+                        required
+                        value={passwordData.newPassword}
+                        onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                    />
                   </div>
-                  <div className={styles.formGroup}>
+                  <div className="formGroup">
                     <label>Подтверждение нового пароля</label>
-                    <input type="password" required value={passwordData.confirmPassword} onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})} />
+                    <input
+                        type="password"
+                        required
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                    />
                   </div>
-                  <div className={styles.buttonGroup}>
-                    <button type="submit" className={styles.btnPrimary}>Сохранить пароль</button>
-                    <button type="button" onClick={closeModals} className={styles.btnSecondary}>Отмена</button>
+                  <div className="buttonGroup">
+                    <button type="submit" className="btnPrimary">Сохранить пароль</button>
+                    <button type="button" onClick={closeModals} className="btnSecondary">Отмена</button>
                   </div>
                 </form>
               </div>
@@ -462,23 +489,28 @@ const Dashboard = () => {
         )}
 
         {activeModal === 'delete' && (
-            <div className={styles.modal} onClick={(e) => e.target === e.currentTarget && closeModals()}>
-              <div className={styles.modalContent}>
-                <span className={styles.close} onClick={closeModals}>&times;</span>
+            <div className="modal" onClick={(e) => e.target === e.currentTarget && closeModals()}>
+              <div className="modalContent">
+                <span className="close" onClick={closeModals}>&times;</span>
                 <h3>🗑️ Удаление аккаунта</h3>
-                <div className={styles.warningBox}>
+                <div className="warningBox">
                   <h4>⚠️ Внимание!</h4>
                   <p>Это действие необратимо. Все ваши данные, включая объявления, будут удалены без возможности восстановления.</p>
                 </div>
                 <p>Для подтверждения введите ваш пароль:</p>
                 <form onSubmit={handleDeleteAccount}>
-                  <div className={styles.formGroup}>
+                  <div className="formGroup">
                     <label>Текущий пароль</label>
-                    <input type="password" required value={deletePassword} onChange={(e) => setDeletePassword(e.target.value)} />
+                    <input
+                        type="password"
+                        required
+                        value={deletePassword}
+                        onChange={(e) => setDeletePassword(e.target.value)}
+                    />
                   </div>
-                  <div className={styles.buttonGroup}>
-                    <button type="submit" className={styles.btnDanger}>Удалить аккаунт</button>
-                    <button type="button" onClick={closeModals} className={styles.btnSecondary}>Отмена</button>
+                  <div className="buttonGroup">
+                    <button type="submit" className="btnDanger">Удалить аккаунт</button>
+                    <button type="button" onClick={closeModals} className="btnSecondary">Отмена</button>
                   </div>
                 </form>
               </div>

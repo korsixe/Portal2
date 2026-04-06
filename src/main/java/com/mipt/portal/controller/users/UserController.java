@@ -45,10 +45,16 @@ public class UserController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<User> login(@RequestBody LoginRequest request) {
+  public ResponseEntity<User> login(@RequestBody LoginRequest request, HttpSession session) {
     log.info("Received login request for email: {}", request.getEmail());
     return userService.loginUser(request.getEmail(), request.getPassword())
         .map(user -> {
+          // Сохраняем пользователя в сессию
+          session.setAttribute("user", user);
+          session.setAttribute("userId", user.getId());
+          session.setAttribute("userName", user.getName());
+          session.setAttribute("userEmail", user.getEmail());
+
           log.info("Successfully logged in user: {}", request.getEmail());
           return ResponseEntity.ok(user);
         })
