@@ -176,15 +176,29 @@ box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
 display: flex;
 flex-direction: column;
 gap: 12px;
+align-items: flex-start;
+width: 100%;
 }
 
 .filter-option {
-display: flex;
+display: grid;
+grid-template-columns: 18px 1fr;
+column-gap: 10px;
 align-items: center;
-gap: 10px;
 cursor: pointer;
-padding: 8px 0;
+width: 100%;
+min-height: 44px;
+padding: 10px 12px;
+border: 1px solid #e1e5e9;
+border-radius: 10px;
+background: #fff;
 transition: color 0.3s ease;
+text-align: left;
+box-sizing: border-box;
+}
+
+.filter-option span {
+line-height: 1.2;
 }
 
 .filter-option:hover {
@@ -193,6 +207,9 @@ color: #667eea;
 
 .filter-option input[type="radio"] {
 margin: 0;
+width: 16px;
+height: 16px;
+justify-self: start;
 }
 
 .filter-actions {

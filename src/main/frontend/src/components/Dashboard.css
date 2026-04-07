@@ -172,15 +172,7 @@
 }
 
 .onlineStatus {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  width: 16px;
-  height: 16px;
-  background: #28a745;
-  border: 3px solid white;
-  border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  display: none;
 }
 
 .buttonsVertical {
@@ -230,15 +222,20 @@
   transform: translateY(-2px);
 }
 
+.actionButtons .btnSecondary {
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+}
+
 .btnSuccess {
-  background: linear-gradient(135deg, #28a745, #20c997);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .btnSuccess:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
 .btnDanger {
@@ -429,34 +426,47 @@
 .adMeta {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   margin-bottom: 15px;
 }
 
 .adCategory {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   background: #667eea;
   color: white;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.8rem;
+  line-height: 1;
+  min-height: 28px;
+  box-sizing: border-box;
 }
 
 .adCondition {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   background: #28a745;
   color: white;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.8rem;
+  line-height: 1;
+  min-height: 28px;
+  box-sizing: border-box;
 }
 
 .adStatus {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 500;
+  line-height: 1;
+  min-height: 28px;
+  box-sizing: border-box;
 }
 
 .statusActive {
@@ -734,10 +744,7 @@
   }
 
   .onlineStatus {
-    width: 14px;
-    height: 14px;
-    bottom: 6px;
-    right: 6px;
+    display: none;
   }
 
   .portalLogo {
