@@ -3,6 +3,7 @@ package com.mipt.portal.controller;
 import com.mipt.portal.dto.CoinManagementRequest;
 import com.mipt.portal.dto.RoleManagementRequest;
 import com.mipt.portal.dto.SystemStats;
+import com.mipt.portal.dto.SanctionRequest;
 import com.mipt.portal.entity.User;
 import com.mipt.portal.enums.Role;
 import com.mipt.portal.service.AdminService;
@@ -81,6 +82,28 @@ public class AdminController {
         }
 
         redirectAttributes.addFlashAttribute("message", success ? "Баланс обновлен" : "Не удалось обновить баланс");
+        redirectAttributes.addFlashAttribute("messageType", success ? "success" : "error");
+        return "redirect:/admin/dashboard";
+    }
+
+    @PostMapping("/sanction")
+    public String manageSanction(@ModelAttribute SanctionRequest request,
+                                 Authentication authentication,
+                                 RedirectAttributes redirectAttributes) {
+        Long adminId = resolveCurrentUserId(authentication);
+        boolean success = false;
+        String type = request.getType() == null ? "" : request.getType().toLowerCase();
+        int duration = request.getDuration() == null ? 0 : request.getDuration();
+
+        if ("freeze".equals(type)) {
+            success = adminService.freezeUser(adminId, request.getTargetUserId(), request.getReason(), duration).orElse(false);
+        } else if ("ban".equals(type)) {
+            success = adminService.banUser(adminId, request.getTargetUserId(), request.getReason(), duration).orElse(false);
+        } else if ("lift".equals(type)) {
+            success = adminService.liftSanctions(adminId, request.getTargetUserId()).orElse(false);
+        }
+
+        redirectAttributes.addFlashAttribute("message", success ? "Санкция применена" : "Не удалось применить санкцию");
         redirectAttributes.addFlashAttribute("messageType", success ? "success" : "error");
         return "redirect:/admin/dashboard";
     }

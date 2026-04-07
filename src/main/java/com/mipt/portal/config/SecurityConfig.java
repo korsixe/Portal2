@@ -1,31 +1,69 @@
 package com.mipt.portal.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
+@EnableMethodSecurity
+@RequiredArgsConstructor
+public class SecurityConfig implements WebMvcConfigurer {
+
+  private final RateLimitInterceptor rateLimitInterceptor;
 
   @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+  public SecurityFilterChain filterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
+    MvcRequestMatcher.Builder mvc = new MvcRequestMatcher.Builder(introspector);
+
     http
         .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .csrf(AbstractHttpConfigurer::disable)
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers(new AntPathRequestMatcher("/api/users/register")).permitAll()
-            .requestMatchers(new AntPathRequestMatcher("/api/users/login")).permitAll()
-            .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll()
+        .securityContext(sc -> sc
+            .securityContextRepository(new HttpSessionSecurityContextRepository())
+            .requireExplicitSave(false)
+        )
+        .authorizeHttpRequests(authz -> authz
+            .requestMatchers(
+                mvc.pattern("/"),
+                mvc.pattern("/index.jsp"),
+                mvc.pattern("/login.jsp"),
+                mvc.pattern("/register.jsp"),
+                mvc.pattern("/home.jsp"),
+                mvc.pattern("/*.jsp"),
+                mvc.pattern("/users/login"),
+                mvc.pattern("/users/register"),
+                mvc.pattern("/custom-login"),
+                mvc.pattern("/api/**")
+            ).permitAll()
+            .requestMatchers(mvc.pattern("/moderator/**")).hasAnyRole("MODERATOR", "ADMIN")
+            .requestMatchers(mvc.pattern("/admin/**")).hasRole("ADMIN")
+            .requestMatchers(
+                mvc.pattern("/dashboard.jsp"),
+                mvc.pattern("/edit-profile.jsp"),
+                mvc.pattern("/create-ad.jsp"),
+                mvc.pattern("/edit-ad.jsp"),
+                mvc.pattern("/delete-account-handler.jsp")
+            ).authenticated()
+            .requestMatchers(
+                mvc.pattern("/api/announcements/*/history"),
+                mvc.pattern("/api/announcements/*/approve")
+            ).hasAnyRole("MODERATOR", "ADMIN")
             .anyRequest().permitAll()
         )
         .formLogin(AbstractHttpConfigurer::disable)
@@ -46,5 +84,11 @@ public class SecurityConfig {
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
     return source;
+  }
+
+  @Override
+  public void addInterceptors(InterceptorRegistry registry) {
+    registry.addInterceptor(rateLimitInterceptor)
+        .addPathPatterns("/moderator/**", "/admin/**");
   }
 }
