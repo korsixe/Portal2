@@ -3,6 +3,8 @@ import { apiGet, apiPost } from '../../api';
 import AccessDenied from '../AccessDenied';
 import './ModeratorDashboard.css';
 
+const API_BASE = 'http://localhost:8080';
+
 const CATEGORY_LABELS = {
   ELECTRONICS: 'Электроника',
   CLOTHING: 'Одежда',
@@ -322,14 +324,18 @@ function ModeratorDashboard() {
                 <div className="ad-card" key={ad.id}>
                   <div className="ad-photo-section">
                     <div className="ad-photo-container">
-                      {ad.photoUrls && ad.photoUrls.length > 0 ? (
-                        <img src={ad.photoUrls[0]} className="ad-photo" alt={ad.title} />
-                      ) : (
-                        <div className="photo-placeholder">
-                          <span style={{ fontSize: '3rem' }}>📷</span>
-                          <span style={{ fontSize: '0.9rem', marginTop: '5px' }}>Нет фото</span>
-                        </div>
-                      )}
+                      <img
+                        src={`${API_BASE}/ad-photo?adId=${ad.id}&photoIndex=0`}
+                        className="ad-photo"
+                        alt={ad.title}
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          const parent = e.currentTarget.parentElement;
+                          if (parent) {
+                            parent.innerHTML = '<div class="photo-placeholder"><span style="font-size:3rem">📷</span><span style="font-size:0.9rem;margin-top:5px">Нет фото</span></div>';
+                          }
+                        }}
+                      />
                     </div>
                   </div>
 
