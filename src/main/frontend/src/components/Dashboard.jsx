@@ -42,7 +42,8 @@ const Dashboard = () => {
           window.location.href = '/login';
           return;
         }
-        throw new Error('Ошибка загрузки пользователя');
+        setErrorMessage('Ошибка загрузки пользователя');
+        return;
       }
       const userData = await userResponse.json();
       setUser(userData);
@@ -357,7 +358,6 @@ const Dashboard = () => {
             <div className="infoItem">
               <span className="infoLabel">Адрес:</span>
               <span className="infoValue">{formatAddress(user.address)}</span>
-              <span className="infoValue">{formatUserAddress(user.address)}</span>
             </div>
           </div>
 

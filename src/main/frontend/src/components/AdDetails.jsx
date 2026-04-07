@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './AdDetails.css';
 
@@ -26,9 +26,7 @@ const AdDetails = () => {
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
   const [commentFeedback, setCommentFeedback] = useState({ type: '', text: '' });
-  const [photoIndex, setPhotoIndex] = useState(0);
-
-  const photoCount = useMemo(() => Number(details.photoCount || 0), [details.photoCount]);
+  const [hasPhoto, setHasPhoto] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -45,7 +43,8 @@ const AdDetails = () => {
           navigate('/error?code=404&message=Объявление не найдено');
           return;
         }
-        throw new Error('Ошибка загрузки объявления');
+        setError('Ошибка загрузки объявления');
+        return;
       }
 
       const adData = await adResp.json();
@@ -55,7 +54,7 @@ const AdDetails = () => {
       setAnnouncement(adData);
       setDetails(detailsData);
       setComments(Array.isArray(commentsData) ? commentsData : []);
-      setPhotoIndex(0);
+      setHasPhoto(Number(detailsData.photoCount || 0) > 0);
     } catch (e) {
       setError(e.message || 'Ошибка загрузки');
     } finally {
@@ -105,12 +104,6 @@ const AdDetails = () => {
     }
   };
 
-  const showPhoto = (index) => {
-    if (index >= 0 && index < photoCount) {
-      setPhotoIndex(index);
-    }
-  };
-
   if (loading) {
     return <div className="adDetailsPage"><div className="adDetailsCard">Загрузка...</div></div>;
   }
@@ -133,19 +126,13 @@ const AdDetails = () => {
           </div>
 
           <div className="photoSection">
-            {photoCount > 0 ? (
-              <>
-                <img
-                  className="mainPhoto"
-                  src={`${API_BASE}/ad-photo?adId=${announcement.id}&photoIndex=${photoIndex}`}
-                  alt="Фото объявления"
-                />
-                <div className="photoControls">
-                  <button onClick={() => showPhoto(photoIndex - 1)} disabled={photoIndex === 0}>←</button>
-                  <span>{photoIndex + 1} / {photoCount}</span>
-                  <button onClick={() => showPhoto(photoIndex + 1)} disabled={photoIndex >= photoCount - 1}>→</button>
-                </div>
-              </>
+            {hasPhoto ? (
+              <img
+                className="mainPhoto"
+                src={`${API_BASE}/ad-photo?adId=${announcement.id}&photoIndex=0`}
+                alt="Фото объявления"
+                onError={() => setHasPhoto(false)}
+              />
             ) : (
               <div className="emptyPhoto">Фотографии отсутствуют</div>
             )}

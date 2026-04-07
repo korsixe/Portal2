@@ -14,7 +14,15 @@ public class AnnouncementCreateDto {
   @NotBlank(message = "Описание обязательно")
   private String description;
 
-  @Min(value = 0, message = "Цена не может быть отрицательной")
+  private String category;
+
+  private String subcategory;
+
+  private String location;
+
+  private String condition;
+
+  @Min(value = -1, message = "Цена не может быть меньше -1")
   private int price;
 
   @NotNull(message = "ID автора обязателен")

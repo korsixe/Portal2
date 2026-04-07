@@ -50,20 +50,6 @@
   background: #f3f4f6;
 }
 
-.photoControls {
-  margin-top: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-.photoControls button {
-  border: none;
-  border-radius: 8px;
-  padding: 6px 10px;
-  cursor: pointer;
-}
 
 .emptyPhoto,
 .emptyComments {

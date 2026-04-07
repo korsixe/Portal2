@@ -6,6 +6,8 @@ import com.mipt.portal.dto.AnnouncementCreateDto;
 import com.mipt.portal.dto.AnnouncementFilterDto;
 import com.mipt.portal.entity.Announcement;
 import com.mipt.portal.enums.AdStatus;
+import com.mipt.portal.enums.Category;
+import com.mipt.portal.enums.Condition;
 import com.mipt.portal.enums.AdminActionType;
 import com.mipt.portal.enums.AuditTargetType;
 import com.mipt.portal.repository.AnnouncementRepository;
@@ -42,6 +44,25 @@ public class AnnouncementService {
         ad.setPrice(dto.getPrice());
         ad.setAuthorId(dto.getAuthorId());
 
+        if (dto.getCategory() != null && !dto.getCategory().isBlank()) {
+            ad.setCategory(parseCategory(dto.getCategory()));
+        } else {
+            ad.setCategory(Category.OTHER);
+        }
+        ad.setSubcategory(dto.getSubcategory());
+        if (dto.getLocation() != null && !dto.getLocation().isBlank()) {
+            ad.setLocation(dto.getLocation());
+        }
+        if (dto.getCondition() != null && !dto.getCondition().isBlank()) {
+            try {
+                ad.setCondition(Condition.valueOf(dto.getCondition()));
+            } catch (IllegalArgumentException ex) {
+                ad.setCondition(Condition.USED);
+            }
+        } else {
+            ad.setCondition(Condition.USED);
+        }
+
         if (dto.getPhotoUrls() != null) {
             ad.setPhotoUrls(dto.getPhotoUrls());
         }
@@ -53,6 +74,17 @@ public class AnnouncementService {
         Announcement savedAd = repository.save(ad);
         log.info("Announcement created successfully with ID: {}", savedAd.getId());
         return savedAd;
+    }
+
+    private Category parseCategory(String rawCategory) {
+        if (rawCategory == null || rawCategory.isBlank()) {
+            return Category.OTHER;
+        }
+        try {
+            return Category.valueOf(rawCategory);
+        } catch (IllegalArgumentException ignored) {
+            return Category.fromDisplayName(rawCategory);
+        }
     }
 
     @Transactional(readOnly = true)
