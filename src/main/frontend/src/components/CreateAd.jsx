@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './CreateAd.css'; // Скопируй сюда стили из тега <style> файла create-ad.jsp
 import ProfanityWarningModal from './ProfanityWarningModal';
@@ -10,7 +10,9 @@ const CreateAd = () => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
+        categoryId: '',
         category: '',
+        subcategory: '',
         location: '',
         condition: 'USED',
         priceType: 'fixed',
@@ -21,6 +23,25 @@ const CreateAd = () => {
     const [photo, setPhoto] = useState(null);
     const [message, setMessage] = useState({ type: '', text: '' });
     const [showProfanityWarning, setShowProfanityWarning] = useState(false);
+    const [categories, setCategories] = useState([]);
+    const [subcategories, setSubcategories] = useState([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await fetch(`${API_BASE}/api/announcements/categories`, { credentials: 'include' });
+                if (!response.ok) {
+                    return;
+                }
+                const data = await response.json();
+                setCategories(Array.isArray(data) ? data : []);
+            } catch (e) {
+                console.error('Ошибка загрузки категорий', e);
+            }
+        };
+
+        fetchCategories();
+    }, []);
 
     const hasProfanity = async (text) => {
         const response = await fetch(`${API_BASE}/api/profanity/check`, {
@@ -36,8 +57,41 @@ const CreateAd = () => {
         return Boolean(data.hasProfanity);
     };
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+    const handleChange = async (e) => {
+        const { name, value } = e.target;
+
+        if (name === 'categoryId') {
+            const selectedCategory = categories.find((c) => String(c.id) === String(value));
+            setFormData((prev) => ({
+                ...prev,
+                categoryId: value,
+                category: selectedCategory?.name || '',
+                subcategory: ''
+            }));
+
+            if (!value) {
+                setSubcategories([]);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/announcements/categories/${value}/subcategories`, {
+                    credentials: 'include'
+                });
+                if (!response.ok) {
+                    setSubcategories([]);
+                    return;
+                }
+                const data = await response.json();
+                setSubcategories(Array.isArray(data) ? data : []);
+            } catch (err) {
+                console.error('Ошибка загрузки подкатегорий', err);
+                setSubcategories([]);
+            }
+            return;
+        }
+
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const handlePhotoChange = (e) => {
@@ -64,6 +118,7 @@ const CreateAd = () => {
             title: formData.title,
             description: formData.description,
             category: formData.category,
+            subcategory: formData.subcategory,
             location: formData.location,
             condition: formData.condition,
             price: parseInt(finalPrice) || 0,
@@ -163,12 +218,27 @@ const CreateAd = () => {
                         <h3 className="section-title">📂 Категория и Локация</h3>
                         <div className="form-group">
                             <label className="required">Категория</label>
-                            <select name="category" className="form-control" required onChange={handleChange}>
+                            <select name="categoryId" className="form-control" required value={formData.categoryId} onChange={handleChange}>
                                 <option value="">Выберите категорию</option>
-                                <option value="ELECTRONICS">Электроника</option>
-                                <option value="CLOTHING">Одежда и обувь</option>
-                                <option value="HOME">Дом и сад</option>
-                                <option value="AUTO">Автотовары</option>
+                                {categories.map((category) => (
+                                    <option key={category.id} value={category.id}>{category.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label className="required">Подкатегория</label>
+                            <select
+                                name="subcategory"
+                                className="form-control"
+                                required
+                                value={formData.subcategory}
+                                onChange={handleChange}
+                                disabled={!formData.categoryId}
+                            >
+                                <option value="">Выберите подкатегорию</option>
+                                {subcategories.map((subcategory) => (
+                                    <option key={subcategory.id} value={subcategory.name}>{subcategory.name}</option>
+                                ))}
                             </select>
                         </div>
                         <div className="form-group">

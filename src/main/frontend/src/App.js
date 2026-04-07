@@ -23,7 +23,8 @@ function App() {
         {/* Когда адрес в браузере просто /, показываем главную */}
         <Route path="/" element={<Home />} />
 
-        {/* Когда адрес /create, показываем создание */}
+        {/* Когда адрес /create-ad (или старый /create), показываем создание */}
+        <Route path="/create-ad" element={<CreateAd />} />
         <Route path="/create" element={<CreateAd />} />
 
         {/* Когда адрес /register, показываем регистрацию */}

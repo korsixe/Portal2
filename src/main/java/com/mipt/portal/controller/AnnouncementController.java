@@ -65,6 +65,16 @@ public class AnnouncementController {
     }
   }
 
+  @GetMapping("/categories")
+  public ResponseEntity<List<Map<String, Object>>> getCategories() {
+    return ResponseEntity.ok(service.getAllCategories());
+  }
+
+  @GetMapping("/categories/{categoryId}/subcategories")
+  public ResponseEntity<List<Map<String, Object>>> getSubcategories(@PathVariable Long categoryId) {
+    return ResponseEntity.ok(service.getSubcategoriesByCategory(categoryId));
+  }
+
   @GetMapping("/search")
   public List<Announcement> search(
       AnnouncementFilterDto filter,
