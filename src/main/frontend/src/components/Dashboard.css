@@ -107,11 +107,18 @@
   gap: 20px;
   position: relative;
   min-height: 120px;
+  --bell-offset: 40%;
 }
 
 .notificationLeft {
   margin-right: auto;
-  margin-left: 40%;
+  margin-left: var(--bell-offset);
+}
+
+@media (max-width: 1024px) {
+  .headerTopBell {
+    --bell-offset: 28%;
+  }
 }
 
 .bellButton {
@@ -627,6 +634,10 @@
 
 /* Адаптивность */
 @media (max-width: 768px) {
+  .headerTopBell {
+    --bell-offset: 0%;
+  }
+
   .headerTopBell {
     flex-direction: column;
     gap: 20px;
