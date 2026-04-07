@@ -216,7 +216,7 @@ function ModeratorDashboard() {
     } catch (error) {
       console.error('Logout failed:', error);
     }
-    globalThis.location.href = '/login';
+    window.location.href = '/login';
   };
 
   if (accessDenied) {
@@ -342,7 +342,7 @@ function ModeratorDashboard() {
                   <div className="ad-content">
                     <div className="ad-title">
                       {ad.title}
-                      <span className="status-badge status-pending">На модерации</span>
+                      <span className="status-badge status-pending">На модерац��и</span>
                     </div>
 
                     <div className="ad-meta">
