@@ -60,10 +60,6 @@ public class Announcement {
   @Column(columnDefinition = "bytea")
   private byte[] photo;
 
-  @JdbcTypeCode(SqlTypes.JSON)
-  @Column(name = "photo_urls")
-  private List<String> photoUrls = new ArrayList<>();
-
   public void sendToModeration() {
     this.status = AdStatus.UNDER_MODERATION;
   }
@@ -78,5 +74,8 @@ public class Announcement {
 
   public void reject() {
     this.status = AdStatus.REJECTED;
+  }
+
+  public void setPhotoUrls(List<String> photoUrls) {
   }
 }

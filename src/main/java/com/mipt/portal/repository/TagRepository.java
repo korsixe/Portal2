@@ -1,160 +1,114 @@
 package com.mipt.portal.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mipt.portal.infrastructure.database.DatabaseConnection;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+import java.util.*;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-@Service
+@Slf4j
+@Repository
 @RequiredArgsConstructor
 public class TagRepository {
 
+  private final JdbcTemplate jdbcTemplate;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
-  public List<Map<String, Object>> getTagsWithValues() throws SQLException {
+  public List<Map<String, Object>> getTagsWithValues() {
+    String sql = """
+        SELECT t.id as tag_id, t.name as tag_name,
+               tv.id as value_id, tv.value as value_name
+        FROM tags t
+        LEFT JOIN tag_values tv ON t.id = tv.tag_id
+        ORDER BY t.name, tv.value
+    """;
 
+    Map<Long, Map<String, Object>> tagsMap = new HashMap<>();
     List<Map<String, Object>> tags = new ArrayList<>();
 
-    String sql = """
-                SELECT t.id as tag_id, t.name as tag_name,
-                       tv.id as value_id, tv.value as value_name
-                FROM tags t
-                LEFT JOIN tag_values tv ON t.id = tv.tag_id
-                ORDER BY t.name, tv.value
-                """;
+    jdbcTemplate.query(sql, rs -> {
+      Long tagId = rs.getLong("tag_id");
+      Map<String, Object> tag = tagsMap.get(tagId);
 
-    try (Connection conn = DatabaseConnection.getConnection();
-         PreparedStatement stmt = conn.prepareStatement(sql);
-         ResultSet rs = stmt.executeQuery()) {
-
-      Map<Long, Map<String, Object>> tagsMap = new HashMap<>();
-
-      while (rs.next()) {
-        Long tagId = rs.getLong("tag_id");
-        Map<String, Object> tag = tagsMap.get(tagId);
-
-        if (tag == null) {
-          tag = new HashMap<>();
-          tag.put("id", tagId);
-          tag.put("name", rs.getString("tag_name"));
-          tag.put("values", new ArrayList<Map<String, Object>>());
-          tagsMap.put(tagId, tag);
-          tags.add(tag);
-        }
-
-        if (rs.getObject("value_id") != null) {
-          Map<String, Object> value = new HashMap<>();
-          value.put("id", rs.getLong("value_id"));
-          value.put("name", rs.getString("value_name"));
-
-          @SuppressWarnings("unchecked")
-          List<Map<String, Object>> values = (List<Map<String, Object>>) tag.get("values");
-          values.add(value);
-        }
+      if (tag == null) {
+        tag = new HashMap<>();
+        tag.put("id", tagId);
+        tag.put("name", rs.getString("tag_name"));
+        tag.put("values", new ArrayList<Map<String, Object>>());
+        tagsMap.put(tagId, tag);
+        tags.add(tag);
       }
 
-      System.out.println(" Loaded " + tags.size() + " tags from database");
+      Long valueId = rs.getLong("value_id");
+      if (!rs.wasNull()) {
+        Map<String, Object> value = new HashMap<>();
+        value.put("id", valueId);
+        value.put("name", rs.getString("value_name"));
+        ((List<Map<String, Object>>) tag.get("values")).add(value);
+      }
+    });
 
-    } catch (SQLException e) {
-      System.err.println(" Error loading tags from database: " + e.getMessage());
-      throw e;
-    }
+    log.info("✅ Loaded {} tags from database", tags.size());
     return tags;
-
   }
 
-  public List<Map<String, Object>> getAvailableTagsForSubcategory(String subcategoryName) throws SQLException {
+  public List<Map<String, Object>> getAvailableTagsForSubcategory(String subcategoryName) {
     return getTagsWithValues();
   }
 
-  public List<Map<String, Object>> getTagsForAd(Long adId) throws SQLException {
-
+  public List<Map<String, Object>> getTagsForAd(Long adId) {
     String sql = "SELECT tags FROM ads WHERE id = ?";
-
-    try (Connection conn = DatabaseConnection.getConnection();
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-      stmt.setLong(1, adId);
-      try (ResultSet rs = stmt.executeQuery()) {
-        if (rs.next()) {
-          String tagsJson = rs.getString("tags");
-          if (tagsJson != null && !tagsJson.trim().isEmpty()) {
-            return objectMapper.readValue(tagsJson,
-              objectMapper.getTypeFactory().constructCollectionType(List.class, Map.class));
-          }
-        }
+    try {
+      String tagsJson = jdbcTemplate.queryForObject(sql, String.class, adId);
+      if (tagsJson != null && !tagsJson.trim().isEmpty()) {
+        return objectMapper.readValue(tagsJson,
+          objectMapper.getTypeFactory().constructCollectionType(List.class, Map.class));
       }
     } catch (Exception e) {
-      throw new SQLException("");
+      log.error("Error getting tags for ad {}", adId, e);
     }
     return new ArrayList<>();
   }
 
-  public void saveAdTags(Long adId, List<Map<String, Object>> tagSelections) throws SQLException {
-
+  public void saveAdTags(Long adId, List<Map<String, Object>> tagSelections) {
     if (adId == null || adId <= 0) {
       throw new IllegalArgumentException("Invalid ad ID");
     }
 
     if (!adExists(adId)) {
-      throw new SQLException("Ad not found with ID: " + adId);
+      throw new RuntimeException("Ad not found with ID: " + adId);
     }
 
     saveTagsToAd(adId, tagSelections);
     updateTagsCount(adId, tagSelections.size());
-
   }
 
-  private boolean adExists(Long adId) throws SQLException {
+  private boolean adExists(Long adId) {
     String sql = "SELECT COUNT(*) FROM ads WHERE id = ?";
-    try (Connection conn = DatabaseConnection.getConnection();
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-      stmt.setLong(1, adId);
-      try (ResultSet rs = stmt.executeQuery()) {
-        return rs.next() && rs.getInt(1) > 0;
-      }
+    try {
+      Integer count = jdbcTemplate.queryForObject(sql, Integer.class, adId);
+      return count != null && count > 0;
+    } catch (Exception e) {
+      return false;
     }
   }
 
-  private void saveTagsToAd(Long adId, List<Map<String, Object>> tagSelections) throws SQLException {
-    String sql = "UPDATE ads SET tags = ?::jsonb, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
-
-    try (Connection conn = DatabaseConnection.getConnection();
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+  private void saveTagsToAd(Long adId, List<Map<String, Object>> tagSelections) {
+    try {
       String tagsJson = objectMapper.writeValueAsString(tagSelections);
-      stmt.setString(1, tagsJson);
-      stmt.setLong(2, adId);
-
-      int updatedRows = stmt.executeUpdate();
+      String sql = "UPDATE ads SET tags = ?::jsonb, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+      int updatedRows = jdbcTemplate.update(sql, tagsJson, adId);
       if (updatedRows == 0) {
-        throw new SQLException("Failed to update tags for ad " + adId);
+        throw new RuntimeException("Failed to update tags for ad " + adId);
       }
     } catch (Exception e) {
-      throw new SQLException("Error serializing tags to JSON for ad " + adId, e);
+      throw new RuntimeException("Error serializing tags to JSON for ad " + adId, e);
     }
-
   }
 
-  private void updateTagsCount(Long adId, int tagsCount) throws SQLException {
+  private void updateTagsCount(Long adId, int tagsCount) {
     String sql = "UPDATE ads SET tags_count = ? WHERE id = ?";
-
-    try (Connection conn = DatabaseConnection.getConnection();
-         PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-      stmt.setInt(1, tagsCount);
-      stmt.setLong(2, adId);
-      stmt.executeUpdate();
-    }
+    jdbcTemplate.update(sql, tagsCount, adId);
   }
 }

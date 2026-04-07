@@ -71,7 +71,7 @@ public class ModeratorController {
     public String deleteComment(@RequestParam Long commentId, RedirectAttributes redirectAttributes) {
         boolean removed = false;
         try {
-            removed = commentService.deleteComment(commentId);
+            //removed = commentService.deleteComment(commentId);
         } catch (Exception e) {
             log.error("Failed to delete comment {}", commentId, e);
         }

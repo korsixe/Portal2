@@ -5,167 +5,46 @@
 <%@ page import="com.mipt.portal.service.AnnouncementService" %>
 <%@ page import="com.mipt.portal.enums.Category" %>
 <%@ page import="com.mipt.portal.enums.Condition" %>
-<%@ page import="com.mipt.portal.service.ProfanityChecker" %>
 <%@ page import="org.springframework.web.context.WebApplicationContext" %>
 <%@ page import="org.springframework.web.context.support.WebApplicationContextUtils" %>
-
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.sql.*" %>
 
 <%
-    // Получаем ID объявления из параметра
     Object sessionUserObj = session.getAttribute("user");
     User sessionUser = sessionUserObj instanceof User ? (User) sessionUserObj : null;
     if (sessionUserObj != null && sessionUser == null) {
         session.invalidate();
     }
+
     String adIdParam = request.getParameter("id");
     Announcement announcement = null;
     List<Comment> comments = new ArrayList<>();
     String authorName = "Неизвестный пользователь";
     int photoCount = 0;
-    WebApplicationContext appContext =
-        WebApplicationContextUtils.getRequiredWebApplicationContext(application);
-    AnnouncementService adsService = appContext.getBean(AnnouncementService.class);
+
+    WebApplicationContext appContext = WebApplicationContextUtils.getRequiredWebApplicationContext(application);
+    AnnouncementService announcementService = appContext.getBean(AnnouncementService.class);
 
     if (adIdParam != null && !adIdParam.trim().isEmpty()) {
         try {
             Long adId = Long.parseLong(adIdParam);
+            announcement = announcementService.findById(adId);
 
-            // Загружаем объявление из БД
-            try (Connection conn = getConnection();
-                 PreparedStatement stmt = conn.prepareStatement(
-                         "SELECT a.*, u.name as author_name FROM ads a " +
-                                 "LEFT JOIN users u ON a.user_id = u.id WHERE a.id = ?")) {
-
-                stmt.setLong(1, adId);
-                ResultSet rs = stmt.executeQuery();
-
-                if (rs.next()) {
-                    announcement = new Announcement();
-                    announcement.setId(rs.getLong("id"));
-                    announcement.setTitle(rs.getString("title"));
-                    announcement.setDescription(rs.getString("description"));
-                    announcement.setCategory(Category.values()[rs.getInt("category")]);
-                    announcement.setSubcategory(rs.getString("subcategory"));
-                    announcement.setCondition(Condition.values()[rs.getInt("condition")]);
-                    announcement.setPrice(rs.getInt("price"));
-                    announcement.setLocation(rs.getString("location"));
-                    //announcement.setUserId(rs.getLong("user_id"));
-                    announcement.setViewCount(rs.getInt("view_count"));
-                    announcement.setCreatedAt(rs.getTimestamp("created_at").toInstant());
-                    announcement.setUpdatedAt(rs.getTimestamp("updated_at").toInstant());
-
-                    authorName = rs.getString("author_name");
-
-                    // Обрабатываем теги из JSONB
-                    String tagsJson = rs.getString("tags");
-                    List<String> tags = new ArrayList<>();
-                    if (tagsJson != null && !tagsJson.equals("null") && !tagsJson.trim().isEmpty()) {
-                        try {
-                            ObjectMapper mapper = new ObjectMapper();
-
-                            if (tagsJson.startsWith("[")) {
-                                Map<String, Object>[] tagArray = mapper.readValue(tagsJson, Map[].class);
-                                for (Map<String, Object> tagObj : tagArray) {
-                                    String valueName = (String) tagObj.get("valueName");
-                                    if (valueName != null && !valueName.trim().isEmpty()) {
-                                        tags.add(valueName.trim());
-                                    }
-                                }
-                            } else if (tagsJson.startsWith("\"")) {
-                                String decodedTags = mapper.readValue(tagsJson, String.class);
-                                if (decodedTags.startsWith("[")) {
-                                    Map<String, Object>[] tagArray = mapper.readValue(decodedTags, Map[].class);
-                                    for (Map<String, Object> tagObj : tagArray) {
-                                        String valueName = (String) tagObj.get("valueName");
-                                        if (valueName != null && !valueName.trim().isEmpty()) {
-                                            tags.add(valueName.trim());
-                                        }
-                                    }
-                                }
-                            }
-                        } catch (Exception e) {
-                            // System.err.println("Ошибка при парсинге тегов: " + e.getMessage());
-                            e.printStackTrace();
-
-                            try {
-                                if (tagsJson.startsWith("[") && tagsJson.endsWith("]")) {
-                                    String[] simpleTags = tagsJson.substring(1, tagsJson.length() - 1).split(",");
-                                    for (String tag : simpleTags) {
-                                        String cleanedTag = tag.trim().replace("\"", "");
-                                        if (!cleanedTag.isEmpty()) {
-                                            tags.add(cleanedTag);
-                                        }
-                                    }
-                                }
-                            } catch (Exception e2) {
-                                System.err.println("Fallback парсинг тоже не удался: " + e2.getMessage());
-                            }
-                        }
-                    }
-
-                    announcement.setTags(tags);
-
-                    /*
-                    // Получаем количество фото через AdsService
-                    try {
-                        List<byte[]> photos = adsService.getAdPhotosBytes(adId);
-                        photoCount = photos != null ? photos.size() : 0;
-                        System.out.println("✅ Loaded " + photoCount + " photos for ad " + adId);
-                    } catch (Exception e) {
-                        System.err.println(" Error loading photos: " + e.getMessage());
-                        photoCount = 0;
-                    }
-
-                    // Увеличиваем счетчик просмотров
-                    try (PreparedStatement updateStmt = conn.prepareStatement(
-                            "UPDATE ads SET view_count = view_count + 1 WHERE id = ?")) {
-                        updateStmt.setLong(1, adId);
-                        updateStmt.executeUpdate();
-                    }
-                    */
-
-                }
+            if (announcement != null) {
+                authorName = announcementService.getAuthorName(announcement.getAuthorId());
+                photoCount = announcementService.getPhotoCount(adId);
             }
-
-            /*
-            // Загружаем комментарии из БД
-            try (Connection conn = getConnection();
-                 PreparedStatement stmt = conn.prepareStatement(
-                         "SELECT * FROM comments WHERE ad_id = ? ORDER BY created_at DESC")) {
-
-                stmt.setLong(1, adId);
-                ResultSet rs = stmt.executeQuery();
-
-                while (rs.next()) {
-                    // Получаем Timestamp и конвертируем в LocalDateTime
-                    Timestamp timestamp = rs.getTimestamp("created_at");
-                    java.time.LocalDateTime createdAt = timestamp != null ?
-                            timestamp.toLocalDateTime() : java.time.LocalDateTime.now();
-
-                    Comment comment = new Comment(
-                            rs.getLong("id"),
-                            rs.getString("user_name"),
-                            rs.getString("content"),
-                            createdAt,
-                            rs.getLong("ad_id")
-                    );
-                    comments.add(comment);
-                }
-            }
-            */
 
         } catch (NumberFormatException e) {
             System.err.println("Неверный формат ID объявления: " + adIdParam);
-        } catch (SQLException e) {
-            System.err.println("Ошибка при загрузке данных: " + e.getMessage());
-            e.printStackTrace();
         } catch (Exception e) {
-            System.err.println("Общая ошибка: " + e.getMessage());
+            System.err.println("Ошибка при загрузке данных: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    // Обработка добавления нового комментария
     if ("POST".equalsIgnoreCase(request.getMethod()) && "addComment".equals(request.getParameter("action"))) {
         User user = sessionUser;
 
@@ -179,73 +58,21 @@
             if (commentText == null || commentText.trim().isEmpty()) {
                 request.setAttribute("error", "Комментарий не может быть пустым");
             } else {
-                // Проверка на мат
-
-                /*
-
-
-                ProfanityChecker profanityChecker =
-                        new ProfanityChecker();
-                boolean hasProfanity = profanityChecker.containsProfanity(commentText);
-
-                if (hasProfanity) {
-                    request.setAttribute("profanityError", "Комментарий содержит недопустимые слова и не может быть сохранен.");
-                } else {
-                    try (Connection conn = getConnection();
-                         PreparedStatement stmt = conn.prepareStatement(
-                                 "INSERT INTO comments (ad_id, user_id, user_name, content, created_at) VALUES (?, ?, ?, ?, ?)")) {
-
-                        stmt.setLong(1, announcement.getId());
-                        stmt.setLong(2, user.getId());
-                        stmt.setString(3, user.getName());
-                        stmt.setString(4, commentText.trim());
-                        stmt.setTimestamp(5, new Timestamp(System.currentTimeMillis()));
-
-                        int affectedRows = stmt.executeUpdate();
-                        System.out.println("Rows affected: " + affectedRows);
-
-                        if (affectedRows > 0) {
-                            System.out.println("Comment saved successfully");
-
-                            try (PreparedStatement commentStmt = conn.prepareStatement(
-                                    "SELECT * FROM comments WHERE ad_id = ? ORDER BY created_at DESC")) {
-                                commentStmt.setLong(1, announcement.getId());
-                                ResultSet rs = commentStmt.executeQuery();
-
-                                comments.clear();
-                                while (rs.next()) {
-                                    Timestamp timestamp = rs.getTimestamp("created_at");
-                                    java.time.LocalDateTime createdAt = timestamp != null ?
-                                            timestamp.toLocalDateTime() : java.time.LocalDateTime.now();
-
-                                    Comment comment = new Comment(
-                                            rs.getLong("id"),
-                                            rs.getString("user_name"),
-                                            rs.getString("content"),
-                                            createdAt,
-                                            rs.getLong("ad_id")
-                                    );
-                                    comments.add(comment);
-                                }
-                                System.out.println("Comments reloaded: " + comments.size());
-                            }
-
-                            request.setAttribute("clearComment", "true");
-                            request.setAttribute("success", "Комментарий успешно добавлен!");
-                        }
-                    } catch (SQLException e) {
-                        System.err.println("Ошибка при создании комментария: " + e.getMessage());
-                        e.printStackTrace();
-                        request.setAttribute("error", "Ошибка при сохранении комментария: " + e.getMessage());
-                    }
+                try {
+                    announcementService.addComment(announcement.getId(), user.getId(), user.getName(), commentText.trim());
+                    comments = announcementService.getCommentsByAdId(announcement.getId());
+                    request.setAttribute("clearComment", "true");
+                    request.setAttribute("success", "Комментарий успешно добавлен!");
+                } catch (Exception e) {
+                    System.err.println("Ошибка при создании комментария: " + e.getMessage());
+                    request.setAttribute("error", "Ошибка при сохранении комментария");
                 }
-
-                 */
             }
         }
+    } else if (announcement != null) {
+        comments = announcementService.getCommentsByAdId(announcement.getId());
     }
 %>
-
 
 <!DOCTYPE html>
 <html lang="ru">
@@ -275,7 +102,6 @@
             gap: 30px;
         }
 
-        /* Шапка */
         .header {
             background: white;
             border-radius: 20px;
@@ -304,7 +130,6 @@
             gap: 10px;
         }
 
-        /* Основной контент */
         .main-content {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -329,7 +154,6 @@
             top: 20px;
         }
 
-        /* Заголовок объявления */
         .ad-header {
             margin-bottom: 30px;
             padding-bottom: 25px;
@@ -385,7 +209,6 @@
             color: white;
         }
 
-        /* Секции */
         .section-title {
             font-size: 1.5rem;
             font-weight: 600;
@@ -396,7 +219,6 @@
             gap: 10px;
         }
 
-        /* Фотографии */
         .photos-section {
             margin-bottom: 30px;
             padding-bottom: 25px;
@@ -496,7 +318,7 @@
             border-color: #667eea;
         }
 
-        .thumbnail{
+        .thumbnail.active {
             border-color: #667eea;
             box-shadow: 0 0 0 2px #667eea;
         }
@@ -507,7 +329,6 @@
             object-fit: contain;
         }
 
-        /* Описание */
         .ad-description {
             margin-bottom: 30px;
             padding-bottom: 25px;
@@ -520,7 +341,6 @@
             font-size: 1.1rem;
         }
 
-        /* Теги */
         .tags-section {
             margin-bottom: 30px;
             padding-bottom: 25px;
@@ -534,15 +354,21 @@
         }
 
         .tag {
-            background: #e9ecef;
-            color: #495057;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
             padding: 6px 12px;
             border-radius: 15px;
             font-size: 0.9rem;
             font-weight: 500;
+            box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
         }
 
-        /* Информация */
+        .tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+        }
+
         .ad-info {
             margin-bottom: 30px;
         }
@@ -571,14 +397,12 @@
             font-weight: 600;
         }
 
-        /* Кнопки действий */
         .action-buttons {
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
         }
 
-        /* Комментарии */
         .comment-form {
             margin-bottom: 25px;
             padding-bottom: 25px;
@@ -645,7 +469,6 @@
             color: #666;
         }
 
-        /* Кнопки */
         .btn {
             padding: 12px 25px;
             border: none;
@@ -682,7 +505,6 @@
             transform: translateY(-2px);
         }
 
-        /* Анимации */
         .fade-in {
             opacity: 0;
             animation: fadeInUp 0.6s ease-out forwards;
@@ -704,12 +526,10 @@
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
-
             .comments-section {
                 position: static;
                 order: 2;
             }
-
             .ad-card {
                 order: 1;
             }
@@ -720,27 +540,21 @@
                 flex-direction: column;
                 text-align: center;
             }
-
             .auth-buttons {
                 justify-content: center;
             }
-
             .ad-title {
                 font-size: 1.8rem;
             }
-
             .ad-price {
                 font-size: 1.6rem;
             }
-
             .action-buttons {
                 flex-direction: column;
             }
-
             .main-photo {
                 height: 300px;
             }
-
             .info-grid {
                 grid-template-columns: 1fr;
             }
@@ -750,94 +564,57 @@
             .header {
                 padding: 20px;
             }
-
             .ad-card {
                 padding: 25px 20px;
             }
-
             .comments-section {
                 padding: 20px;
             }
-
             .portal-logo {
                 font-size: 2rem;
             }
-
             .btn {
                 padding: 10px 20px;
                 font-size: 0.9rem;
             }
-
             .photo-thumbnails {
                 grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
             }
-
             .thumbnail {
                 width: 60px;
                 height: 60px;
             }
         }
-
-        .tags-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .tag {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .tag:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
-        }
     </style>
 </head>
 <body>
 <div class="container">
-
-    <!-- Шапка -->
     <div class="header">
         <div class="portal-logo">PORTAL</div>
         <div class="auth-buttons">
-            <%
-                User user = sessionUser;
-                if (user != null) {
-            %>
-            <a href="dashboard.jsp" class="btn btn-primary">Личный кабинет</a>
-            <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary">Выйти</a>
+            <% if (sessionUser != null) { %>
+            <a href="<%= request.getContextPath() %>/dashboard" class="btn btn-primary">Личный кабинет</a>
+            <a href="<%= request.getContextPath() %>/logout" class="btn btn-secondary">Выйти</a>
             <% } else { %>
-            <a href="login.jsp" class="btn btn-secondary">Войти</a>
-            <a href="register.jsp" class="btn btn-primary">Регистрация</a>
+            <a href="<%= request.getContextPath() %>/login" class="btn btn-secondary">Войти</a>
+            <a href="<%= request.getContextPath() %>/register" class="btn btn-primary">Регистрация</a>
             <% } %>
-            <a href="${pageContext.request.contextPath}/home.jsp" class="btn btn-secondary">На главную</a>
+            <a href="<%= request.getContextPath() %>/home" class="btn btn-secondary">На главную</a>
         </div>
     </div>
 
     <% if (announcement == null) { %>
-    <!-- Сообщение об ошибке -->
     <div class="ad-card fade-in">
         <div style="text-align: center; padding: 60px 20px;">
             <div style="font-size: 4rem; margin-bottom: 20px; opacity: 0.5;">🔍</div>
             <h2 style="color: #333; margin-bottom: 15px;">Объявление не найдено</h2>
             <p style="color: #666; margin-bottom: 30px;">Запрошенное объявление не существует или было удалено.</p>
-            <a href="${pageContext.request.contextPath}/home.jsp" class="btn btn-primary">Вернуться к объявлениям</a>
+            <a href="<%= request.getContextPath() %>/home" class="btn btn-primary">Вернуться к объявлениям</a>
         </div>
     </div>
     <% } else { %>
-    <!-- Основной контент -->
     <div class="main-content">
-        <!-- Левая колонка - информация об объявлении -->
         <div class="ad-card fade-in">
-            <!-- Заголовок и цена -->
             <div class="ad-header">
                 <h1 class="ad-title"><%= announcement.getTitle() %></h1>
                 <div class="ad-price">
@@ -849,26 +626,10 @@
                     <span class="meta-badge location-badge">📍 <%= announcement.getLocation() %></span>
                     <span class="meta-badge author-badge">👤 <%= authorName %></span>
                 </div>
-
-                <% if (user != null && (user.isModerator() || user.isAdmin())) { %>
-                <div class="action-buttons" style="margin-top: 10px; gap: 10px;">
-                    <form method="post" action="<%= request.getContextPath() %>/moderator/approve">
-                        <input type="hidden" name="adId" value="<%= announcement.getId() %>">
-                        <button type="submit" class="btn btn-primary">✅ Одобрить</button>
-                    </form>
-                    <form method="post" action="<%= request.getContextPath() %>/moderator/reject" style="display: flex; gap: 8px; align-items: center;">
-                        <input type="hidden" name="adId" value="<%= announcement.getId() %>">
-                        <input type="text" name="reason" placeholder="Причина (опционально)" style="padding: 10px; border: 1px solid #e1e5e9; border-radius: 8px;">
-                        <button type="submit" class="btn btn-secondary">↩️ Отозвать на доработку</button>
-                    </form>
-                </div>
-                <% } %>
             </div>
 
-            <!-- Фотографии -->
             <div class="photos-section">
                 <h3 class="section-title">📷 Фотографии (<%= photoCount %>)</h3>
-
                 <% if (photoCount == 0) { %>
                 <div class="main-photo">
                     <div class="photo-placeholder">📷</div>
@@ -877,86 +638,35 @@
                     </div>
                 </div>
                 <% } else { %>
-                <!-- Основное фото с навигацией -->
                 <div class="main-photo">
                     <img id="mainPhoto"
-                         src="<%= request.getContextPath() %>/ad-photo?adId=<%= announcement.getId() %>&photoIndex=0&t=<%= System.currentTimeMillis() %>"
+                         src="<%= request.getContextPath() %>/ad-photo?adId=<%= announcement.getId() %>&photoIndex=0"
                          alt="Фото объявления"
-                         onerror="handlePhotoError(this)"
-                         style="display: block;">
-                    <div class="photo-placeholder" style="display: none;">📷</div>
-                    <div class="photo-counter">
-                        <span id="currentPhoto">1</span> / <%= photoCount %>
-                    </div>
-                    <% if (photoCount > 1) { %>
-                    <div class="photo-navigation">
-                        <button class="nav-btn" onclick="prevPhoto()" id="prevBtn" disabled>❮</button>
-                        <button class="nav-btn" onclick="nextPhoto()" id="nextBtn" <%= photoCount > 1 ? "" : "disabled" %>>❯</button>
-                    </div>
-                    <% } %>
-                </div>
-
-                <!-- Миниатюры -->
-                <% if (photoCount > 1) { %>
-                <div class="photo-thumbnails">
-                    <% for (int i = 0; i < photoCount; i++) { %>
-                    <div class="thumbnail <%= i == 0 ? "active" : "" %>"
-                         onclick="showPhoto(<%= i %>)"
-                         data-index="<%= i %>">
-                        <img src="<%= request.getContextPath() %>/ad-photo?adId=<%= announcement.getId() %>&photoIndex=<%= i %>&t=<%= System.currentTimeMillis() %>"
-                             alt="Миниатюра <%= i + 1 %>"
-                             onerror="handleThumbnailError(this)"
-                             loading="lazy">
-                    </div>
-                    <% } %>
-                </div>
-                <% } %>
-                <% } %>
+                         onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'photo-placeholder\'>📷<br/>Ошибка загрузки фото</div>';"
+                style="max-width: 100%; max-height: 100%; object-fit: contain;">
             </div>
+            <% } %>
+        </div>
 
-            <!-- Описание -->
             <div class="ad-description">
                 <h3 class="section-title">📝 Описание</h3>
-                <div class="description-text">
-                    <%= announcement.getDescription() != null ?
-                            announcement.getDescription() : "Описание отсутствует" %>
-                </div>
+                <div class="description-text"><%= announcement.getDescription() != null ? announcement.getDescription() : "Описание отсутствует" %></div>
             </div>
 
-            <!-- Теги -->
-            <%
-                List<String> tags = announcement.getTags();
-                boolean hasTags = tags != null && !tags.isEmpty() && !(tags.size() == 1 && tags.get(0).isEmpty());
-            %>
-            <% if (hasTags) { %>
+            <% if (announcement.getTags() != null && !announcement.getTags().isEmpty()) { %>
             <div class="tags-section">
                 <h3 class="section-title">🏷️ Теги</h3>
                 <div class="tags-container">
-                    <% for (String tag : tags) {
-                        if (tag != null && !tag.trim().isEmpty()) {
-                    %>
-                    <span class="tag">#<%= tag.trim() %></span>
-                    <% } } %>
+                    <% for (String tag : announcement.getTags()) { %>
+                    <span class="tag">#<%= tag %></span>
+                    <% } %>
                 </div>
             </div>
             <% } %>
 
-            <!-- Дополнительная информация -->
             <div class="ad-info">
                 <h3 class="section-title">ℹ️ Информация</h3>
                 <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">Автор</span>
-                        <span class="info-value">👤 <%= authorName %></span>
-                    </div>
-                    <% if (user != null && (user.isModerator() || user.isAdmin())) { %>
-                    <div class="info-item">
-                        <span class="info-label">Профиль автора</span>
-                        <span class="info-value">
-                            <a href="<%= request.getContextPath() %>/admin/dashboard" class="btn btn-secondary">Открыть в админке</a>
-                        </span>
-                    </div>
-                    <% } %>
                     <div class="info-item">
                         <span class="info-label">Просмотры</span>
                         <span class="info-value">👁️ <%= announcement.getViewCount() %></span>
@@ -978,58 +688,46 @@
                 </div>
             </div>
 
-            <!-- Кнопки действий -->
             <div class="action-buttons">
-                <a href="${pageContext.request.contextPath}/home.jsp" class="btn btn-secondary">← Назад к объявлениям</a>
-                <% if (user != null) { %>
+                <a href="<%= request.getContextPath() %>/home" class="btn btn-secondary">← Назад к объявлениям</a>
+                <% if (sessionUser != null) { %>
                 <button onclick="contactSeller()" class="btn btn-primary">📞 Связаться с продавцом</button>
                 <% } else { %>
-                <a href="login.jsp" class="btn btn-primary">🔐 Войдите, чтобы связаться</a>
+                <a href="<%= request.getContextPath() %>/login" class="btn btn-primary">🔐 Войдите, чтобы связаться</a>
                 <% } %>
             </div>
         </div>
 
-        <!-- Правая колонка - комментарии -->
         <div class="comments-section fade-in">
             <h3 class="section-title">💬 Комментарии (<%= comments.size() %>)</h3>
 
-            <% if (request.getAttribute("profanityError") != null) { %>
-            <div style="background: rgba(247, 37, 133, 0.1); border: 1px solid #f72585; color: #f72585; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-weight: 500;">
-                ⚠️ <%= request.getAttribute("profanityError") %>
+            <% if (request.getAttribute("error") != null) { %>
+            <div style="background: rgba(247, 37, 133, 0.1); border: 1px solid #f72585; color: #f72585; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                ⚠️ <%= request.getAttribute("error") %>
             </div>
             <% } %>
 
-            <!-- Форма добавления комментария -->
-            <% if (user != null) { %>
+            <% if (request.getAttribute("success") != null) { %>
+            <div style="background: rgba(76, 201, 240, 0.1); border: 1px solid #4cc9f0; color: #4cc9f0; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                ✅ <%= request.getAttribute("success") %>
+            </div>
+            <% } %>
+
+            <% if (sessionUser != null) { %>
             <div class="comment-form">
-                <form id="commentForm" method="POST" action="ad-details.jsp?id=<%= announcement.getId() %>">
-                    <input type="hidden" name="action" value="addComment">
-                    <textarea name="commentText" id="commentText" class="comment-input"
-                              placeholder="Напишите ваш комментарий..." required><%= request.getAttribute("clearComment") != null ? "" : "" %></textarea>
-
-                    <% if (request.getAttribute("success") != null) { %>
-                    <div style="color: green; margin-bottom: 10px; font-weight: 500;">
-                        ✅ <%= request.getAttribute("success") %>
-                    </div>
-                    <% } %>
-
-                    <% if (request.getAttribute("error") != null) { %>
-                    <div style="color: red; margin-bottom: 10px; font-weight: 500;">
-                         <%= request.getAttribute("error") %>
-                    </div>
-                    <% } %>
-
-                    <button type="submit" class="btn btn-primary" onclick="console.log('Кнопка нажата!')">Добавить комментарий</button>
+                <form method="POST" action="<%= request.getContextPath() %>/ad-details">
+                    <input type="hidden" name="id" value="<%= announcement.getId() %>">
+                    <textarea name="commentText" class="comment-input" placeholder="Напишите ваш комментарий..." required></textarea>
+                    <button type="submit" class="btn btn-primary">Добавить комментарий</button>
                 </form>
             </div>
             <% } else { %>
             <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 25px;">
                 <p style="color: #666; margin-bottom: 15px;">Войдите, чтобы оставить комментарий</p>
-                <a href="login.jsp" class="btn btn-primary">Войти</a>
+                <a href="<%= request.getContextPath() %>/login" class="btn btn-primary">Войти</a>
             </div>
             <% } %>
 
-            <!-- Список комментариев -->
             <div class="comments-list">
                 <% if (comments.isEmpty()) { %>
                 <div class="no-comments">
@@ -1041,18 +739,10 @@
                 <% for (Comment comment : comments) { %>
                 <div class="comment-item">
                     <div class="comment-header">
-                        <span class="comment-author"><%= comment.getAuthor() %></span>
+                        <span class="comment-author"><%= comment.getUserName() %></span>
                         <span class="comment-date"><%= formatCommentDate(comment.getCreatedAt()) %></span>
                     </div>
-                    <div class="comment-text">
-                        <%= comment.getText() %>
-                    </div>
-                    <% if (user != null && (user.isModerator() || user.isAdmin())) { %>
-                    <form method="post" action="<%= request.getContextPath() %>/moderator/comment/delete" style="margin-top: 10px; text-align: right;">
-                        <input type="hidden" name="commentId" value="<%= comment.getId() %>">
-                        <button type="submit" class="btn btn-secondary">🧹 Удалить комментарий</button>
-                    </form>
-                    <% } %>
+                    <div class="comment-text"><%= comment.getContent() %></div>
                 </div>
                 <% } %>
                 <% } %>
@@ -1061,6 +751,7 @@
     </div>
     <% } %>
 </div>
+
 <script>
     let currentPhotoIndex = 0;
     const totalPhotos = <%= photoCount %>;
@@ -1069,42 +760,14 @@
     function showPhoto(index) {
         if (index >= 0 && index < totalPhotos && adId > 0) {
             currentPhotoIndex = index;
-
-            // Обновляем основное фото через сервлет
             const mainPhoto = document.getElementById('mainPhoto');
-            const timestamp = new Date().getTime();
-
-            // Используем contextPath из JSP
             const contextPath = '<%= request.getContextPath() %>';
-            const newSrc = contextPath + '/ad-photo?adId=' + adId + '&photoIndex=' + index + '&t=' + timestamp;
-
-            console.log('Loading photo:', newSrc);
-            mainPhoto.style.opacity = '0.5';
-
-            // Создаем новое изображение для предзагрузки
-            const tempImg = new Image();
-            tempImg.onload = function() {
-                mainPhoto.src = newSrc;
-                mainPhoto.style.opacity = '1';
-                mainPhoto.style.display = 'block';
-
-                const placeholder = document.querySelector('.main-photo .photo-placeholder');
-                if (placeholder) placeholder.style.display = 'none';
-            };
-            tempImg.onerror = function() {
-                console.error('Error loading photo:', newSrc);
-                handlePhotoError(mainPhoto);
-            };
-            tempImg.src = newSrc;
-
+            mainPhoto.src = contextPath + '/ad-photo?adId=' + adId + '&photoIndex=' + index;
             document.getElementById('currentPhoto').textContent = index + 1;
 
-            // Обновляем активную миниатюру
             document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
                 thumb.classList.toggle('active', i === index);
             });
-
-            // Обновляем состояние кнопок навигации
             updateNavigationButtons();
         }
     }
@@ -1130,86 +793,37 @@
         }
     }
 
-    // Улучшенная обработка ошибок загрузки фото
-    function handlePhotoError(img) {
-        console.error('Error loading main photo');
-        img.style.display = 'none';
-        const placeholder = document.querySelector('.main-photo .photo-placeholder');
-        if (placeholder) {
-            placeholder.style.display = 'flex';
-            placeholder.style.flexDirection = 'column';
-            placeholder.innerHTML = '<div style="text-align: center; margin-top: 10px; font-size: 1rem; color: #666;">Ошибка загрузки фото</div>';
-        }
+    function contactSeller() {
+        alert('Функция связи с продавцом будет доступна в ближайшее время');
     }
 
-    function handleThumbnailError(img) {
-        console.error('Error loading thumbnail');
-        img.style.display = 'none';
-        const thumbnail = img.parentElement;
-        thumbnail.innerHTML = '';
-        thumbnail.style.alignItems = 'center';
-        thumbnail.style.justifyContent = 'center';
-        thumbnail.style.fontSize = '1.2rem';
-        thumbnail.style.color = '#ccc';
-        thumbnail.style.background = '#f8f9fa';
-    }
-
-    // навигация
     document.addEventListener('DOMContentLoaded', function() {
-        if (totalPhotos > 0) {
-            updateNavigationButtons();
-
-            if (totalPhotos > 1) {
-                const nextImg = new Image();
-                nextImg.src = '/ad-photo?adId=' + adId + '&photoIndex=1&t=' + new Date().getTime();
-            }
-        }
-
-        // обработка клавиш клавиатуры
+        if (totalPhotos > 0) updateNavigationButtons();
         document.addEventListener('keydown', function(e) {
             if (e.key === 'ArrowLeft') prevPhoto();
             if (e.key === 'ArrowRight') nextPhoto();
         });
     });
 </script>
-<%@ include file="profanity-check.jsp" %>
 </body>
 </html>
 
 <%!
-    // Вспомогательные методы для форматирования
-
     private String formatPrice(int price) {
-        if (price == -1) {
-            return "Договорная";
-        } else if (price == 0) {
-            return "Бесплатно";
-        } else {
-            return String.format("%,d руб.", price);
-        }
+        if (price == -1) return "Договорная";
+        if (price == 0) return "Бесплатно";
+        return String.format("%,d руб.", price);
     }
 
     private String formatDate(java.time.Instant instant) {
         if (instant == null) return "Не указано";
-        java.time.format.DateTimeFormatter formatter =
-                java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
-                        .withZone(java.time.ZoneId.systemDefault());
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").withZone(java.time.ZoneId.systemDefault());
         return formatter.format(instant);
     }
 
     private String formatCommentDate(java.time.LocalDateTime dateTime) {
         if (dateTime == null) return "Не указано";
-        java.time.format.DateTimeFormatter formatter =
-                java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
         return formatter.format(dateTime);
-    }
-
-    // Метод для получения соединения с БД
-    private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(
-                "jdbc:postgresql://localhost:5432/myproject",
-                "myuser",
-                "mypassword"
-        );
     }
 %>
