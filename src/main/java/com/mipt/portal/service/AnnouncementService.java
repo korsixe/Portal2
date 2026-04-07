@@ -101,6 +101,57 @@ public class AnnouncementService {
         return repository.findById(id).orElse(null);
     }
 
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getAllCategories() {
+        return categoryService.getAllCategories();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getSubcategoriesByCategory(Long categoryId) {
+        return categoryService.getSubcategoriesByCategory(categoryId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getTagsWithValues() {
+        return categoryService.getTagsWithValues();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getTagsForAd(Long adId) {
+        return categoryService.getTagsForAd(adId);
+    }
+
+    @Transactional
+    public void saveAdTags(Long adId, List<Map<String, Object>> selectedTags) {
+        categoryService.saveAdTags(adId, selectedTags);
+    }
+
+    @Transactional
+    public void addComment(Long adId, Long userId, String userName, String content) {
+        commentService.createComment(adId, userId, userName, content);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Comment> getCommentsByAdId(Long adId) {
+        return commentService.getCommentsByAdId(adId);
+    }
+
+    @Transactional(readOnly = true)
+    public String getAuthorName(Long authorId) {
+        return userRepository.findById(authorId)
+                .map(User::getName)
+                .orElse("Неизвестный пользователь");
+    }
+
+    @Transactional(readOnly = true)
+    public int getPhotoCount(Long adId) {
+        Announcement ad = findById(adId);
+        if (ad == null) {
+            return 0;
+        }
+        return (ad.getPhoto() != null && ad.getPhoto().length > 0) ? 1 : 0;
+    }
+
     @Transactional
     public Announcement save(Announcement ad) {
         ad.setUpdatedAt(Instant.now());
