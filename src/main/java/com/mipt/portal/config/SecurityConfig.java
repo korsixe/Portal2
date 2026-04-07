@@ -41,11 +41,8 @@ public class SecurityConfig implements WebMvcConfigurer {
         .authorizeHttpRequests(authz -> authz
             .requestMatchers(
                 mvc.pattern("/"),
-                mvc.pattern("/index.jsp"),
-                mvc.pattern("/login.jsp"),
-                mvc.pattern("/register.jsp"),
-                mvc.pattern("/home.jsp"),
-                mvc.pattern("/*.jsp"),
+                mvc.pattern("/login"),
+                mvc.pattern("/register"),
                 mvc.pattern("/users/login"),
                 mvc.pattern("/users/register"),
                 mvc.pattern("/custom-login"),
@@ -53,13 +50,6 @@ public class SecurityConfig implements WebMvcConfigurer {
             ).permitAll()
             .requestMatchers(mvc.pattern("/moderator/**")).hasAnyRole("MODERATOR", "ADMIN")
             .requestMatchers(mvc.pattern("/admin/**")).hasRole("ADMIN")
-            .requestMatchers(
-                mvc.pattern("/dashboard.jsp"),
-                mvc.pattern("/edit-profile.jsp"),
-                mvc.pattern("/create-ad.jsp"),
-                mvc.pattern("/edit-ad.jsp"),
-                mvc.pattern("/delete-account-handler.jsp")
-            ).authenticated()
             .requestMatchers(
                 mvc.pattern("/api/announcements/*/history"),
                 mvc.pattern("/api/announcements/*/approve")

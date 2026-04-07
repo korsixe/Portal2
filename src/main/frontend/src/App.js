@@ -5,6 +5,9 @@ import CreateAd from './components/CreateAd';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
+import AdminDashboard from './components/admin/AdminDashboard';
+import ModeratorDashboard from './components/moderator/ModeratorDashboard';
+import ModerationHistory from './components/moderator/ModerationHistory';
 
 function App() {
   return (
@@ -20,6 +23,9 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/moderator" element={<ModeratorDashboard />} />
+        <Route path="/moderator/history" element={<ModerationHistory />} />
       </Routes>
     </Router>
   );

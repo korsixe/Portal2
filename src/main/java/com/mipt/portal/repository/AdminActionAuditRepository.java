@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AdminActionAuditRepository extends JpaRepository<AdminActionAudit, Long> {
+    java.util.List<AdminActionAudit> findAllByOrderByCreatedAtDesc();
 }

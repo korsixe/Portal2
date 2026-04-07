@@ -1,0 +1,25 @@
+.history-page {
+  padding: 24px;
+  font-family: Arial, sans-serif;
+}
+
+.history-message {
+  margin: 12px 0;
+  padding: 10px;
+  background: #f0f0f0;
+  border-radius: 6px;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+}
+
+.history-table th,
+.history-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
