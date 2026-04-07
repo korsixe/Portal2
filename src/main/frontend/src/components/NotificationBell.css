@@ -6,11 +6,20 @@
 .notificationBell {
   position: relative;
   border: none;
-  background: #ffffff;
+  background: transparent;
   border-radius: 10px;
-  padding: 8px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  line-height: 1;
+  padding: 8px 8px 8px 0;
   cursor: pointer;
   font-size: 20px;
+}
+
+.notificationBell:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .notificationBadge {

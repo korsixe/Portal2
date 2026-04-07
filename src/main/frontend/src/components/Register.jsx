@@ -72,7 +72,7 @@ const Register = () => {
   };
 
   return (
-      <div className="portal-container">
+      <div className="portal-container loginContainer">
         <div className="portal-logo">PORTAL</div>
         <div className="portal-subtitle">Регистрация</div>
 

@@ -76,7 +76,7 @@ const Login = () => {
 
   if (isLoggedIn) {
     return (
-        <div className="portal-container">
+        <div className="portal-container loginContainer">
           <div className="portal-logo">PORTAL</div>
           <div className="portal-subtitle">Вход</div>
           <div className="button-group">
@@ -89,7 +89,7 @@ const Login = () => {
   }
 
   return (
-      <div className="portal-container">
+      <div className="portal-container loginContainer">
         <div className="portal-logo">PORTAL</div>
         <div className="portal-subtitle">Вход</div>
 

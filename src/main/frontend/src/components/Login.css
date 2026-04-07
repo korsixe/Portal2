@@ -120,14 +120,15 @@
   transform: translateY(-2px);
 }
 
-.loginContainer {
+.portal-container.loginContainer {
   background: white;
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   padding: 60px 40px;
   text-align: center;
-  max-width: 500px;
-  width: 100%;
+  width: 48% !important;
+  max-width: 560px !important;
+  margin: 0 auto !important;
   animation: fadeInUp 0.8s ease-out;
 }
 
@@ -270,6 +271,11 @@
   .portal-container {
     padding: 40px 20px;
     margin: 20px;
+  }
+
+  .portal-container.loginContainer {
+    width: 100% !important;
+    max-width: none !important;
   }
 
   .portal-logo {
