@@ -2,6 +2,8 @@ package com.mipt.portal.controller.users;
 
 import com.mipt.portal.entity.User;
 import com.mipt.portal.service.UserService;
+import com.mipt.portal.service.AuditService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,10 +25,12 @@ public class LoginController {
 
   private final UserService userService;
   private final CustomUserDetailsService userDetailsService;
+  private final AuditService auditService;
 
-  public LoginController(UserService userService, CustomUserDetailsService userDetailsService) {
+  public LoginController(UserService userService, CustomUserDetailsService userDetailsService, AuditService auditService) {
     this.userService = userService;
     this.userDetailsService = userDetailsService;
+    this.auditService = auditService;
   }
 
   @GetMapping("/login")
@@ -42,6 +46,7 @@ public class LoginController {
   public String login(@RequestParam String email,
       @RequestParam String password,
       HttpSession session,
+      HttpServletRequest request,
       Model model) {
 
     Optional<User> result = userService.loginUser(email, password);
@@ -63,6 +68,7 @@ public class LoginController {
       session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
 
       if (loggedInUser.getRoles().contains(Role.ADMIN)) {
+        auditAdminLogin(email, true, request);
         return "redirect:/admin/dashboard";
       } else if (loggedInUser.getRoles().contains(Role.MODERATOR)) {
         return "redirect:/moderator/dashboard";
@@ -70,11 +76,21 @@ public class LoginController {
         return "redirect:/dashboard.jsp";
       }
     } else {
+      // логируем только попытки админов
+      userService.findUserByEmail(email)
+          .filter(u -> u.getRoles().contains(Role.ADMIN))
+          .ifPresent(u -> auditAdminLogin(email, false, request));
       model.addAttribute("message", "❌ Неверный email или пароль");
       model.addAttribute("messageType", "error");
       model.addAttribute("email", email);
       return "forward:/login.jsp";
     }
+  }
+
+  private void auditAdminLogin(String email, boolean success, HttpServletRequest request) {
+    String ip = request.getRemoteAddr();
+    String ua = request.getHeader("User-Agent");
+    auditService.logAdminLogin(email, success, ip, ua);
   }
 
   @GetMapping("/register")

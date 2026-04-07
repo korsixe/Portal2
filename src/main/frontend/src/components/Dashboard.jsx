@@ -9,6 +9,7 @@ const Dashboard = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [activeModal, setActiveModal] = useState(null);
+  const [deletePassword, setDeletePassword] = useState('');
 
   // Загрузка данных
   useEffect(() => {
