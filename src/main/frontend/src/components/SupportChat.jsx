@@ -30,7 +30,8 @@ const SupportChat = () => {
       }
 
       if (!response.ok) {
-        throw new Error('Не удалось загрузить обращения');
+        setFeedback('Не удалось загрузить обращения');
+        return;
       }
 
       const data = await response.json();
@@ -80,7 +81,6 @@ const SupportChat = () => {
       <div className="supportCard">
         <div className="supportHeader">
           <h1>Техподдержка</h1>
-          <button className="secondary" onClick={() => navigate('/dashboard')}>Назад в ЛК</button>
         </div>
 
         {feedback && <div className="supportFeedback">{feedback}</div>}
@@ -110,7 +110,10 @@ const SupportChat = () => {
             placeholder="Опишите проблему или вопрос"
             required
           />
-          <button type="submit">Отправить обращение</button>
+          <div className="supportActions">
+            <button type="button" onClick={() => navigate('/dashboard')}>Назад в ЛК</button>
+            <button type="submit">Отправить обращение</button>
+          </div>
         </form>
       </div>
     </div>

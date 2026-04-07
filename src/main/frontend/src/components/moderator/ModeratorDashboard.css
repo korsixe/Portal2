@@ -6,8 +6,9 @@
 }
 
 .moderator-page .container {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
 }
 
 .moderator-page .header {
@@ -746,6 +747,9 @@
 .moderator-page .profile-info {
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   margin-bottom: 20px;
+  width: 100%;
+  max-width: none;
+  align-self: stretch;
 }
 
 .moderator-page .profile-info h3 {
