@@ -1,0 +1,735 @@
+/* Контейнеры */
+.dashboardContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.loader {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.errorContainer {
+  text-align: center;
+  padding: 50px;
+  background: white;
+  border-radius: 20px;
+  margin: 50px auto;
+  max-width: 400px;
+}
+
+/* Сообщения */
+.successMessage {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  animation: slideIn 0.5s ease-out;
+}
+
+.successIcon {
+  font-size: 1.3em;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.header {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  margin-bottom: 30px;
+}
+
+.headerTop {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.portalLogo {
+  font-size: 3.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 2px;
+}
+
+/* Bell Header */
+.headerBell {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  padding: 30px 40px;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.headerTopBell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  position: relative;
+  min-height: 120px;
+}
+
+.notificationLeft {
+  margin-right: auto;
+  margin-left: 40%;
+}
+
+.bellButton {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.bellButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.avatarCenter {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.avatarCircle {
+  width: 80px;
+  height: 80px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  cursor: pointer;
+}
+
+.avatarCircle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.avatarIcon {
+  font-size: 2rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.onlineStatus {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 16px;
+  height: 16px;
+  background: #28a745;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.buttonsVertical {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-left: auto;
+  min-width: 200px;
+}
+
+/* Кнопки */
+.btnPrimary, .btnSecondary, .btnSuccess, .btnDanger, .btnEdit, .btnModerator, .btnAdmin {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btnPrimary {
+  background: white;
+  color: #667eea;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
+}
+
+.btnSecondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.btnSecondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.btnSuccess {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btnSuccess:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+}
+
+.btnDanger {
+  background: #dc3545;
+  color: white;
+}
+
+.btnDanger:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+}
+
+.btnEdit {
+  background: #ffc107;
+  color: black;
+}
+
+.btnEdit:hover {
+  background: #e0a800;
+  transform: translateY(-2px);
+}
+
+.btnModerator {
+  background-color: #ff6b6b;
+  color: white;
+}
+
+.btnAdmin {
+  background-color: #333;
+  color: white;
+}
+
+.btnIcon {
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+/* Profile Actions */
+.profileActions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin: 30px 0;
+  flex-wrap: wrap;
+}
+
+/* Статистика */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.statCard {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.statNumber {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.statLabel {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* Информация о пользователе */
+.userInfo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.infoCard {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.infoCard h3 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+}
+
+.infoItem {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.infoLabel {
+  font-weight: 600;
+  color: #555;
+}
+
+.infoValue {
+  color: #333;
+}
+
+.ratingStars {
+  color: #ffc107;
+  font-size: 1.2rem;
+}
+
+.coins {
+  color: #ffd700;
+  font-weight: 600;
+}
+
+/* Объявления */
+.adsSection {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.adsSection h3 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.adList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.adItem {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  border-left: 4px solid #667eea;
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.adItem:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.adTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.adDescription {
+  color: #666;
+  margin-bottom: 10px;
+  line-height: 1.4;
+  max-height: 60px;
+  overflow: hidden;
+}
+
+.adPrice {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 10px;
+}
+
+.adMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.adCategory {
+  display: inline-block;
+  background: #667eea;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+}
+
+.adCondition {
+  display: inline-block;
+  background: #28a745;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+}
+
+.adStatus {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.statusActive {
+  background: #d4edda;
+  color: #155724;
+}
+
+.statusDraft {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.statusModeration {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.statusArchived {
+  background: #e2e3e5;
+  color: #383d41;
+}
+
+.statusDeleted {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.adLocation {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.adViews, .adDate {
+  color: #999;
+  font-size: 0.8rem;
+  margin-top: 5px;
+}
+
+.adActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.noAds {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 40px;
+  grid-column: 1 / -1;
+}
+
+/* Кнопки действий */
+.actionButtons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+/* Модальные окна */
+.modal {
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalContent {
+  background-color: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 500px;
+  position: relative;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.close {
+  position: absolute;
+  right: 20px;
+  top: 15px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #999;
+}
+
+.close:hover {
+  color: #333;
+}
+
+.modalContent h3 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 500;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e1e5e9;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.warningBox {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 15px 0;
+  text-align: center;
+}
+
+.warningBox h4 {
+  color: #856404;
+  margin-bottom: 10px;
+}
+
+/* Анимации */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .headerTopBell {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .notificationLeft {
+    order: 1;
+    margin: 0 auto;
+  }
+
+  .avatarCenter {
+    order: 2;
+    position: static;
+    transform: none;
+  }
+
+  .buttonsVertical {
+    order: 3;
+    margin-left: 0;
+    min-width: 100%;
+  }
+
+  .avatarCircle {
+    width: 70px;
+    height: 70px;
+  }
+
+  .userInfo {
+    grid-template-columns: 1fr;
+  }
+
+  .adList {
+    grid-template-columns: 1fr;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+  }
+
+  .actionButtons button {
+    width: 100%;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .adsSection h3 {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profileActions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profileActions button {
+    width: 200px;
+  }
+
+  .buttonGroup {
+    flex-direction: column;
+  }
+
+  .modalContent {
+    margin: 20px;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerBell {
+    padding: 25px 20px;
+  }
+
+  .buttonsVertical {
+    min-width: 100%;
+  }
+
+  .btnPrimary, .btnSecondary, .btnSuccess, .btnDanger, .btnEdit {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .avatarCircle {
+    width: 60px;
+    height: 60px;
+  }
+
+  .avatarIcon {
+    font-size: 1.6rem;
+  }
+
+  .onlineStatus {
+    width: 14px;
+    height: 14px;
+    bottom: 6px;
+    right: 6px;
+  }
+
+  .portalLogo {
+    font-size: 2.5rem;
+  }
+}

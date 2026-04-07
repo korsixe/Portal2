@@ -109,7 +109,7 @@
                             session.setAttribute("user", updatedUser);
                             session.removeAttribute("canEditProfile");
                             session.setAttribute("successMessage", "✅ Профиль успешно обновлен!");
-                            response.sendRedirect("dashboard.jsp");
+                            response.sendRedirect("/dashboard");
                             return;
                         } else {
                             message = "❌ Ошибка при обновлении профиля. Попробуйте позже.";

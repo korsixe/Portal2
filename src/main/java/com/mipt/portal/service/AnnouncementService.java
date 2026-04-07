@@ -87,6 +87,11 @@ public class AnnouncementService {
     return repository.findById(id).orElse(null);
   }
 
+  @Transactional(readOnly = true)
+  public List<Announcement> findAllByAuthorId(Long authorId) {
+    return repository.findAllByAuthorId(authorId);
+  }
+
   @Transactional
   public Announcement save(Announcement ad) {
     ad.setUpdatedAt(java.time.Instant.now());

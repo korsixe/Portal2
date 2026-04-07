@@ -61,5 +61,5 @@
     session.setAttribute("deleteMessageType", messageType);
 
     // Перенаправляем обратно на дашборд
-    response.sendRedirect("dashboard.jsp");
+    response.sendRedirect("/dashboard");
 %>

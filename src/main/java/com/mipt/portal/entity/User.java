@@ -6,12 +6,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
@@ -29,6 +33,9 @@ public class User {
 
   @Column(name = "salt", nullable = false)
   private String salt;
+
+  @Column(name = "telegram_chat_id", unique = true)
+  private Long telegramChatId;
 
   @Column(name = "name", nullable = false)
   private String name;
@@ -121,4 +128,5 @@ public class User {
     this.coins -= amount;
     return true;
   }
+
 }

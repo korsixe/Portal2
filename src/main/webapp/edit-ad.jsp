@@ -21,26 +21,26 @@
 
     Announcement announcement = (Announcement) request.getAttribute("announcement");
     if (announcement == null) {
-        response.sendRedirect("dashboard.jsp");
+        response.sendRedirect("/dashboard");
         return;
     }
     // Загружаем теги для редактирования
     if (request.getAttribute("availableTags") == null || request.getAttribute("currentTags") == null) {
         try {
-            com.mipt.portal.repository.TagRepository tagSelector =
-                    new com.mipt.portal.repository.TagRepository();
-            java.util.List<java.util.Map<String, Object>> availableTags = tagSelector.getTagsWithValues();
-            request.setAttribute("availableTags", availableTags);
+            com.mipt.portal.service.AnnouncementService announcementService =
+                    (com.mipt.portal.service.AnnouncementService) request.getServletContext().getAttribute("announcementService");
+            if (announcementService != null) {
+                java.util.List<java.util.Map<String, Object>> availableTags = announcementService.getTagsWithValues();
+                request.setAttribute("availableTags", availableTags);
 
-            // Загружаем текущие теги объявления
-            List<Map<String, Object>> currentTags = tagSelector.getTagsForAd(announcement.getId());
-            request.setAttribute("currentTags", currentTags);
+                // Загружаем текущие теги объявления
+                List<Map<String, Object>> currentTags = announcementService.getTagsForAd(announcement.getId());
+                request.setAttribute("currentTags", currentTags);
 
-            System.out.println("✅ Set currentTags in request: " + (currentTags != null ? currentTags.size() : 0));
-
+                System.out.println("✅ Set currentTags in request: " + (currentTags != null ? currentTags.size() : 0));
+            }
         } catch (Exception e) {
             System.err.println("Error loading tags in edit-ad.jsp: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
@@ -749,21 +749,23 @@
                         <option value="">Выберите категорию</option>
                         <%
                             try {
-                                com.mipt.portal.repository.CategoryRepository categorySelector =
-                                        new com.mipt.portal.repository.CategoryRepository();
-                                java.util.List<java.util.Map<String, Object>> categories = categorySelector.getAllCategories();
+                                com.mipt.portal.service.AnnouncementService announcementService =
+                                        (com.mipt.portal.service.AnnouncementService) request.getServletContext().getAttribute("announcementService");
+                                if (announcementService != null) {
+                                    java.util.List<java.util.Map<String, Object>> categories = announcementService.getAllCategories();
 
-                                for (java.util.Map<String, Object> category : categories) {
-                                    String categoryName = (String) category.get("name");
-                                    boolean isSelected = categoryName.equals(currentCategoryValue); // ИЗМЕНЕНО
+                                    for (java.util.Map<String, Object> category : categories) {
+                                        String categoryName = (String) category.get("name");
+                                        boolean isSelected = categoryName.equals(currentCategoryValue); // ИЗМЕНЕНО
                         %>
                         <option value="<%= categoryName %>" <%= isSelected ? "selected" : "" %>>
                             <%= categoryName %>
                         </option>
                         <%
-                            }
-                        } catch (Exception e) {
-                            System.err.println("Error loading categories: " + e.getMessage());
+                                    }
+                                }
+                            } catch (Exception e) {
+                                System.err.println("Error loading categories: " + e.getMessage());
                         %>
                         <option value="">Ошибка загрузки категорий</option>
                         <%
@@ -793,14 +795,14 @@
                             try {
                                 System.out.println("🔍 Ищем категорию в БД: '" + currentCategoryValue + "'");
 
-                                com.mipt.portal.repository.CategoryRepository categorySelector =
-                                        new com.mipt.portal.repository.CategoryRepository();
-                                java.util.List<java.util.Map<String, Object>> allCategories = categorySelector.getAllCategories();
+                                com.mipt.portal.service.AnnouncementService announcementService =
+                                        (com.mipt.portal.service.AnnouncementService) request.getServletContext().getAttribute("announcementService");
+                                if (announcementService != null) {
+                                    java.util.List<java.util.Map<String, Object>> allCategories = announcementService.getAllCategories();
 
-                                System.out.println("📊 Всего категорий в БД: " + allCategories.size());
+                                    System.out.println("📊 Всего категорий в БД: " + allCategories.size());
 
-                                Long categoryId = null;
-                                boolean foundExactMatch = false;
+                                    Long categoryId = null;
 
                                 System.out.println("📋 Категории в БД:");
                                 for (java.util.Map<String, Object> category : allCategories) {
@@ -810,24 +812,16 @@
 
                                     if (catName != null && catName.equals(currentCategoryValue)) {
                                         categoryId = catId;
-                                        foundExactMatch = true;
                                         System.out.println("✅ Точное совпадение найдено! ID: " + categoryId);
                                         break;
                                     }
                                 }
 
                                 if (categoryId != null) {
-
-                                    com.mipt.portal.repository.SubcategoryRepository subcategorySelector =
-                                            new com.mipt.portal.repository.SubcategoryRepository();
                                     java.util.List<java.util.Map<String, Object>> subcategories =
-                                            subcategorySelector.getSubcategoriesByCategory(categoryId);
-
+                                            announcementService.getSubcategoriesByCategory(categoryId);
 
                                     if (subcategories != null && !subcategories.isEmpty()) {
-                                        for (java.util.Map<String, Object> subcategory : subcategories) {
-                                            String subcategoryName = (String) subcategory.get("name");
-                                        }
                         %>
                         <option value="">Выберите подкатегорию</option>
                         <%
@@ -862,15 +856,14 @@
                         <option value="">Категория не найдена в БД</option>
                         <%
                             }
-                        } catch (Exception e) {
-                            System.err.println(" ERROR loading subcategories: " + e.getMessage());
-                            e.printStackTrace();
+                                }
+                            } catch (Exception e) {
+                                System.err.println(" ERROR loading subcategories: " + e.getMessage());
                         %>
                         <option value="">Ошибка загрузки подкатегорий</option>
                         <%
-                                }
                             }
-                            System.out.println("=== DEBUG SUBCATEGORIES END ===");
+                        }
                         %>
                     </select>
                 </div>
