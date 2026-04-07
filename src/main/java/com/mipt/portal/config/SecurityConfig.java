@@ -2,72 +2,49 @@ package com.mipt.portal.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
-import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
 public class SecurityConfig {
 
   @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
-    MvcRequestMatcher.Builder mvc = new MvcRequestMatcher.Builder(introspector);
-
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .csrf(AbstractHttpConfigurer::disable)
-        .securityContext(sc -> sc
-            .securityContextRepository(new HttpSessionSecurityContextRepository())
-            .requireExplicitSave(false)
-        )
-        .authorizeHttpRequests(authz -> authz
-            // Публичные страницы
-            .requestMatchers(
-                mvc.pattern("/"),
-                mvc.pattern("/index.jsp"),
-                mvc.pattern("/login.jsp"),
-                mvc.pattern("/register.jsp"),
-                mvc.pattern("/home.jsp"),
-                mvc.pattern("/*.jsp"),
-                // Разрешаем доступ к нашим контроллерам
-                mvc.pattern("/users/login"),
-                mvc.pattern("/users/register"),
-                mvc.pattern("/custom-login")
-            ).permitAll()
-            // Защищенные страницы
-            .requestMatchers(mvc.pattern("/moderator/**")).hasAnyRole("MODERATOR", "ADMIN")
-            .requestMatchers(mvc.pattern("/admin/**")).hasRole("ADMIN")
-            .requestMatchers(
-                mvc.pattern("/dashboard.jsp"),
-                mvc.pattern("/edit-profile.jsp"),
-                mvc.pattern("/create-ad.jsp"),
-                mvc.pattern("/edit-ad.jsp"),
-                mvc.pattern("/delete-account-handler.jsp")
-            ).authenticated()
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers(new AntPathRequestMatcher("/api/users/register")).permitAll()
+            .requestMatchers(new AntPathRequestMatcher("/api/users/login")).permitAll()
+            .requestMatchers(new AntPathRequestMatcher("/api/**")).permitAll()
             .anyRequest().permitAll()
         )
-        // Отключаем стандартную форму логина Spring Security
         .formLogin(AbstractHttpConfigurer::disable)
-        // Отключаем HTTP Basic аутентификацию
-        .httpBasic(AbstractHttpConfigurer::disable)
-        // Настраиваем logout
-        .logout(logout -> logout
-            .logoutUrl("/logout")
-            .logoutSuccessUrl("/logout-success.jsp")
-            .invalidateHttpSession(true)
-            .deleteCookies("JSESSIONID")
-            .permitAll()
-        )
-        .exceptionHandling(ex -> ex.accessDeniedPage("/access-denied.jsp"));
+        .httpBasic(AbstractHttpConfigurer::disable);
 
     return http.build();
+  }
+
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    configuration.setAllowedHeaders(Arrays.asList("*"));
+    configuration.setAllowCredentials(true);
+    configuration.setExposedHeaders(Arrays.asList("JSESSIONID"));
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+    return source;
   }
 }

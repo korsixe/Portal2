@@ -598,6 +598,56 @@ public class UserService {
       return new ArrayList<>();
     }
   }
+
+  /**
+   * Смена пароля пользователя
+   */
+  public boolean changePassword(Long userId, String currentPassword, String newPassword) {
+    Optional<User> userOpt = userRepository.findById(userId);
+    if (userOpt.isEmpty()) {
+      return false;
+    }
+
+    User user = userOpt.get();
+
+    // Проверяем текущий пароль
+    if (!passwordEncoder.matches(currentPassword, user.getHashPassword())) {
+      return false;
+    }
+
+    // Устанавливаем новый пароль (захешированный)
+    user.setHashPassword(passwordEncoder.encode(newPassword));
+    userRepository.save(user);
+
+    return true;
+  }
+
+
+  /**
+   * Удаление аккаунта пользователя
+   */
+  public boolean deleteAccount(Long userId, String password) {
+    Optional<User> userOpt = userRepository.findById(userId);
+    if (userOpt.isEmpty()) {
+      return false;
+    }
+
+    User user = userOpt.get();
+
+    // Проверяем пароль
+    if (!passwordEncoder.matches(password, user.getHashPassword())) {
+      return false;
+    }
+
+    // Удаляем пользователя
+    userRepository.delete(user);
+    return true;
+  }
+
+  public PasswordEncoder getPasswordEncoder() {
+    return this.passwordEncoder;
+  }
+
 }
 
 

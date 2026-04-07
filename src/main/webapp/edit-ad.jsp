@@ -21,7 +21,7 @@
 
     Announcement announcement = (Announcement) request.getAttribute("announcement");
     if (announcement == null) {
-        response.sendRedirect("dashboard.jsp");
+        response.sendRedirect("/dashboard");
         return;
     }
     // Загружаем теги для редактирования
