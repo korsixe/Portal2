@@ -5,6 +5,7 @@ import com.mipt.portal.dto.*;
 import com.mipt.portal.entity.User;
 import com.mipt.portal.service.UserService;
 import jakarta.servlet.http.HttpSession;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -79,15 +80,42 @@ public class UserController {
         });
   }
 
-  @GetMapping("/{id}")
-  public ResponseEntity<User> getUserById(@PathVariable long id) {
-    log.info("Fetching user details for ID: {}", id);
-    return userService.findUserById(id)
-        .map(ResponseEntity::ok)
-        .orElseGet(() -> {
-          log.warn("User not found with ID: {}", id);
-          return ResponseEntity.notFound().build();
-        });
+
+  @PutMapping("/{id}")
+  public ResponseEntity<?> updateUser(
+      @PathVariable long id,
+      @RequestBody UserUpdateRequest request,
+      HttpSession session) {
+
+    User currentUser = (User) session.getAttribute("user");
+    if (currentUser == null || currentUser.getId() != id) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Не авторизован");
+    }
+
+    // Обновляем данные
+    currentUser.setName(request.getName());
+
+    // Обновляем адрес
+    if (request.getAddress() != null) {
+      Address address = new Address(request.getAddress().getFullAddress());
+      address.setCity(request.getAddress().getCity());
+      address.setStreet(request.getAddress().getStreet());
+      address.setHouseNumber(request.getAddress().getHouseNumber());
+      address.setBuilding(request.getAddress().getBuilding());
+      currentUser.setAddress(address);
+    }
+
+    currentUser.setStudyProgram(request.getStudyProgram());
+    currentUser.setCourse(request.getCourse());
+
+    Optional<User> updated = userService.updateUser(currentUser);
+
+    if (updated.isPresent()) {
+      session.setAttribute("user", updated.get());
+      return ResponseEntity.ok(updated.get());
+    } else {
+      return ResponseEntity.badRequest().body("Ошибка обновления");
+    }
   }
 
   @GetMapping
