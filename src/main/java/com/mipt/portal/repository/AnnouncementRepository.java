@@ -4,6 +4,7 @@ import com.mipt.portal.entity.Announcement;
 import com.mipt.portal.enums.AdStatus;
 import com.mipt.portal.enums.Category;
 import jakarta.persistence.LockModeType;
+import java.time.Instant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -28,4 +29,8 @@ public interface AnnouncementRepository extends JpaRepository<Announcement, Long
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT a FROM Announcement a WHERE a.id = :id")
     Optional<Announcement> findByIdWithLock(@Param("id") Long id);
+
+    List<Announcement> findByAuthorId(Long authorId);
+
+    List<Announcement> findByStatusAndUpdatedAtBefore(AdStatus status, Instant date);
 }
