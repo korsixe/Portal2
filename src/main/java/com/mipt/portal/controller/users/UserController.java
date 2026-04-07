@@ -111,10 +111,13 @@ public class UserController {
     Optional<User> updated = userService.updateUser(currentUser);
 
     if (updated.isPresent()) {
-      session.setAttribute("user", updated.get());
-      return ResponseEntity.ok(updated.get());
+      User user = updated.get();
+      user.setHashPassword(null);
+      user.setSalt(null);
+      session.setAttribute("user", user);
+      return ResponseEntity.ok(user);
     } else {
-      return ResponseEntity.badRequest().body("Ошибка обновления");
+      return ResponseEntity.badRequest().body("Ошибка обновления профиля");
     }
   }
 
