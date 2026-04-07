@@ -39,7 +39,7 @@ public class LoginController {
       model.addAttribute("message", "Неверный email или пароль");
       model.addAttribute("messageType", "error");
     }
-    return "redirect:/login.jsp";
+    return "redirect:/login";
   }
 
   @PostMapping("/login")
@@ -73,7 +73,7 @@ public class LoginController {
       } else if (loggedInUser.getRoles().contains(Role.MODERATOR)) {
         return "redirect:/moderator/dashboard";
       } else {
-        return "redirect:/dashboard.jsp";
+        return "redirect:/dashboard";
       }
     } else {
       // логируем только попытки админов
@@ -95,6 +95,6 @@ public class LoginController {
 
   @GetMapping("/register")
   public String showRegisterPage() {
-    return "redirect:/register.jsp";
+    return "redirect:/register";
   }
 }

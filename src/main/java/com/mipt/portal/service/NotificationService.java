@@ -99,6 +99,22 @@ public class NotificationService {
     }
   }
 
+  public boolean markAllAsRead(List<Long> adIds) {
+    log.info("Пометка всех уведомлений как прочитанных для объявлений: {}", adIds);
+
+    if (adIds == null || adIds.isEmpty()) {
+      return true;
+    }
+
+    for (Long adId : adIds) {
+      List<ModerationMessage> notifications = notificationStorage.get(adId);
+      if (notifications != null) {
+        notifications.forEach(msg -> msg.setIsRead(true));
+      }
+    }
+    return true;
+  }
+
   // Создать тестовое уведомление
   public ModerationMessage createNotification(Long adId, String action, String reason, String moderatorEmail) {
     ModerationMessage msg = new ModerationMessage();

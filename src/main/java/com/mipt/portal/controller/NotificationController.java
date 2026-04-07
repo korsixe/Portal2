@@ -42,6 +42,14 @@ public class NotificationController {
     return ResponseEntity.ok(Map.of("success", success));
   }
 
+  @PostMapping("/user/read-all")
+  public ResponseEntity<Map<String, Boolean>> markAllAsRead(
+    @RequestBody List<Long> adIds) {
+    log.info("REST request to mark all notifications as read for adIds: {}", adIds);
+    boolean success = notificationService.markAllAsRead(adIds);
+    return ResponseEntity.ok(Map.of("success", success));
+  }
+
   @DeleteMapping("/{notificationId}")
   public ResponseEntity<Map<String, Boolean>> deleteNotification(
     @PathVariable Long notificationId) {

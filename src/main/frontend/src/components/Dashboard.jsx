@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 import ChangePasswordModal from './ChangePasswordModal';
+import NotificationBell from './NotificationBell';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -193,6 +194,18 @@ const Dashboard = () => {
     return date.toLocaleDateString('ru-RU');
   };
 
+  const formatAddress = (address) => {
+    if (!address) return 'Не указан';
+    if (typeof address === 'string') return address;
+    if (address.fullAddress && String(address.fullAddress).trim()) return address.fullAddress;
+
+    const parts = [address.city, address.street, address.houseNumber, address.building]
+      .filter(Boolean)
+      .map((v) => String(v).trim())
+      .filter(Boolean);
+    return parts.length ? parts.join(', ') : 'Не указан';
+  };
+
   const getCategoryDisplayName = (category) => {
     const categoryMap = {
       'ELECTRONICS': 'Электроника',
@@ -275,7 +288,7 @@ const Dashboard = () => {
         <div className="headerBell">
           <div className="headerTopBell">
             <div className="notificationLeft">
-              <button className="bellButton">🔔</button>
+              <NotificationBell adIds={ads.map((ad) => ad.id)} />
             </div>
 
             <div className="avatarCenter">
@@ -343,7 +356,7 @@ const Dashboard = () => {
             </div>
             <div className="infoItem">
               <span className="infoLabel">Адрес:</span>
-              <span className="infoValue">{user.address || 'Не указан'}</span>
+              <span className="infoValue">{formatAddress(user.address)}</span>
             </div>
           </div>
 
@@ -410,7 +423,7 @@ const Dashboard = () => {
                       <div className="adViews">👁️ {ad.viewCount || 0} просмотров</div>
                       <div className="adDate">📅 {formatDate(ad.createdAt)}</div>
                       <div className="adActions">
-                        <button onClick={() => window.location.href = `/edit-ad?id=${ad.id}`} className="btnEdit">
+                        <button onClick={() => window.location.href = `/edit-ad?adId=${ad.id}`} className="btnEdit">
                           Редактировать
                         </button>
                         <button onClick={() => handleDeleteAd(ad.id)} className="btnDanger">
@@ -424,6 +437,9 @@ const Dashboard = () => {
         </div>
 
         <div className="actionButtons">
+          <button onClick={() => window.location.href = '/support'} className="btnPrimary">
+            Техподдержка
+          </button>
           <button onClick={() => window.location.href = '/'} className="btnPrimary">
             На главную
           </button>

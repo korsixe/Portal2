@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
 
+const API_BASE = 'http://localhost:8080';
+const FALLBACK_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='480'%3E%3Crect width='100%25' height='100%25' fill='%23eef1f7'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dominant-baseline='middle' fill='%238391a8' font-size='28' font-family='Arial,sans-serif'%3ENo photo%3C/text%3E%3C/svg%3E";
+
 const Home = () => {
     // Состояния для хранения данных и фильтров
     const [ads, setAds] = useState([]);
@@ -153,6 +156,16 @@ const Home = () => {
                     <div className="ads-grid">
                         {ads.map(ad => (
                             <div key={ad.id} className="ad-card" onClick={() => window.location.href=`/ad/${ad.id}`}>
+                                <div className="ad-image">
+                                    <img
+                                        src={`${API_BASE}/ad-photo?adId=${ad.id}&photoIndex=0`}
+                                        alt={ad.title || 'ad-photo'}
+                                        onError={(e) => {
+                                            e.currentTarget.onerror = null;
+                                            e.currentTarget.src = FALLBACK_IMAGE;
+                                        }}
+                                    />
+                                </div>
                                 <div className="ad-title">{ad.title}</div>
                                 <div className="ad-price">{ad.price > 0 ? `${ad.price} руб.` : (ad.price === 0 ? 'Бесплатно' : 'Договорная')}</div>
                                 <div className="ad-meta">
