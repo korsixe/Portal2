@@ -1,52 +1,48 @@
 package com.mipt.portal.controller;
 
+import com.mipt.portal.dto.AdminDashboardResponse;
 import com.mipt.portal.dto.CoinManagementRequest;
 import com.mipt.portal.dto.RoleManagementRequest;
-import com.mipt.portal.dto.SystemStats;
 import com.mipt.portal.dto.SanctionRequest;
+import com.mipt.portal.dto.SimpleActionResponse;
+import com.mipt.portal.dto.SystemStats;
+import com.mipt.portal.entity.AdminActionAudit;
 import com.mipt.portal.entity.User;
 import com.mipt.portal.enums.Role;
+import com.mipt.portal.repository.AdminActionAuditRepository;
 import com.mipt.portal.service.AdminService;
 import com.mipt.portal.service.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Slf4j
-@Controller
-@RequestMapping("/admin")
+@RestController
+@RequestMapping("/api/admin")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
-public class AdminController {
+public class AdminApiController {
 
     private final UserService userService;
     private final AdminService adminService;
+    private final AdminActionAuditRepository adminActionAuditRepository;
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
+    public AdminDashboardResponse dashboard() {
         List<User> users = userService.getAllUsers();
         SystemStats stats = userService.buildSystemStats();
+        return new AdminDashboardResponse(users, stats);
+    }
 
-        model.addAttribute("users", users);
-        model.addAttribute("stats", stats);
-        
-        return "/admin/dashboard"; // абсолютное имя вида, чтобы избежать относительного /admin/admin/...
+    @GetMapping("/actions")
+    public List<AdminActionAudit> actions() {
+        return adminActionAuditRepository.findAllByOrderByCreatedAtDesc();
     }
 
     @PostMapping("/role")
-    public String manageRole(@ModelAttribute RoleManagementRequest request,
-                             Authentication authentication,
-                             RedirectAttributes redirectAttributes) {
+    public SimpleActionResponse manageRole(@RequestBody RoleManagementRequest request, Authentication authentication) {
         Long adminId = resolveCurrentUserId(authentication);
         boolean success = false;
         String action = request.getAction() == null ? "" : request.getAction().toLowerCase();
@@ -62,15 +58,11 @@ public class AdminController {
                 : adminService.demoteFromAdmin(adminId, request.getTargetUserId()).orElse(false);
         }
 
-        redirectAttributes.addFlashAttribute("message", success ? "Роль обновлена" : "Не удалось изменить роль");
-        redirectAttributes.addFlashAttribute("messageType", success ? "success" : "error");
-        return "redirect:/admin/dashboard";
+        return new SimpleActionResponse(success, success ? "Role updated" : "Role update failed");
     }
 
     @PostMapping("/coins")
-    public String manageCoins(@ModelAttribute CoinManagementRequest request,
-                              Authentication authentication,
-                              RedirectAttributes redirectAttributes) {
+    public SimpleActionResponse manageCoins(@RequestBody CoinManagementRequest request, Authentication authentication) {
         Long adminId = resolveCurrentUserId(authentication);
         boolean success = false;
         String action = request.getAction() == null ? "" : request.getAction().toLowerCase();
@@ -81,15 +73,11 @@ public class AdminController {
             success = adminService.deductCoinsFromUser(adminId, request.getTargetUserId(), request.getAmount()).orElse(false);
         }
 
-        redirectAttributes.addFlashAttribute("message", success ? "Баланс обновлен" : "Не удалось обновить баланс");
-        redirectAttributes.addFlashAttribute("messageType", success ? "success" : "error");
-        return "redirect:/admin/dashboard";
+        return new SimpleActionResponse(success, success ? "Coins updated" : "Coins update failed");
     }
 
     @PostMapping("/sanction")
-    public String manageSanction(@ModelAttribute SanctionRequest request,
-                                 Authentication authentication,
-                                 RedirectAttributes redirectAttributes) {
+    public SimpleActionResponse manageSanction(@RequestBody SanctionRequest request, Authentication authentication) {
         Long adminId = resolveCurrentUserId(authentication);
         boolean success = false;
         String type = request.getType() == null ? "" : request.getType().toLowerCase();
@@ -103,9 +91,7 @@ public class AdminController {
             success = adminService.liftSanctions(adminId, request.getTargetUserId()).orElse(false);
         }
 
-        redirectAttributes.addFlashAttribute("message", success ? "Санкция применена" : "Не удалось применить санкцию");
-        redirectAttributes.addFlashAttribute("messageType", success ? "success" : "error");
-        return "redirect:/admin/dashboard";
+        return new SimpleActionResponse(success, success ? "Sanction updated" : "Sanction update failed");
     }
 
     private Long resolveCurrentUserId(Authentication authentication) {
@@ -117,3 +103,4 @@ public class AdminController {
             .orElse(null);
     }
 }
+

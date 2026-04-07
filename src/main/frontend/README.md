@@ -2,6 +2,12 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## App routes
+
+- `/admin` - admin dashboard
+- `/moderator` - moderator dashboard
+- `/moderator/history` - moderation history
+
 ## Available Scripts
 
 In the project directory, you can run:

@@ -54,13 +54,6 @@ public class SecurityConfig implements WebMvcConfigurer {
             .requestMatchers(mvc.pattern("/moderator/**")).hasAnyRole("MODERATOR", "ADMIN")
             .requestMatchers(mvc.pattern("/admin/**")).hasRole("ADMIN")
             .requestMatchers(
-                mvc.pattern("/dashboard.jsp"),
-                mvc.pattern("/edit-profile.jsp"),
-                mvc.pattern("/create-ad.jsp"),
-                mvc.pattern("/edit-ad.jsp"),
-                mvc.pattern("/delete-account-handler.jsp")
-            ).authenticated()
-            .requestMatchers(
                 mvc.pattern("/api/announcements/*/history"),
                 mvc.pattern("/api/announcements/*/approve")
             ).hasAnyRole("MODERATOR", "ADMIN")

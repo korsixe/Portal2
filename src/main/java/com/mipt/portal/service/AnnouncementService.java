@@ -80,14 +80,20 @@ public class AnnouncementService {
         });
     }
 
-  @Transactional
-  public Optional<Announcement> changeStatus(Long id, AdStatus newStatus) {
-    return repository.findById(id).map(ad -> {
-      ad.setStatus(newStatus);
-      ad.setUpdatedAt(Instant.now());
-      return repository.save(ad);
-    });
-  }
+    @Transactional
+    public Optional<Announcement> changeStatus(Long id, AdStatus newStatus, Long moderatorId, String reason) {
+        return repository.findById(id).map(ad -> {
+            AdStatus previous = ad.getStatus();
+            ad.setStatus(newStatus);
+            ad.setUpdatedAt(Instant.now());
+            Announcement saved = repository.save(ad);
+            moderationHistoryService.record(id, moderatorId, previous, newStatus, reason);
+            auditService.logAdminAction(moderatorId, null, AdminActionType.AD_STATUS_CHANGE, AuditTargetType.ANNOUNCEMENT, id,
+                "Статус " + previous + " -> " + newStatus + (reason != null ? (". Причина: " + reason) : ""));
+            log.info("Status changed for Ad ID: {}. New status: {}", id, newStatus);
+            return saved;
+        });
+    }
 
     @Transactional(readOnly = true)
     public Long getUserIdByEmail(String email) {

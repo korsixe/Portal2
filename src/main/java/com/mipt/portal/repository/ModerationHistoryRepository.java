@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface ModerationHistoryRepository extends JpaRepository<ModerationHistory, Long> {
     List<ModerationHistory> findAllByAdIdOrderByCreatedAtDesc(Long adId);
+    List<ModerationHistory> findAllByOrderByCreatedAtDesc();
 }

@@ -41,7 +41,7 @@ const Dashboard = () => {
           window.location.href = '/login';
           return;
         }
-        throw new Error('Ошибка загрузки пользователя');
+        
       }
       const userData = await userResponse.json();
       setUser(userData);
@@ -230,6 +230,11 @@ const Dashboard = () => {
   const openModal = (modalName) => setActiveModal(modalName);
   const closeModals = () => setActiveModal(null);
 
+  const formatUserAddress = (address) => {
+    if (!address) return 'Не указан';
+    return address.formattedAddress || address.fullAddress || address.address || 'Не указан';
+  };
+
   if (loading) {
     return (
         <div className="loadingContainer">
@@ -249,6 +254,10 @@ const Dashboard = () => {
         </div>
     );
   }
+
+  const roleSet = new Set((user.roles || []).map((role) => String(role)));
+  const isModerator = Boolean(user.moderator) || roleSet.has('MODERATOR') || roleSet.has('ADMIN');
+  const isAdmin = Boolean(user.admin) || roleSet.has('ADMIN');
 
   return (
       <div className="dashboardContainer">
@@ -299,12 +308,12 @@ const Dashboard = () => {
         </div>
 
         <div className="profileActions">
-          {user.moderator && (
+          {isModerator && (
               <button onClick={() => window.location.href = '/moderator/dashboard'} className="btnModerator">
                 Кабинет модератора
               </button>
           )}
-          {user.admin && (
+          {isAdmin && (
               <button onClick={() => window.location.href = '/admin/dashboard'} className="btnAdmin">
                 Админка
               </button>
@@ -343,7 +352,7 @@ const Dashboard = () => {
             </div>
             <div className="infoItem">
               <span className="infoLabel">Адрес:</span>
-              <span className="infoValue">{user.address || 'Не указан'}</span>
+              <span className="infoValue">{formatUserAddress(user.address)}</span>
             </div>
           </div>
 

@@ -1,0 +1,117 @@
+.admin-page {
+  font-family: sans-serif;
+  padding: 20px;
+}
+
+.admin-page .stats {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.admin-page .stat-card {
+  background: #f0f0f0;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.admin-page .stat-card h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.admin-page table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background: #fff;
+  table-layout: fixed;
+}
+
+.admin-page tbody tr {
+  background: #fff;
+}
+
+.admin-page th,
+.admin-page td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+  word-break: break-word;
+}
+
+.admin-page th {
+  background-color: #f2f2f2;
+}
+
+.admin-page .actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-page .btn {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  max-width: 100%;
+}
+
+.admin-page .btn-primary {
+  background: #4f46e5;
+  color: #fff;
+  border-color: #4f46e5;
+}
+
+.admin-page .btn-danger {
+  background: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
+}
+
+.admin-page .alert {
+  padding: 12px;
+  border-radius: 8px;
+  margin: 10px 0;
+}
+
+.admin-page .alert.success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.admin-page .alert.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.admin-page .nav {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0 20px;
+  flex-wrap: wrap;
+}
+
+.admin-page .nav .btn {
+  text-decoration: none;
+  display: inline-block;
+}
+
+.admin-page .inline-form {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.admin-page .inline-form input {
+  width: 80px;
+  max-width: 100%;
+}
+
+.admin-page .alert-slot {
+  min-height: 44px;
+}

@@ -56,7 +56,7 @@ public class AnnouncementController {
   @PostMapping("/{id}/approve")
   @PreAuthorize("hasAnyRole('ADMIN','MODERATOR')")
   public ResponseEntity<Announcement> approve(@PathVariable Long id) {
-    return service.changeStatus(id, AdStatus.ACTIVE)
+    return service.changeStatus(id, AdStatus.ACTIVE, null, null)
         .map(ResponseEntity::ok)
         .orElse(ResponseEntity.notFound().build());
   }
@@ -123,7 +123,7 @@ public class AnnouncementController {
       return ResponseEntity.status(HttpStatus.FORBIDDEN)
           .body("Нет прав на удаление этого объявления");
     }
-    service.changeStatus(id, AdStatus.DELETED);
+    service.changeStatus(id, AdStatus.DELETED, null, null);
     log.info("Announcement {} deleted by user {}", id, currentUser.getEmail());
 
     return ResponseEntity.ok().body("Объявление удалено");

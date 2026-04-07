@@ -10,6 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import com.mipt.portal.service.CustomUserDetailsService;
 
 import java.util.List;
 
@@ -20,6 +25,7 @@ import java.util.List;
 public class UserController {
 
   private final UserService userService;
+  private final CustomUserDetailsService userDetailsService;
 
   @PostMapping("/register")
   public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
@@ -55,6 +61,15 @@ public class UserController {
           session.setAttribute("userName", user.getName());
           session.setAttribute("userEmail", user.getEmail());
 
+          // Сохраняем контекст безопасности для ролей
+          UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
+          UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+              userDetails, null, userDetails.getAuthorities());
+          SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+          securityContext.setAuthentication(auth);
+          SecurityContextHolder.setContext(securityContext);
+          session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
+
           log.info("Successfully logged in user: {}", request.getEmail());
           return ResponseEntity.ok(user);
         })
@@ -86,11 +101,21 @@ public class UserController {
    */
   @GetMapping("/me")
   public ResponseEntity<User> getCurrentUser(HttpSession session) {
-    User currentUser = (User) session.getAttribute("user");
-    if (currentUser == null) {
+    Long userId = (Long) session.getAttribute("userId");
+    if (userId == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
-    return ResponseEntity.ok(currentUser);
+
+    return userService.findUserById(userId)
+        .map(user -> {
+          user.setHashPassword(null);
+          user.setSalt(null);
+          session.setAttribute("user", user);
+          session.setAttribute("userName", user.getName());
+          session.setAttribute("userEmail", user.getEmail());
+          return ResponseEntity.ok(user);
+        })
+        .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
   }
 
   /**
