@@ -3,7 +3,9 @@ export async function apiGet(path) {
     credentials: 'include'
   });
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
+    const error = new Error(`Request failed: ${response.status}`);
+    error.status = response.status;
+    throw error;
   }
   return response.json();
 }
@@ -18,7 +20,9 @@ export async function apiPost(path, body) {
     body: JSON.stringify(body || {})
   });
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
+    const error = new Error(`Request failed: ${response.status}`);
+    error.status = response.status;
+    throw error;
   }
   return response.json();
 }
@@ -29,8 +33,9 @@ export async function apiDelete(path) {
     credentials: 'include'
   });
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
+    const error = new Error(`Request failed: ${response.status}`);
+    error.status = response.status;
+    throw error;
   }
   return response.json();
 }
-

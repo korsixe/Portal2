@@ -1,23 +1,56 @@
 import React, { useEffect, useState } from 'react';
 import { apiGet, apiPost } from '../../api';
+import AccessDenied from '../AccessDenied';
 import './AdminDashboard.css';
+
+const ROLE_LABELS = {
+  ADMIN: 'Администратор',
+  MODERATOR: 'Модератор',
+  USER: 'Пользователь'
+};
+
+function getRoleLabel(role) {
+  if (!role) return '';
+  if (typeof role === 'string') return ROLE_LABELS[role] || role;
+  if (role.displayName) return role.displayName;
+  return String(role.name || role);
+}
 
 function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState(null);
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [accessDenied, setAccessDenied] = useState(false);
+
+  const refreshDashboard = async () => {
+    const data = await apiGet('/api/admin/dashboard');
+    const orderedUsers = (data.users || []).slice().sort((a, b) => (a.id || 0) - (b.id || 0));
+    setUsers(orderedUsers);
+    setStats(data.stats || null);
+  };
 
   useEffect(() => {
     let active = true;
+    setLoading(true);
     apiGet('/api/admin/dashboard')
       .then((data) => {
         if (!active) return;
-        setUsers(data.users || []);
+        const orderedUsers = (data.users || []).slice().sort((a, b) => (a.id || 0) - (b.id || 0));
+        setUsers(orderedUsers);
         setStats(data.stats || null);
+        setLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
         if (!active) return;
-        setMessage('Failed to load admin dashboard');
+        if (err && (err.status === 401 || err.status === 403)) {
+          setAccessDenied(true);
+        } else {
+          setMessage('Не удалось загрузить панель администратора');
+          setMessageType('error');
+        }
+        setLoading(false);
       });
     return () => {
       active = false;
@@ -31,9 +64,13 @@ function AdminDashboard() {
         role,
         action
       });
-      setMessage(res.message);
+      setMessage(res.message || 'Готово');
+      setMessageType(res.success ? 'success' : 'error');
+      await refreshDashboard();
     } catch (err) {
-      setMessage('Role update failed');
+      console.error('Failed to update role:', err);
+      setMessage('Не удалось обновить роль');
+      setMessageType('error');
     }
   };
 
@@ -44,87 +81,136 @@ function AdminDashboard() {
         action,
         amount: Number(amount || 0)
       });
-      setMessage(res.message);
+      setMessage(res.message || 'Готово');
+      setMessageType(res.success ? 'success' : 'error');
+      await refreshDashboard();
     } catch (err) {
-      setMessage('Coins update failed');
+      console.error('Failed to update coins:', err);
+      setMessage('Не удалось обновить монеты');
+      setMessageType('error');
     }
   };
 
-  const submitSanction = async (userId, type, duration, reason) => {
+  const handleLogout = async () => {
     try {
-      const res = await apiPost('/api/admin/sanction', {
-        targetUserId: userId,
-        type,
-        duration: duration ? Number(duration) : null,
-        reason
+      await fetch('http://localhost:8080/api/users/logout', {
+        method: 'POST',
+        credentials: 'include'
       });
-      setMessage(res.message);
-    } catch (err) {
-      setMessage('Sanction update failed');
+    } catch (error) {
+      console.error('Logout failed:', error);
     }
+    globalThis.location.href = '/login';
   };
+
+  if (accessDenied) {
+    return (
+      <AccessDenied
+        title="Доступ к админке запрещен"
+        message="У вашей учетной записи нет прав администратора."
+        actionLabel="В личный кабинет"
+        actionHref="/dashboard"
+      />
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="admin-page">
+        <h1>Панель администратора</h1>
+        <div className="alert">Загрузка...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-page">
-      <h1>Admin dashboard</h1>
-      {message && <div className="admin-message">{message}</div>}
+      <h1>Панель администратора</h1>
 
-      {stats && (
-        <div className="admin-stats">
-          <div className="admin-card">
-            <div className="admin-card-title">Total users</div>
-            <div className="admin-card-value">{stats.totalUsers}</div>
-          </div>
-          <div className="admin-card">
-            <div className="admin-card-title">Admins</div>
-            <div className="admin-card-value">{stats.adminCount}</div>
-          </div>
-          <div className="admin-card">
-            <div className="admin-card-title">Moderators</div>
-            <div className="admin-card-value">{stats.moderatorCount}</div>
-          </div>
+      <div className="nav">
+        <a className="btn" href="/">На главную</a>
+        <a className="btn btn-primary" href="/dashboard">Личный кабинет</a>
+        <a className="btn" href="/moderator/dashboard">История модерации</a>
+        <button className="btn" type="button" onClick={handleLogout}>Выйти</button>
+      </div>
+
+      <div className="alert-slot">
+        {message && <div className={`alert ${messageType || ''}`}>{message}</div>}
+      </div>
+
+      <div className="stats">
+        <div className="stat-card">
+          <h3>Всего пользователей</h3>
+          <p>{stats?.totalUsers ?? 0}</p>
         </div>
-      )}
+        <div className="stat-card">
+          <h3>Администраторов</h3>
+          <p>{stats?.adminCount ?? 0}</p>
+        </div>
+        <div className="stat-card">
+          <h3>Модераторов</h3>
+          <p>{stats?.moderatorCount ?? 0}</p>
+        </div>
+      </div>
 
-      <table className="admin-table">
+      <h2>Пользователи</h2>
+      <table>
         <thead>
           <tr>
             <th>ID</th>
             <th>Email</th>
-            <th>Name</th>
-            <th>Roles</th>
-            <th>Coins</th>
-            <th>Actions</th>
+            <th>Имя</th>
+            <th>Роли</th>
+            <th>Монеты</th>
+            <th>Действия</th>
           </tr>
         </thead>
         <tbody>
+          {users.length === 0 && (
+            <tr>
+              <td colSpan="6">Пользователи не найдены</td>
+            </tr>
+          )}
           {users.map((user) => {
-            const roles = (user.roles || []).map((role) => String(role));
-            const isModerator = roles.includes('MODERATOR');
-            const isAdmin = roles.includes('ADMIN');
+            const userRoles = new Set((user.roles || []).map(String));
+            const isModerator = userRoles.has('MODERATOR') || userRoles.has('ADMIN');
+            const isAdmin = userRoles.has('ADMIN');
 
             return (
               <tr key={user.id}>
                 <td>{user.id}</td>
                 <td>{user.email}</td>
                 <td>{user.name}</td>
-                <td>{roles.join(', ')}</td>
+                <td>
+                  {(user.roles || []).map((role, index) => (
+                    <span key={`${user.id}-role-${index}`}>
+                      {getRoleLabel(role)}
+                      <br />
+                    </span>
+                  ))}
+                </td>
                 <td>{user.coins}</td>
                 <td>
-                  <div className="admin-actions">
-                    <button
-                      type="button"
-                      onClick={() => submitRole(user.id, 'MODERATOR', isModerator ? 'revoke' : 'assign')}
-                    >
-                      {isModerator ? 'Revoke moderator' : 'Assign moderator'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => submitRole(user.id, 'ADMIN', isAdmin ? 'revoke' : 'assign')}
-                    >
-                      {isAdmin ? 'Revoke admin' : 'Assign admin'}
-                    </button>
-                    <div className="admin-inline">
+                  <div className="actions">
+                    <div>
+                      <button
+                        className="btn"
+                        type="button"
+                        onClick={() => submitRole(user.id, 'MODERATOR', isModerator ? 'revoke' : 'assign')}
+                      >
+                        {isModerator ? 'Снять модератора' : 'Назначить модератором'}
+                      </button>
+                    </div>
+                    <div>
+                      <button
+                        className="btn btn-primary"
+                        type="button"
+                        onClick={() => submitRole(user.id, 'ADMIN', isAdmin ? 'revoke' : 'assign')}
+                      >
+                        {isAdmin ? 'Снять админа' : 'Назначить админом'}
+                      </button>
+                    </div>
+                    <div className="inline-form">
                       <input
                         type="number"
                         min="1"
@@ -132,13 +218,14 @@ function AdminDashboard() {
                         id={`coins-add-${user.id}`}
                       />
                       <button
+                        className="btn"
                         type="button"
                         onClick={() => submitCoins(user.id, 'add', document.getElementById(`coins-add-${user.id}`).value)}
                       >
-                        Add coins
+                        + Монеты
                       </button>
                     </div>
-                    <div className="admin-inline">
+                    <div className="inline-form">
                       <input
                         type="number"
                         min="1"
@@ -146,39 +233,11 @@ function AdminDashboard() {
                         id={`coins-deduct-${user.id}`}
                       />
                       <button
+                        className="btn btn-danger"
                         type="button"
                         onClick={() => submitCoins(user.id, 'deduct', document.getElementById(`coins-deduct-${user.id}`).value)}
                       >
-                        Deduct coins
-                      </button>
-                    </div>
-                    <div className="admin-inline">
-                      <select id={`sanction-type-${user.id}`} defaultValue="freeze">
-                        <option value="freeze">Freeze</option>
-                        <option value="ban">Ban</option>
-                        <option value="lift">Lift</option>
-                      </select>
-                      <input
-                        type="number"
-                        min="1"
-                        placeholder="Duration"
-                        id={`sanction-duration-${user.id}`}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Reason"
-                        id={`sanction-reason-${user.id}`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const type = document.getElementById(`sanction-type-${user.id}`).value;
-                          const duration = document.getElementById(`sanction-duration-${user.id}`).value;
-                          const reason = document.getElementById(`sanction-reason-${user.id}`).value;
-                          submitSanction(user.id, type, duration, reason);
-                        }}
-                      >
-                        Apply
+                        - Монеты
                       </button>
                     </div>
                   </div>
