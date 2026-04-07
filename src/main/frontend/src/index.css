@@ -7,6 +7,26 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+#root {
+  width: 100%;
+  max-width: none;
+}
+
+/* Full-width layout for page-level wrappers */
+.home-container,
+.dashboardContainer,
+.loginContainer,
+.access-denied-card,
+.edit-profile-card,
+.successCard,
+.successEditCard,
+.moderator-page .container {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
