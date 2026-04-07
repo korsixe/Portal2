@@ -12,6 +12,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.ByteArrayInputStream;
+import java.net.URLConnection;
+
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -41,8 +44,13 @@ public class AdPhotoController {
       }
 
       // Игнорируем photoIndex, так как только одно фото
+      String detectedContentType = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(photoData));
+      MediaType mediaType = (detectedContentType != null)
+        ? MediaType.parseMediaType(detectedContentType)
+        : MediaType.APPLICATION_OCTET_STREAM;
+
       HttpHeaders headers = new HttpHeaders();
-      headers.setContentType(MediaType.IMAGE_JPEG);
+      headers.setContentType(mediaType);
       headers.setContentLength(photoData.length);
 
       log.info("Serving photo for ad: {}, size: {} bytes", adId, photoData.length);

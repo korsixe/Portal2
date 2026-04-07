@@ -1,0 +1,52 @@
+.errorPage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.errorCard {
+  width: min(560px, calc(100vw - 32px));
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px;
+  text-align: center;
+}
+
+.errorCode {
+  font-size: 52px;
+  font-weight: 800;
+  color: #dc2626;
+  margin-bottom: 8px;
+}
+
+.errorCard h1 {
+  margin: 0 0 8px;
+}
+
+.errorCard p {
+  color: #4b5563;
+}
+
+.errorActions {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.errorActions button {
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #fff;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.errorActions .secondary {
+  background: #6b7280;
+}
+

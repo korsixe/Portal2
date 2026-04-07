@@ -5,6 +5,12 @@ import CreateAd from './components/CreateAd';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
+import EditAd from './components/EditAd';
+import AdDetails from './components/AdDetails';
+import ErrorPage from './components/ErrorPage';
+import SupportChat from './components/SupportChat';
+import SuccessfulCreateAd from './components/SuccessfulCreateAd';
+import SuccessfulEditAd from './components/SuccessfulEditAd';
 import AdminDashboard from './components/admin/AdminDashboard';
 import ModeratorDashboard from './components/moderator/ModeratorDashboard';
 import ModerationHistory from './components/moderator/ModerationHistory';
@@ -19,12 +25,18 @@ function App() {
 
         {/* Когда адрес /create, показываем создание */}
         <Route path="/create" element={<CreateAd />} />
-        <Route path="/create-ad" element={<CreateAd />} />
 
         {/* Когда адрес /register, показываем регистрацию */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/edit-ad" element={<EditAd />} />
+        <Route path="/successful-create-ad" element={<SuccessfulCreateAd />} />
+        <Route path="/successful-edit-ad" element={<SuccessfulEditAd />} />
+        <Route path="/ad/:id" element={<AdDetails />} />
+        <Route path="/support" element={<SupportChat />} />
+        <Route path="/error" element={<ErrorPage />} />
+        <Route path="*" element={<ErrorPage defaultCode="404" defaultMessage="Страница не найдена" />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/moderator" element={<ModeratorDashboard />} />

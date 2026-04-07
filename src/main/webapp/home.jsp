@@ -695,11 +695,11 @@
 
         <div class="auth-buttons">
             <% if (user != null) { %>
-            <a href="dashboard.jsp" class="btn btn-primary">Личный кабинет</a>
+            <a href="${pageContext.request.contextPath}/dashboard" class="btn btn-primary">Личный кабинет</a>
             <a href="${pageContext.request.contextPath}/logout" class="btn btn-secondary">Выйти</a>
             <% } else { %>
-            <a href="login.jsp" class="btn btn-secondary">Войти</a>
-            <a href="register.jsp" class="btn btn-primary">Регистрация</a>
+            <a href="${pageContext.request.contextPath}/login" class="btn btn-secondary">Войти</a>
+            <a href="${pageContext.request.contextPath}/register" class="btn btn-primary">Регистрация</a>
             <% } %>
         </div>
     </div>
@@ -806,7 +806,7 @@
         <!-- Сетка объявлений -->
         <div class="ads-grid">
             <% for (Announcement ad : recentAds) { %>
-            <div class="ad-card" onclick="location.href='ad-details.jsp?id=<%= ad.getId() %>'">
+            <div class="ad-card" onclick="location.href='${pageContext.request.contextPath}/ad/<%= ad.getId() %>'">
                 <div class="ad-title"><%= ad.getTitle() %>
                 </div>
 

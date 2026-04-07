@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 import ChangePasswordModal from './ChangePasswordModal';
+import NotificationBell from './NotificationBell';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -41,7 +42,7 @@ const Dashboard = () => {
           window.location.href = '/login';
           return;
         }
-        
+        throw new Error('Ошибка загрузки пользователя');
       }
       const userData = await userResponse.json();
       setUser(userData);
@@ -193,6 +194,18 @@ const Dashboard = () => {
     return date.toLocaleDateString('ru-RU');
   };
 
+  const formatAddress = (address) => {
+    if (!address) return 'Не указан';
+    if (typeof address === 'string') return address;
+    if (address.fullAddress && String(address.fullAddress).trim()) return address.fullAddress;
+
+    const parts = [address.city, address.street, address.houseNumber, address.building]
+      .filter(Boolean)
+      .map((v) => String(v).trim())
+      .filter(Boolean);
+    return parts.length ? parts.join(', ') : 'Не указан';
+  };
+
   const getCategoryDisplayName = (category) => {
     const categoryMap = {
       'ELECTRONICS': 'Электроника',
@@ -230,11 +243,6 @@ const Dashboard = () => {
   const openModal = (modalName) => setActiveModal(modalName);
   const closeModals = () => setActiveModal(null);
 
-  const formatUserAddress = (address) => {
-    if (!address) return 'Не указан';
-    return address.formattedAddress || address.fullAddress || address.address || 'Не указан';
-  };
-
   if (loading) {
     return (
         <div className="loadingContainer">
@@ -254,10 +262,6 @@ const Dashboard = () => {
         </div>
     );
   }
-
-  const roleSet = new Set((user.roles || []).map((role) => String(role)));
-  const isModerator = Boolean(user.moderator) || roleSet.has('MODERATOR') || roleSet.has('ADMIN');
-  const isAdmin = Boolean(user.admin) || roleSet.has('ADMIN');
 
   return (
       <div className="dashboardContainer">
@@ -284,7 +288,7 @@ const Dashboard = () => {
         <div className="headerBell">
           <div className="headerTopBell">
             <div className="notificationLeft">
-              <button className="bellButton">🔔</button>
+              <NotificationBell adIds={ads.map((ad) => ad.id)} />
             </div>
 
             <div className="avatarCenter">
@@ -308,12 +312,12 @@ const Dashboard = () => {
         </div>
 
         <div className="profileActions">
-          {isModerator && (
+          {user.moderator && (
               <button onClick={() => window.location.href = '/moderator/dashboard'} className="btnModerator">
                 Кабинет модератора
               </button>
           )}
-          {isAdmin && (
+          {user.admin && (
               <button onClick={() => window.location.href = '/admin/dashboard'} className="btnAdmin">
                 Админка
               </button>
@@ -352,6 +356,7 @@ const Dashboard = () => {
             </div>
             <div className="infoItem">
               <span className="infoLabel">Адрес:</span>
+              <span className="infoValue">{formatAddress(user.address)}</span>
               <span className="infoValue">{formatUserAddress(user.address)}</span>
             </div>
           </div>
@@ -419,7 +424,7 @@ const Dashboard = () => {
                       <div className="adViews">👁️ {ad.viewCount || 0} просмотров</div>
                       <div className="adDate">📅 {formatDate(ad.createdAt)}</div>
                       <div className="adActions">
-                        <button onClick={() => window.location.href = `/edit-ad?id=${ad.id}`} className="btnEdit">
+                        <button onClick={() => window.location.href = `/edit-ad?adId=${ad.id}`} className="btnEdit">
                           Редактировать
                         </button>
                         <button onClick={() => handleDeleteAd(ad.id)} className="btnDanger">
@@ -433,6 +438,9 @@ const Dashboard = () => {
         </div>
 
         <div className="actionButtons">
+          <button onClick={() => window.location.href = '/support'} className="btnPrimary">
+            Техподдержка
+          </button>
           <button onClick={() => window.location.href = '/'} className="btnPrimary">
             На главную
           </button>

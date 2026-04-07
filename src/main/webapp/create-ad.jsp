@@ -666,7 +666,7 @@
 
             <!-- Кнопки действий -->
             <div class="form-actions">
-                <a href="dashboard.jsp" class="btn btn-outline">
+                <a href="${pageContext.request.contextPath}/dashboard" class="btn btn-outline">
                     <span class="icon">←</span> Отмена
                 </a>
 

@@ -5,6 +5,7 @@ import com.mipt.portal.entity.Announcement;
 import com.mipt.portal.enums.Category;
 import com.mipt.portal.enums.Condition;
 import com.mipt.portal.service.AnnouncementService;
+import com.mipt.portal.service.MediaService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -22,9 +23,10 @@ import java.util.Map;
 public class AdWebController {
 
   private final AnnouncementService announcementService;
+  private final MediaService mediaService;
   private final ObjectMapper objectMapper = new ObjectMapper();
-  private static final String LOGIN_REDIRECT = "redirect:/login.jsp";
-  private static final String DASHBOARD_REDIRECT = "redirect:/dashboard.jsp";
+  private static final String LOGIN_REDIRECT = "redirect:/login";
+  private static final String SUCCESSFUL_CREATE_REDIRECT = "redirect:/successful-create-ad";
   private static final String USER_ID_ATTR = "userId";
   private static final String ERROR_ATTR = "error";
   private static final String SUCCESS_ATTR = "success";
@@ -82,7 +84,7 @@ public class AdWebController {
     @RequestParam("priceType") String priceType,
     @RequestParam(value = "price", required = false, defaultValue = "0") int price,
     @RequestParam("action") String action,
-    @RequestParam(value = "photos", required = false) MultipartFile[] photos,
+    @RequestParam(value = "photo", required = false) MultipartFile photo,
     @RequestParam(value = "selectedTags", required = false) String selectedTags,
     HttpSession session,
     Model model) {
@@ -119,12 +121,17 @@ public class AdWebController {
         announcementService.saveAdTags(ad.getId(), tagList);
       }
 
+      if (photo != null && !photo.isEmpty()) {
+        mediaService.savePhoto(ad.getId(), mediaService.multipartFileToBytes(photo));
+      }
+
       if ("publish".equals(action)) {
         announcementService.sendToModeration(ad.getId());
       }
 
       model.addAttribute(SUCCESS_ATTR, "Объявление успешно создано!");
-      return DASHBOARD_REDIRECT;
+      model.addAttribute(ANNOUNCEMENT_ATTR, ad);
+      return SUCCESSFUL_CREATE_REDIRECT;
 
     } catch (Exception e) {
       model.addAttribute(ERROR_ATTR, "Произошла ошибка при создании: " + e.getMessage());
@@ -142,97 +149,97 @@ public class AdWebController {
     }
   }
 
-  @GetMapping("/edit-ad")
-  public String showEditAdForm(@RequestParam("adId") Long adId, HttpSession session, Model model) {
-    Long currentUserId = (Long) session.getAttribute(USER_ID_ATTR);
-    if (currentUserId == null) {
-      return LOGIN_REDIRECT;
-    }
+//  @GetMapping("/legacy/edit-ad")
+//  public String showEditAdForm(@RequestParam("adId") Long adId, HttpSession session, Model model) {
+//    Long currentUserId = (Long) session.getAttribute(USER_ID_ATTR);
+//    if (currentUserId == null) {
+//      return LOGIN_REDIRECT;
+//    }
+//
+//    Announcement ad = announcementService.findById(adId);
+//    if (ad == null) {
+//      model.addAttribute(ERROR_ATTR, "Объявление не найдено!");
+//      return DASHBOARD_REDIRECT;
+//    }
+//
+//    if (!ad.getAuthorId().equals(currentUserId)) {
+//      model.addAttribute(ERROR_ATTR, "У вас нет прав редактировать чужое объявление!");
+//      return DASHBOARD_REDIRECT;
+//    }
+//
+//    model.addAttribute(ANNOUNCEMENT_ATTR, ad);
+//    model.addAttribute("categories", announcementService.getAllCategories());
+//    model.addAttribute("tags", announcementService.getTagsWithValues());
+//    model.addAttribute("adTags", announcementService.getTagsForAd(adId));
+//
+//    return "edit-ad";
+//  }
 
-    Announcement ad = announcementService.findById(adId);
-    if (ad == null) {
-      model.addAttribute(ERROR_ATTR, "Объявление не найдено!");
-      return DASHBOARD_REDIRECT;
-    }
-
-    if (!ad.getAuthorId().equals(currentUserId)) {
-      model.addAttribute(ERROR_ATTR, "У вас нет прав редактировать чужое объявление!");
-      return DASHBOARD_REDIRECT;
-    }
-
-    model.addAttribute(ANNOUNCEMENT_ATTR, ad);
-    model.addAttribute("categories", announcementService.getAllCategories());
-    model.addAttribute("tags", announcementService.getTagsWithValues());
-    model.addAttribute("adTags", announcementService.getTagsForAd(adId));
-
-    return "edit-ad";
-  }
-
-  @PostMapping("/edit-ad")
-  public String processEditAd(
-    @RequestParam("adId") Long adId,
-    @RequestParam("title") String title,
-    @RequestParam("description") String description,
-    @RequestParam("category") String categoryName,
-    @RequestParam("subcategory") String subcategory,
-    @RequestParam("location") String location,
-    @RequestParam("condition") String conditionName,
-    @RequestParam("priceType") String priceType,
-    @RequestParam(value = "price", required = false, defaultValue = "0") int price,
-    @RequestParam("action") String action,
-    @RequestParam(value = "photos", required = false) MultipartFile[] photos,
-    @RequestParam(value = "selectedTags", required = false) String selectedTags,
-    HttpSession session,
-    Model model) {
-
-    Long currentUserId = (Long) session.getAttribute(USER_ID_ATTR);
-    if (currentUserId == null) {
-      return LOGIN_REDIRECT;
-    }
-
-    try {
-      Announcement ad = announcementService.findById(adId);
-      if (ad == null || !ad.getAuthorId().equals(currentUserId)) {
-        return DASHBOARD_REDIRECT;
-      }
-
-      ad.setTitle(title);
-      ad.setDescription(description);
-      ad.setCategory(Category.fromDisplayName(categoryName));
-      ad.setSubcategory(subcategory);
-      ad.setLocation(location);
-      ad.setCondition(Condition.valueOf(conditionName));
-
-      if ("free".equals(priceType)) {
-        ad.setPrice(0);
-      } else if ("negotiable".equals(priceType)) {
-        ad.setPrice(-1);
-      } else {
-        ad.setPrice(price);
-      }
-
-      if (selectedTags != null && !selectedTags.isEmpty()) {
-        List<Map<String, Object>> tagList = objectMapper.readValue(selectedTags,
-          objectMapper.getTypeFactory().constructCollectionType(List.class, Map.class));
-        announcementService.saveAdTags(ad.getId(), tagList);
-      }
-
-      if ("publish".equals(action)) {
-        announcementService.sendToModeration(ad.getId());
-      }
-
-      announcementService.save(ad);
-
-      model.addAttribute(SUCCESS_ATTR, "Объявление успешно обновлено!");
-      return DASHBOARD_REDIRECT;
-
-    } catch (Exception e) {
-      model.addAttribute(ERROR_ATTR, "Ошибка при обновлении: " + e.getMessage());
-      Announcement ad = announcementService.findById(adId);
-      model.addAttribute(ANNOUNCEMENT_ATTR, ad);
-      model.addAttribute("categories", announcementService.getAllCategories());
-      model.addAttribute("tags", announcementService.getTagsWithValues());
-      return "edit-ad";
-    }
-  }
+//  @PostMapping("/legacy/edit-ad")
+//  public String processEditAd(
+//    @RequestParam("adId") Long adId,
+//    @RequestParam("title") String title,
+//    @RequestParam("description") String description,
+//    @RequestParam("category") String categoryName,
+//    @RequestParam("subcategory") String subcategory,
+//    @RequestParam("location") String location,
+//    @RequestParam("condition") String conditionName,
+//    @RequestParam("priceType") String priceType,
+//    @RequestParam(value = "price", required = false, defaultValue = "0") int price,
+//    @RequestParam("action") String action,
+//    @RequestParam(value = "photos", required = false) MultipartFile[] photos,
+//    @RequestParam(value = "selectedTags", required = false) String selectedTags,
+//    HttpSession session,
+//    Model model) {
+//
+//    Long currentUserId = (Long) session.getAttribute(USER_ID_ATTR);
+//    if (currentUserId == null) {
+//      return LOGIN_REDIRECT;
+//    }
+//
+//    try {
+//      Announcement ad = announcementService.findById(adId);
+//      if (ad == null || !ad.getAuthorId().equals(currentUserId)) {
+//        return DASHBOARD_REDIRECT;
+//      }
+//
+//      ad.setTitle(title);
+//      ad.setDescription(description);
+//      ad.setCategory(Category.fromDisplayName(categoryName));
+//      ad.setSubcategory(subcategory);
+//      ad.setLocation(location);
+//      ad.setCondition(Condition.valueOf(conditionName));
+//
+//      if ("free".equals(priceType)) {
+//        ad.setPrice(0);
+//      } else if ("negotiable".equals(priceType)) {
+//        ad.setPrice(-1);
+//      } else {
+//        ad.setPrice(price);
+//      }
+//
+//      if (selectedTags != null && !selectedTags.isEmpty()) {
+//        List<Map<String, Object>> tagList = objectMapper.readValue(selectedTags,
+//          objectMapper.getTypeFactory().constructCollectionType(List.class, Map.class));
+//        announcementService.saveAdTags(ad.getId(), tagList);
+//      }
+//
+//      if ("publish".equals(action)) {
+//        announcementService.sendToModeration(ad.getId());
+//      }
+//
+//      announcementService.save(ad);
+//
+//      model.addAttribute(SUCCESS_ATTR, "Объявление успешно обновлено!");
+//      return DASHBOARD_REDIRECT;
+//
+//    } catch (Exception e) {
+//      model.addAttribute(ERROR_ATTR, "Ошибка при обновлении: " + e.getMessage());
+//      Announcement ad = announcementService.findById(adId);
+//      model.addAttribute(ANNOUNCEMENT_ATTR, ad);
+//      model.addAttribute("categories", announcementService.getAllCategories());
+//      model.addAttribute("tags", announcementService.getTagsWithValues());
+//      return "edit-ad";
+//    }
+//  }
 }
