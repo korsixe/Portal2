@@ -179,11 +179,8 @@ html {
 /* Icon base styles */
 .icon {
   flex-shrink: 0;
-  transition: transform var(--transition-fast);
-}
-
-.icon:hover {
-  transform: scale(1.1);
+  transition: none;
+  pointer-events: none;
 }
 
 /* Button hover effects */
