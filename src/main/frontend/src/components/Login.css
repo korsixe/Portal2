@@ -1,3 +1,5 @@
+/* Login Page - Minimalist Design */
+
 * {
   margin: 0;
   padding: 0;
@@ -5,39 +7,43 @@
 }
 
 .container {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, var(--color-lavender) 0%, var(--color-purple) 100%);
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   min-height: 100vh;
   padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .portal-container {
   width: 100%;
   max-width: none;
   margin: 0;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  padding: 60px 40px;
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  padding: 48px 40px;
   text-align: center;
+  border: 1px solid rgba(208, 189, 244, 0.3);
 }
 
 .portal-logo {
-  font-size: 3.5rem;
+  font-size: 2.8rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, var(--color-purple), var(--color-lavender));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 10px;
-  letter-spacing: 2px;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
 }
 
 .portal-subtitle {
-  color: #666;
-  font-size: 1.2rem;
-  margin-bottom: 40px;
-  font-weight: 300;
+  color: var(--color-text-secondary);
+  font-size: 1.1rem;
+  margin-bottom: 36px;
+  font-weight: 400;
 }
 
 .form-group {
@@ -48,94 +54,102 @@
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  color: #333;
+  color: var(--color-dark-slate);
   font-weight: 500;
+  font-size: 0.95rem;
 }
 
 .form-group input {
   width: 100%;
-  padding: 12px 15px;
-  border: 2px solid #e1e5e9;
-  border-radius: 10px;
+  padding: 14px 16px;
+  border: 2px solid var(--color-pale-blue);
+  border-radius: var(--radius-md);
   font-size: 1rem;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
+  background: var(--color-pale-blue);
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--color-purple);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 4px rgba(132, 88, 179, 0.1);
+}
+
+.form-group input::placeholder {
+  color: var(--color-text-secondary);
 }
 
 .button-group {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  margin-top: 30px;
+  gap: 14px;
+  margin-top: 28px;
 }
 
 .btn {
-  padding: 15px 25px;
+  padding: 14px 24px;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
   text-decoration: none;
   display: inline-block;
   text-align: center;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, var(--color-purple), var(--color-lavender));
   color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 14px rgba(132, 88, 179, 0.25);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 20px rgba(132, 88, 179, 0.35);
 }
 
 .btn-secondary {
   background: transparent;
-  color: #667eea;
-  border: 2px solid #667eea;
+  color: var(--color-purple);
+  border: 2px solid var(--color-purple);
 }
 
 .btn-secondary:hover {
-  background: #667eea;
+  background: var(--color-purple);
   color: white;
   transform: translateY(-2px);
 }
 
 .btn-danger {
-  background: #dc3545;
+  background: #ef4444;
   color: white;
 }
 
 .btn-danger:hover {
-  background: #c82333;
+  background: #dc2626;
   transform: translateY(-2px);
 }
 
 .portal-container.loginContainer {
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  padding: 60px 40px;
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  padding: 48px 40px;
   text-align: center;
-  width: 48% !important;
-  max-width: 560px !important;
+  width: 100% !important;
+  max-width: 440px !important;
   margin: 0 auto !important;
-  animation: fadeInUp 0.8s ease-out;
+  animation: pageFadeIn 0.5s ease-out;
+  border: 1px solid rgba(208, 189, 244, 0.3);
 }
 
-@keyframes fadeInUp {
+@keyframes pageFadeIn {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -144,21 +158,21 @@
 }
 
 .logo {
-  font-size: 3.5rem;
+  font-size: 2.8rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, var(--color-purple), var(--color-lavender));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 10px;
-  letter-spacing: 2px;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
 }
 
 .subtitle {
-  color: #666;
-  font-size: 1.2rem;
-  margin-bottom: 40px;
-  font-weight: 300;
+  color: var(--color-text-secondary);
+  font-size: 1.1rem;
+  margin-bottom: 36px;
+  font-weight: 400;
 }
 
 .formGroup {
@@ -169,96 +183,103 @@
 .formGroup label {
   display: block;
   margin-bottom: 8px;
-  color: #333;
+  color: var(--color-dark-slate);
   font-weight: 500;
+  font-size: 0.95rem;
 }
 
 .formGroup input {
   width: 100%;
-  padding: 12px 15px;
-  border: 2px solid #e1e5e9;
-  border-radius: 10px;
+  padding: 14px 16px;
+  border: 2px solid var(--color-pale-blue);
+  border-radius: var(--radius-md);
   font-size: 1rem;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
+  background: var(--color-pale-blue);
 }
 
 .formGroup input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--color-purple);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 4px rgba(132, 88, 179, 0.1);
 }
 
 .buttonGroup {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  margin-top: 30px;
+  gap: 14px;
+  margin-top: 28px;
 }
 
 .btnPrimary, .btnSecondary, .btnDanger {
-  padding: 15px 25px;
+  padding: 14px 24px;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-base);
   text-decoration: none;
   display: inline-block;
   text-align: center;
 }
 
 .btnPrimary {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, var(--color-purple), var(--color-lavender));
   color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 14px rgba(132, 88, 179, 0.25);
 }
 
 .btnPrimary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 20px rgba(132, 88, 179, 0.35);
 }
 
 .btnSecondary {
   background: transparent;
-  color: #667eea;
-  border: 2px solid #667eea;
+  color: var(--color-purple);
+  border: 2px solid var(--color-purple);
 }
 
 .btnSecondary:hover {
-  background: #667eea;
+  background: var(--color-purple);
   color: white;
   transform: translateY(-2px);
 }
 
 .btnDanger {
-  background: #dc3545;
+  background: #ef4444;
   color: white;
 }
 
 .btnDanger:hover {
-  background: #c82333;
+  background: #dc2626;
   transform: translateY(-2px);
 }
 
 .message {
-  padding: 15px;
-  border-radius: 10px;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
   margin-bottom: 20px;
   font-weight: 500;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
 .success {
-  background: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .error {
-  background: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
 .btnPrimary:disabled {
@@ -269,21 +290,22 @@
 
 @media (max-width: 480px) {
   .portal-container {
-    padding: 40px 20px;
-    margin: 20px;
+    padding: 36px 24px;
+    margin: 16px;
   }
 
   .portal-container.loginContainer {
     width: 100% !important;
     max-width: none !important;
+    margin: 16px !important;
   }
 
   .portal-logo {
-    font-size: 2.8rem;
+    font-size: 2.4rem;
   }
 
   .button-group {
-    gap: 15px;
+    gap: 12px;
   }
 
   .btn {
@@ -292,16 +314,16 @@
   }
 
   .loginContainer {
-    padding: 40px 20px;
-    margin: 20px;
+    padding: 36px 24px;
+    margin: 16px;
   }
 
   .logo {
-    font-size: 2.8rem;
+    font-size: 2.4rem;
   }
 
   .buttonGroup {
-    gap: 15px;
+    gap: 12px;
   }
 
   .btnPrimary, .btnSecondary, .btnDanger {

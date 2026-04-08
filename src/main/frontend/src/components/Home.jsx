@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
+import Icon from './Icon';
 
 const API_BASE = 'http://localhost:8080';
-const FALLBACK_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='480'%3E%3Crect width='100%25' height='100%25' fill='%23eef1f7'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dominant-baseline='middle' fill='%238391a8' font-size='28' font-family='Arial,sans-serif'%3ENo photo%3C/text%3E%3C/svg%3E";
+const FALLBACK_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='480'%3E%3Crect width='100%25' height='100%25' fill='%23E5EAF5'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dominant-baseline='middle' fill='%238458B3' font-size='28' font-family='Inter,sans-serif'%3ENo photo%3C/text%3E%3C/svg%3E";
 
 const Home = () => {
-    // Состояния для хранения данных и фильтров
     const [ads, setAds] = useState([]);
     const [filters, setFilters] = useState({
         searchQuery: '',
@@ -15,15 +15,12 @@ const Home = () => {
         condition: ''
     });
 
-    // Загружаем объявления при первом открытии страницы
     useEffect(() => {
         fetchAds();
     }, []);
 
-    // Функция запроса к нашему REST API (Spring Boot)
     const fetchAds = async () => {
         try {
-            // Формируем URL с параметрами фильтрации
             const queryParams = new URLSearchParams({
                 text: filters.searchQuery,
                 minPrice: filters.minPrice,
@@ -32,34 +29,31 @@ const Home = () => {
                 condition: filters.condition
             });
 
-            // Тот самый эндпоинт из твоей Postman коллекции!
             const response = await fetch(`http://localhost:8080/api/announcements/search?${queryParams}`);
 
             if (response.ok) {
                 const data = await response.json();
-                setAds(data); // Обновляем список на экране
+                setAds(data);
             } else {
-                console.error("Ошибка сервера при загрузке объявлений");
+                console.error("Server error while loading ads");
             }
         } catch (error) {
-            console.error("Ошибка сети:", error);
+            console.error("Network error:", error);
         }
     };
 
-    // Обработчик отправки формы поиска/фильтрации
     const handleFilterSubmit = (e) => {
         e.preventDefault();
         fetchAds();
     };
 
-    // Обработчик изменения полей ввода
     const handleChange = (e) => {
         setFilters({ ...filters, [e.target.name]: e.target.value });
     };
 
     return (
         <div className="home-container">
-            {/* Шапка с поиском */}
+            {/* Header with search */}
             <div className="header">
                 <div className="portal-logo">PORTAL</div>
                 <div className="search-section">
@@ -67,90 +61,106 @@ const Home = () => {
                         <input
                             type="text"
                             className="search-input"
-                            placeholder="🔍 Поиск объявлений..."
+                            placeholder="Search ads..."
                             name="searchQuery"
                             value={filters.searchQuery}
                             onChange={handleChange}
                         />
-                        <button type="submit" className="search-btn">Найти</button>
+                        <button type="submit" className="search-btn">Search</button>
                     </form>
                 </div>
                 <div className="auth-buttons">
-                    <a href="/login" className="btn btn-secondary">Войти</a>
-                    <a href="/register" className="btn btn-primary">Регистрация</a>
+                    <a href="/login" className="btn btn-secondary">Sign In</a>
+                    <a href="/register" className="btn btn-primary">Register</a>
                 </div>
             </div>
 
-            {/* Боковая панель с фильтрами */}
+            {/* Sidebar with filters */}
             <div className="filters-sidebar">
-                <h2 className="filters-title">🔍 Фильтры</h2>
+                <h2 className="filters-title">
+                    <Icon name="filter" size={24} />
+                    Filters
+                </h2>
                 <form onSubmit={handleFilterSubmit}>
                     <div className="filter-section">
-                        <div className="filter-label">💰 Цена</div>
-                        <div className="price-inputs">
-                            <input type="number" className="price-input" placeholder="Цена от" name="minPrice" value={filters.minPrice} onChange={handleChange} />
+                        <div className="filter-label">
+                            <Icon name="price" size={20} />
+                            Price
                         </div>
                         <div className="price-inputs">
-                            <input type="number" className="price-input" placeholder="Цена до" name="maxPrice" value={filters.maxPrice} onChange={handleChange} />
+                            <input type="number" className="price-input" placeholder="From" name="minPrice" value={filters.minPrice} onChange={handleChange} />
+                        </div>
+                        <div className="price-inputs">
+                            <input type="number" className="price-input" placeholder="To" name="maxPrice" value={filters.maxPrice} onChange={handleChange} />
                         </div>
                     </div>
 
                     <div className="filter-section">
-                        <div className="filter-label">📂 Категория</div>
+                        <div className="filter-label">
+                            <Icon name="category" size={20} />
+                            Category
+                        </div>
                         <select className="filter-select" name="category" value={filters.category} onChange={handleChange}>
-                            <option value="">Все категории</option>
-                            <option value="ELECTRONICS">Электроника</option>
-                            <option value="CLOTHING">Одежда и обувь</option>
-                            <option value="HOME">Дом и сад</option>
-                            <option value="AUTO">Автотовары</option>
-                            <option value="SERVICES">Услуги</option>
-                            <option value="OTHER">Другое</option>
+                            <option value="">All categories</option>
+                            <option value="ELECTRONICS">Electronics</option>
+                            <option value="CLOTHING">Clothing & Shoes</option>
+                            <option value="HOME">Home & Garden</option>
+                            <option value="AUTO">Auto</option>
+                            <option value="SERVICES">Services</option>
+                            <option value="OTHER">Other</option>
                         </select>
                     </div>
 
                     <div className="filter-section">
-                        <div className="filter-label">🔄 Состояние</div>
+                        <div className="filter-label">
+                            <Icon name="condition" size={20} />
+                            Condition
+                        </div>
                         <div className="filter-options">
                             <label className="filter-option">
                                 <input type="radio" name="condition" value="" checked={filters.condition === ''} onChange={handleChange} />
-                                <span>Все состояния</span>
+                                <span>All conditions</span>
                             </label>
                             <label className="filter-option">
                                 <input type="radio" name="condition" value="NEW" checked={filters.condition === 'NEW'} onChange={handleChange} />
-                                <span>Новое</span>
+                                <span>New</span>
                             </label>
                             <label className="filter-option">
                                 <input type="radio" name="condition" value="USED" checked={filters.condition === 'USED'} onChange={handleChange} />
-                                <span>Б/У</span>
+                                <span>Used</span>
                             </label>
                             <label className="filter-option">
                                 <input type="radio" name="condition" value="BROKEN" checked={filters.condition === 'BROKEN'} onChange={handleChange} />
-                                <span>Не работает</span>
+                                <span>Not working</span>
                             </label>
                         </div>
                     </div>
 
                     <div className="filter-actions">
-                        <button type="submit" className="btn-apply">Применить фильтры</button>
+                        <button type="submit" className="btn-apply">Apply Filters</button>
                         <button type="button" className="btn-reset" onClick={() => {
                             setFilters({searchQuery: '', minPrice: '', maxPrice: '', category: '', condition: ''});
                             fetchAds();
-                        }}>Сбросить</button>
+                        }}>Reset</button>
                     </div>
                 </form>
             </div>
 
-            {/* Основной контент (Сетка объявлений) */}
+            {/* Main content (Ads grid) */}
             <div className="main-content">
                 <div className="content-header">
-                    <h1 className="section-title">🎯 Объявления</h1>
-                    <div className="results-count">Найдено: {ads.length} объявлений</div>
+                    <h1 className="section-title">
+                        <Icon name="target" size={28} />
+                        Ads
+                    </h1>
+                    <div className="results-count">Found: {ads.length} ads</div>
                 </div>
 
                 {ads.length === 0 ? (
                     <div className="no-ads">
-                        <div className="no-ads-icon">📭</div>
-                        <h3>Объявлений не найдено</h3>
+                        <Icon name="empty-box" size={80} className="no-ads-icon" />
+                        <h3>No ads found</h3>
+                        <p>Try adjusting your search filters or check back later.</p>
                     </div>
                 ) : (
                     <div className="ads-grid">
@@ -167,12 +177,15 @@ const Home = () => {
                                     />
                                 </div>
                                 <div className="ad-title">{ad.title}</div>
-                                <div className="ad-price">{ad.price > 0 ? `${ad.price} руб.` : (ad.price === 0 ? 'Бесплатно' : 'Договорная')}</div>
+                                <div className="ad-price">{ad.price > 0 ? `${ad.price} RUB` : (ad.price === 0 ? 'Free' : 'Negotiable')}</div>
                                 <div className="ad-meta">
                                     <span className="ad-category">{ad.category}</span>
                                     <span className="ad-condition">{ad.condition}</span>
                                 </div>
-                                <div className="ad-location">📍 {ad.location}</div>
+                                <div className="ad-location">
+                                    <Icon name="location" size={16} />
+                                    {ad.location}
+                                </div>
                                 <div className="ad-description">{ad.description}</div>
                             </div>
                         ))}

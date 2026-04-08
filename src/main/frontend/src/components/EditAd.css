@@ -1,40 +1,61 @@
+/* Edit Ad Page - Minimalist Design */
+
 .editAdPage {
   min-height: 100vh;
   padding: 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-lavender) 0%, var(--color-purple) 100%);
 }
 
 .editAdCard {
   max-width: 760px;
   margin: 0 auto;
-  background: #fff;
-  border-radius: 14px;
-  padding: 24px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid rgba(208, 189, 244, 0.3);
+  animation: pageFadeIn 0.5s ease-out;
 }
 
 .editAdCard h1 {
-  margin: 0 0 16px;
-  color: #1f2937;
+  margin: 0 0 20px;
+  color: var(--color-dark-slate);
+  font-size: 1.8rem;
+  text-align: center;
 }
 
 .editAdCard form {
   display: grid;
-  gap: 12px;
+  gap: 16px;
 }
 
 .editAdCard label {
   font-weight: 600;
-  color: #374151;
+  color: var(--color-dark-slate);
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+  display: block;
 }
 
 .editAdCard input,
 .editAdCard textarea,
 .editAdCard select {
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 14px;
+  border: 2px solid var(--color-pale-blue);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  font-size: 1rem;
+  width: 100%;
+  transition: all var(--transition-base);
+  background: var(--color-pale-blue);
+}
+
+.editAdCard input:focus,
+.editAdCard textarea:focus,
+.editAdCard select:focus {
+  outline: none;
+  border-color: var(--color-purple);
+  background: var(--color-surface);
+  box-shadow: 0 0 0 4px rgba(132, 88, 179, 0.1);
 }
 
 .editAdCard textarea {
@@ -44,43 +65,74 @@
 
 .editAdAlert {
   margin: 8px 0 14px;
-  padding: 10px 12px;
-  border-radius: 8px;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
   font-weight: 600;
 }
 
 .editAdAlert.success {
-  background: #dcfce7;
-  color: #166534;
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .editAdAlert.error {
-  background: #fee2e2;
-  color: #991b1b;
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
 .editAdActions {
-  margin-top: 8px;
+  margin-top: 12px;
   display: flex;
-  gap: 10px;
+  gap: 12px;
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
 .editAdActions button {
   border: none;
-  border-radius: 8px;
-  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  padding: 14px 24px;
   cursor: pointer;
-  color: #fff;
-  background: #2563eb;
+  color: white;
+  background: linear-gradient(135deg, var(--color-purple), var(--color-lavender));
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all var(--transition-base);
+  box-shadow: 0 4px 14px rgba(132, 88, 179, 0.25);
+}
+
+.editAdActions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(132, 88, 179, 0.35);
 }
 
 .editAdActions button.secondary {
-  background: #6b7280;
+  background: var(--color-text-secondary);
+  box-shadow: none;
+}
+
+.editAdActions button.secondary:hover {
+  background: var(--color-dark-slate);
 }
 
 .editAdActions button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+  transform: none;
 }
 
+@media (max-width: 600px) {
+  .editAdCard {
+    padding: 24px 20px;
+  }
+  
+  .editAdActions {
+    flex-direction: column;
+  }
+  
+  .editAdActions button {
+    width: 100%;
+  }
+}
