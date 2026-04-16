@@ -8,6 +8,20 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 - `/moderator` - moderator dashboard
 - `/moderator/history` - moderation history
 
+## Yandex Maps setup
+
+1. Create a local env file:
+
+```zsh
+cp .env.example .env.local
+```
+
+2. Put your key into `REACT_APP_YANDEX_MAPS_API_KEY`.
+
+3. Restart `npm start` after changing env vars.
+
+Map picker is available on ad create/edit forms: click on map -> coordinates are shown under the map and the nearest address is written to the `location` field.
+
 ## Available Scripts
 
 In the project directory, you can run:

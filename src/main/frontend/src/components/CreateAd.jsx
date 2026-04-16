@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './CreateAd.css'; // Скопируй сюда стили из тега <style> файла create-ad.jsp
 import ProfanityWarningModal from './ProfanityWarningModal';
+import YandexLocationPicker from './YandexLocationPicker.jsx';
 
 const API_BASE = 'http://localhost:8080';
 
@@ -98,6 +99,10 @@ const CreateAd = () => {
         const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
         setPhoto(file);
     };
+
+    const handleAddressSelect = useCallback((address) => {
+        setFormData((prev) => ({ ...prev, location: address }));
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -243,7 +248,13 @@ const CreateAd = () => {
                         </div>
                         <div className="form-group">
                             <label className="required">Местоположение</label>
-                            <input type="text" name="location" className="form-control" required onChange={handleChange} />
+                            <div className="location-preview">
+                                <span className="location-preview-label">Выбранный адрес:</span>
+                                <span className="location-preview-value">
+                                    {formData.location || 'пока не выбран'}
+                                </span>
+                            </div>
+                            <YandexLocationPicker onAddressChange={handleAddressSelect} />
                         </div>
                     </div>
 

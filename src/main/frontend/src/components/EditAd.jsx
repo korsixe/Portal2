@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import './EditAd.css';
 import ProfanityWarningModal from './ProfanityWarningModal';
+import YandexLocationPicker from './YandexLocationPicker.jsx';
 
 const API_BASE = 'http://localhost:8080';
 
@@ -78,7 +79,8 @@ const EditAd = () => {
         });
 
         if (!response.ok) {
-          throw new Error('Не удалось загрузить объявление');
+          setMessage({ type: 'error', text: 'Не удалось загрузить объявление' });
+          return;
         }
 
         const ad = await response.json();
@@ -118,6 +120,10 @@ const EditAd = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleAddressSelect = useCallback((address) => {
+    setFormData((prev) => ({ ...prev, location: address }));
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -156,7 +162,8 @@ const EditAd = () => {
 
       if (!response.ok) {
         const text = await response.text();
-        throw new Error(text || 'Ошибка при сохранении');
+        setMessage({ type: 'error', text: text || 'Ошибка при сохранении' });
+        return;
       }
 
       const savedAd = await response.json();
@@ -207,7 +214,11 @@ const EditAd = () => {
           <input name="subcategory" value={formData.subcategory} onChange={handleChange} required />
 
           <label>Местоположение</label>
-          <input name="location" value={formData.location} onChange={handleChange} required />
+          <div className="location-preview">
+            <span className="location-preview-label">Выбранный адрес:</span>
+            <span className="location-preview-value">{formData.location || 'пока не выбран'}</span>
+          </div>
+          <YandexLocationPicker onAddressChange={handleAddressSelect} />
 
           <label>Состояние</label>
           <select name="condition" value={formData.condition} onChange={handleChange}>

@@ -96,6 +96,25 @@
         margin-bottom: 20px;
       }
 
+      .location-preview {
+        margin-top: 10px;
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: rgba(67, 97, 238, 0.08);
+        border: 1px solid rgba(67, 97, 238, 0.18);
+        font-size: 0.95rem;
+        color: var(--dark);
+      }
+
+      .location-preview-label {
+        font-weight: 700;
+        margin-right: 8px;
+      }
+
+      .location-preview-value {
+        word-break: break-word;
+      }
+
       label {
         display: block;
         margin-bottom: 8px;
