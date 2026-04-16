@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Login.css';
+import Icon from './Icon';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -24,7 +25,7 @@ const Login = () => {
         setIsLoggedIn(true);
       }
     } catch (error) {
-      console.log('Не авторизован');
+      console.log('Not authenticated');
     }
   };
 
@@ -45,17 +46,17 @@ const Login = () => {
 
       if (response.ok) {
         setMessageType('success');
-        setMessage('✅ Вход выполнен успешно!');
+        setMessage('Login successful!');
         setTimeout(() => {
           window.location.href = '/dashboard';
         }, 1000);
       } else {
         setMessageType('error');
-        setMessage('❌ Неверный email или пароль');
+        setMessage('Invalid email or password');
       }
     } catch (error) {
       setMessageType('error');
-      setMessage('❌ Ошибка сети. Сервер недоступен.');
+      setMessage('Network error. Server unavailable.');
     } finally {
       setLoading(false);
     }
@@ -70,7 +71,7 @@ const Login = () => {
       setIsLoggedIn(false);
       window.location.href = '/login';
     } catch (error) {
-      console.error('Ошибка выхода:', error);
+      console.error('Logout error:', error);
     }
   };
 
@@ -78,11 +79,11 @@ const Login = () => {
     return (
         <div className="portal-container loginContainer">
           <div className="portal-logo">PORTAL</div>
-          <div className="portal-subtitle">Вход</div>
+          <div className="portal-subtitle">Sign In</div>
           <div className="button-group">
-            <a href="/dashboard" className="btn btn-primary">Перейти в личный кабинет</a>
-            <a href="/" className="btn btn-secondary">На главную</a>
-            <button onClick={handleLogout} className="btn btn-danger">Выйти</button>
+            <a href="/dashboard" className="btn btn-primary">Go to Dashboard</a>
+            <a href="/" className="btn btn-secondary">Home</a>
+            <button onClick={handleLogout} className="btn btn-danger">Sign Out</button>
           </div>
         </div>
     );
@@ -91,10 +92,11 @@ const Login = () => {
   return (
       <div className="portal-container loginContainer">
         <div className="portal-logo">PORTAL</div>
-        <div className="portal-subtitle">Вход</div>
+        <div className="portal-subtitle">Sign In</div>
 
         {message && (
             <div className={`message ${messageType}`}>
+              <Icon name={messageType === 'success' ? 'success' : 'error'} size={20} />
               {message}
             </div>
         )}
@@ -114,23 +116,23 @@ const Login = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Пароль</label>
+            <label htmlFor="password">Password</label>
             <input
                 type="password"
                 id="password"
                 name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Введите ваш пароль"
+                placeholder="Enter your password"
                 required
             />
           </div>
 
           <div className="button-group">
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Вход...' : 'Войти'}
+              {loading ? 'Signing in...' : 'Sign In'}
             </button>
-            <a href="/register" className="btn btn-secondary">Регистрация</a>
+            <a href="/register" className="btn btn-secondary">Register</a>
           </div>
         </form>
       </div>
