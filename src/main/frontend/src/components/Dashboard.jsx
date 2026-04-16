@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 import ChangePasswordModal from './ChangePasswordModal';
 import NotificationBell from './NotificationBell';
+import Icon from './Icon';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -12,7 +13,6 @@ const Dashboard = () => {
   const [activeModal, setActiveModal] = useState(null);
   const [deletePassword, setDeletePassword] = useState('');
 
-  // Загрузка данных
   useEffect(() => {
     loadUserData();
   }, []);
@@ -31,7 +31,6 @@ const Dashboard = () => {
   const loadUserData = async () => {
     setLoading(true);
     try {
-      // Получаем данные пользователя
       const userResponse = await fetch('http://localhost:8080/api/users/me', {
         method: 'GET',
         credentials: 'include'
@@ -42,13 +41,12 @@ const Dashboard = () => {
           window.location.href = '/login';
           return;
         }
-        setErrorMessage('Ошибка загрузки пользователя');
+        setErrorMessage('Error loading user data');
         return;
       }
       const userData = await userResponse.json();
       setUser(userData);
 
-      // Получаем объявления пользователя
       const adsResponse = await fetch('http://localhost:8080/api/announcements/my', {
         method: 'GET',
         credentials: 'include'
@@ -60,27 +58,24 @@ const Dashboard = () => {
         setAds(activeAds);
       }
     } catch (error) {
-      console.error('Ошибка загрузки данных:', error);
-      setErrorMessage('Не удалось загрузить данные');
+      console.error('Error loading data:', error);
+      setErrorMessage('Failed to load data');
     } finally {
       setLoading(false);
     }
   };
 
-  // Обработчик смены пароля (использует ChangePasswordRequest)
   const handlePasswordChanged = async (currentPassword, newPassword, confirmPassword) => {
-    // Валидация
     if (newPassword !== confirmPassword) {
-      setErrorMessage('❌ Пароли не совпадают!');
+      setErrorMessage('Passwords do not match!');
       return false;
     }
     if (newPassword.length < 8) {
-      setErrorMessage('❌ Пароль должен содержать минимум 8 символов!');
+      setErrorMessage('Password must be at least 8 characters!');
       return false;
     }
 
     try {
-      // Отправляем запрос в формате ChangePasswordRequest
       const response = await fetch('http://localhost:8080/api/users/change-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -95,26 +90,25 @@ const Dashboard = () => {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        setSuccessMessage(data.message || '✅ Пароль успешно изменен!');
-        // Обновляем пользователя в сессии
+        setSuccessMessage(data.message || 'Password changed successfully!');
         if (data.user) {
           setUser(data.user);
         }
         return true;
       } else {
-        setErrorMessage(data.message || '❌ Ошибка при смене пароля');
+        setErrorMessage(data.message || 'Error changing password');
         return false;
       }
     } catch (error) {
-      console.error('Ошибка:', error);
-      setErrorMessage('❌ Ошибка при смене пароля');
+      console.error('Error:', error);
+      setErrorMessage('Error changing password');
       return false;
     }
   };
 
   const handleDeleteAccount = async (e) => {
     e.preventDefault();
-    const confirm = window.confirm('❗ Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить!');
+    const confirm = window.confirm('Are you sure you want to delete your account? This action cannot be undone!');
     if (!confirm) return;
 
     try {
@@ -126,16 +120,16 @@ const Dashboard = () => {
       });
 
       if (response.ok) {
-        setSuccessMessage('Аккаунт успешно удален');
+        setSuccessMessage('Account deleted successfully');
         setTimeout(() => {
           window.location.href = '/login';
         }, 2000);
       } else {
         const error = await response.text();
-        setErrorMessage('Ошибка: ' + error);
+        setErrorMessage('Error: ' + error);
       }
     } catch (error) {
-      setErrorMessage('Ошибка при удалении аккаунта');
+      setErrorMessage('Error deleting account');
     }
   };
 
@@ -147,13 +141,13 @@ const Dashboard = () => {
       });
       window.location.href = '/login';
     } catch (error) {
-      console.error('Ошибка выхода:', error);
+      console.error('Logout error:', error);
       window.location.href = '/login';
     }
   };
 
   const handleDeleteAd = async (adId) => {
-    if (!window.confirm('Вы уверены, что хотите удалить это объявление?')) return;
+    if (!window.confirm('Are you sure you want to delete this ad?')) return;
 
     try {
       const response = await fetch(`http://localhost:8080/api/announcements/${adId}`, {
@@ -162,13 +156,13 @@ const Dashboard = () => {
       });
 
       if (response.ok) {
-        setSuccessMessage('Объявление удалено');
+        setSuccessMessage('Ad deleted');
         loadUserData();
       } else {
-        setErrorMessage('Ошибка при удалении');
+        setErrorMessage('Error deleting ad');
       }
     } catch (error) {
-      setErrorMessage('Ошибка при удалении');
+      setErrorMessage('Error deleting ad');
     }
   };
 
@@ -184,19 +178,19 @@ const Dashboard = () => {
   };
 
   const formatPrice = (price) => {
-    if (price === -1) return 'Договорная';
-    if (price === 0) return 'Бесплатно';
-    return `${price.toLocaleString()} руб.`;
+    if (price === -1) return 'Negotiable';
+    if (price === 0) return 'Free';
+    return `${price.toLocaleString()} RUB`;
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'Не указано';
+    if (!dateString) return 'Not specified';
     const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU');
+    return date.toLocaleDateString('en-US');
   };
 
   const formatAddress = (address) => {
-    if (!address) return 'Не указан';
+    if (!address) return 'Not specified';
     if (typeof address === 'string') return address;
     if (address.fullAddress && String(address.fullAddress).trim()) return address.fullAddress;
 
@@ -204,39 +198,39 @@ const Dashboard = () => {
       .filter(Boolean)
       .map((v) => String(v).trim())
       .filter(Boolean);
-    return parts.length ? parts.join(', ') : 'Не указан';
+    return parts.length ? parts.join(', ') : 'Not specified';
   };
 
   const getCategoryDisplayName = (category) => {
     const categoryMap = {
-      'ELECTRONICS': 'Электроника',
-      'CLOTHING': 'Одежда',
-      'BOOKS': 'Книги',
-      'FURNITURE': 'Мебель',
-      'SPORTS': 'Спорт',
-      'OTHER': 'Другое'
+      'ELECTRONICS': 'Electronics',
+      'CLOTHING': 'Clothing',
+      'BOOKS': 'Books',
+      'FURNITURE': 'Furniture',
+      'SPORTS': 'Sports',
+      'OTHER': 'Other'
     };
     return categoryMap[category] || category;
   };
 
   const getConditionDisplayName = (condition) => {
     const conditionMap = {
-      'NEW': 'Новое',
-      'LIKE_NEW': 'Как новое',
-      'GOOD': 'Хорошее',
-      'FAIR': 'Удовлетворительное',
-      'POOR': 'Плохое'
+      'NEW': 'New',
+      'LIKE_NEW': 'Like New',
+      'GOOD': 'Good',
+      'FAIR': 'Fair',
+      'POOR': 'Poor'
     };
     return conditionMap[condition] || condition;
   };
 
   const getStatusDisplayName = (status) => {
     const statusMap = {
-      'ACTIVE': 'Активно',
-      'DRAFT': 'Черновик',
-      'UNDER_MODERATION': 'На модерации',
-      'ARCHIVED': 'Архивировано',
-      'DELETED': 'Удалено'
+      'ACTIVE': 'Active',
+      'DRAFT': 'Draft',
+      'UNDER_MODERATION': 'Under Moderation',
+      'ARCHIVED': 'Archived',
+      'DELETED': 'Deleted'
     };
     return statusMap[status] || status;
   };
@@ -248,7 +242,7 @@ const Dashboard = () => {
     return (
         <div className="loadingContainer">
           <div className="loader"></div>
-          <p>Загрузка...</p>
+          <p>Loading...</p>
         </div>
     );
   }
@@ -256,9 +250,9 @@ const Dashboard = () => {
   if (!user) {
     return (
         <div className="errorContainer">
-          <p>Не удалось загрузить данные пользователя</p>
+          <p>Failed to load user data</p>
           <button onClick={() => window.location.href = '/login'} className="btnPrimary">
-            Войти снова
+            Sign In Again
           </button>
         </div>
     );
@@ -268,14 +262,14 @@ const Dashboard = () => {
       <div className="dashboardContainer">
         {successMessage && (
             <div className="successMessage">
-              <span className="successIcon">🎉</span>
+              <Icon name="success" size={24} className="successIcon" />
               <span>{successMessage}</span>
             </div>
         )}
 
         {errorMessage && (
             <div className="errorMessage">
-              <span className="errorIcon">❌</span>
+              <Icon name="error" size={24} className="errorIcon" />
               <span>{errorMessage}</span>
             </div>
         )}
@@ -294,19 +288,19 @@ const Dashboard = () => {
 
             <div className="avatarCenter">
               <div className="avatarCircle">
-                <span className="avatarIcon">👤</span>
+                <Icon name="user" size={40} className="avatarIcon" />
                 <div className="onlineStatus"></div>
               </div>
             </div>
 
             <div className="buttonsVertical">
               <button onClick={() => window.location.href = '/edit-profile'} className="btnPrimary">
-                <span className="btnIcon">✏️</span>
-                Редактировать профиль
+                <Icon name="edit" size={18} className="btnIcon" />
+                Edit Profile
               </button>
               <button onClick={() => openModal('account')} className="btnPrimary">
-                <span className="btnIcon">⚙️</span>
-                Управление аккаунтом
+                <Icon name="settings" size={18} className="btnIcon" />
+                Account Settings
               </button>
             </div>
           </div>
@@ -315,12 +309,12 @@ const Dashboard = () => {
         <div className="profileActions">
           {user.moderator && (
               <button onClick={() => window.location.href = '/moderator/dashboard'} className="btnModerator">
-                Кабинет модератора
+                Moderator Panel
               </button>
           )}
           {user.admin && (
               <button onClick={() => window.location.href = '/admin/dashboard'} className="btnAdmin">
-                Админка
+                Admin Panel
               </button>
           )}
         </div>
@@ -328,84 +322,97 @@ const Dashboard = () => {
         <div className="stats">
           <div className="statCard">
             <div className="statNumber">{ads.length}</div>
-            <div className="statLabel">Объявлений</div>
+            <div className="statLabel">Ads</div>
           </div>
           <div className="statCard">
             <div className="statNumber">{user.rating?.toFixed(1) || '0.0'}</div>
-            <div className="statLabel">Рейтинг</div>
+            <div className="statLabel">Rating</div>
           </div>
           <div className="statCard">
             <div className="statNumber">{user.coins || 0}</div>
-            <div className="statLabel">Коинов</div>
+            <div className="statLabel">Coins</div>
           </div>
           <div className="statCard">
             <div className="statNumber">{user.course || 1}</div>
-            <div className="statLabel">Курс</div>
+            <div className="statLabel">Course</div>
           </div>
         </div>
 
         <div className="userInfo">
           <div className="infoCard">
-            <h3>👤 Основная информация</h3>
+            <h3>
+              <Icon name="user" size={24} />
+              Basic Information
+            </h3>
             <div className="infoItem">
-              <span className="infoLabel">Имя:</span>
-              <span className="infoValue">{user.name || 'Не указано'}</span>
+              <span className="infoLabel">Name:</span>
+              <span className="infoValue">{user.name || 'Not specified'}</span>
             </div>
             <div className="infoItem">
               <span className="infoLabel">Email:</span>
               <span className="infoValue">{user.email}</span>
             </div>
             <div className="infoItem">
-              <span className="infoLabel">Адрес:</span>
+              <span className="infoLabel">Address:</span>
               <span className="infoValue">{formatAddress(user.address)}</span>
             </div>
           </div>
 
           <div className="infoCard">
-            <h3>🎓 Учебная информация</h3>
+            <h3>
+              <Icon name="graduation" size={24} />
+              Academic Information
+            </h3>
             <div className="infoItem">
-              <span className="infoLabel">Учебная программа:</span>
-              <span className="infoValue">{user.studyProgram || 'Не указана'}</span>
+              <span className="infoLabel">Study Program:</span>
+              <span className="infoValue">{user.studyProgram || 'Not specified'}</span>
             </div>
             <div className="infoItem">
-              <span className="infoLabel">Курс:</span>
-              <span className="infoValue">{user.course || 1} курс</span>
+              <span className="infoLabel">Course:</span>
+              <span className="infoValue">{user.course || 1} year</span>
             </div>
           </div>
 
           <div className="infoCard">
-            <h3>⭐ Рейтинг и коины</h3>
+            <h3>
+              <Icon name="star" size={24} />
+              Rating & Coins
+            </h3>
             <div className="infoItem">
-              <span className="infoLabel">Рейтинг:</span>
+              <span className="infoLabel">Rating:</span>
               <span className="infoValue">
               <span className="ratingStars">
                 {[...Array(5)].map((_, i) => (
-                    <span key={i}>{i < Math.round(user.rating || 0) ? '★' : '☆'}</span>
+                    <span key={i}>{i < Math.round(user.rating || 0) ? '\u2605' : '\u2606'}</span>
                 ))}
               </span>
               ({(user.rating || 0).toFixed(1)})
             </span>
             </div>
             <div className="infoItem">
-              <span className="infoLabel">Коины:</span>
-              <span className="infoValue coins">{user.coins || 0} 🪙</span>
+              <span className="infoLabel">Coins:</span>
+              <span className="infoValue coins">
+                {user.coins || 0}
+                <Icon name="coin" size={18} />
+              </span>
             </div>
           </div>
         </div>
 
         <div className="adsSection">
           <h3>
-            📋 Мои объявления
+            <Icon name="list" size={24} />
+            My Ads
             <button onClick={() => window.location.href = '/create-ad'} className="btnSuccess">
-              + Создать объявление
+              + Create Ad
             </button>
           </h3>
 
           <div className="adList">
             {ads.length === 0 ? (
                 <div className="noAds">
-                  <h4>У вас пока нет объявлений</h4>
-                  <p>Создайте первое объявление, чтобы начать продавать или обмениваться вещами!</p>
+                  <h4>You have no ads yet</h4>
+                  <p>Create your first ad to start selling or trading items!</p>
                 </div>
             ) : (
                 ads.map(ad => (
@@ -419,16 +426,25 @@ const Dashboard = () => {
                   </span>
                       </div>
                       <div className="adPrice">{formatPrice(ad.price)}</div>
-                      <div className="adLocation">📍 {ad.location || 'Не указано'}</div>
+                      <div className="adLocation">
+                        <Icon name="location" size={16} />
+                        {ad.location || 'Not specified'}
+                      </div>
                       <div className="adDescription">{ad.description}</div>
-                      <div className="adViews">👁️ {ad.viewCount || 0} просмотров</div>
-                      <div className="adDate">📅 {formatDate(ad.createdAt)}</div>
+                      <div className="adViews">
+                        <Icon name="view" size={14} />
+                        {ad.viewCount || 0} views
+                      </div>
+                      <div className="adDate">
+                        <Icon name="calendar" size={14} />
+                        {formatDate(ad.createdAt)}
+                      </div>
                       <div className="adActions">
                         <button onClick={() => window.location.href = `/edit-ad?adId=${ad.id}`} className="btnEdit">
-                          Редактировать
+                          Edit
                         </button>
                         <button onClick={() => handleDeleteAd(ad.id)} className="btnDanger">
-                          Удалить
+                          Delete
                         </button>
                       </div>
                     </div>
@@ -439,35 +455,38 @@ const Dashboard = () => {
 
         <div className="actionButtons">
           <button onClick={() => window.location.href = '/support'} className="btnPrimary">
-            Техподдержка
+            Support
           </button>
           <button onClick={() => window.location.href = '/'} className="btnPrimary">
-            На главную
+            Home
           </button>
           <button onClick={handleLogout} className="btnSecondary">
-            Выйти
+            Sign Out
           </button>
         </div>
 
-        {/* Модальное окно управления аккаунтом */}
+        {/* Account Management Modal */}
         {activeModal === 'account' && (
             <div className="modal" onClick={(e) => e.target === e.currentTarget && closeModals()}>
               <div className="modalContent">
                 <span className="close" onClick={closeModals}>&times;</span>
-                <h3>🔧 Управление аккаунтом</h3>
+                <h3>
+                  <Icon name="settings" size={28} />
+                  Account Management
+                </h3>
                 <div className="buttonGroup">
                   <button onClick={() => openModal('password')} className="btnPrimary">
-                    Изменить пароль
+                    Change Password
                   </button>
                   <button onClick={() => openModal('delete')} className="btnDanger">
-                    Удалить аккаунт
+                    Delete Account
                   </button>
                 </div>
               </div>
             </div>
         )}
 
-        {/* Модальное окно смены пароля - используем отдельный компонент */}
+        {/* Change Password Modal */}
         {activeModal === 'password' && (
             <ChangePasswordModal
                 onClose={closeModals}
@@ -475,20 +494,26 @@ const Dashboard = () => {
             />
         )}
 
-        {/* Модальное окно удаления аккаунта */}
+        {/* Delete Account Modal */}
         {activeModal === 'delete' && (
             <div className="modal" onClick={(e) => e.target === e.currentTarget && closeModals()}>
               <div className="modalContent">
                 <span className="close" onClick={closeModals}>&times;</span>
-                <h3>🗑️ Удаление аккаунта</h3>
+                <h3>
+                  <Icon name="delete" size={28} />
+                  Delete Account
+                </h3>
                 <div className="warningBox">
-                  <h4>⚠️ Внимание!</h4>
-                  <p>Это действие необратимо. Все ваши данные, включая объявления, будут удалены без возможности восстановления.</p>
+                  <h4>
+                    <Icon name="warning" size={20} />
+                    Warning!
+                  </h4>
+                  <p>This action is irreversible. All your data, including ads, will be permanently deleted.</p>
                 </div>
-                <p>Для подтверждения введите ваш пароль:</p>
+                <p>Enter your password to confirm:</p>
                 <form onSubmit={handleDeleteAccount}>
                   <div className="formGroup">
-                    <label>Текущий пароль</label>
+                    <label>Current Password</label>
                     <input
                         type="password"
                         required
@@ -497,8 +522,8 @@ const Dashboard = () => {
                     />
                   </div>
                   <div className="buttonGroup">
-                    <button type="submit" className="btnDanger">Удалить аккаунт</button>
-                    <button type="button" onClick={closeModals} className="btnSecondary">Отмена</button>
+                    <button type="submit" className="btnDanger">Delete Account</button>
+                    <button type="button" onClick={closeModals} className="btnSecondary">Cancel</button>
                   </div>
                 </form>
               </div>

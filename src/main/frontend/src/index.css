@@ -1,10 +1,58 @@
-body {
+/* Portal Theme - Minimalist Design */
+:root {
+  /* Primary Color Palette */
+  --color-light-blue: #A0D2EB;
+  --color-pale-blue: #E5EAF5;
+  --color-lavender: #D0BDF4;
+  --color-purple: #8458B3;
+  --color-dark-slate: #494D5F;
+  
+  /* Semantic Colors */
+  --color-primary: #8458B3;
+  --color-primary-light: #D0BDF4;
+  --color-primary-dark: #6a4690;
+  --color-secondary: #A0D2EB;
+  --color-background: #E5EAF5;
+  --color-surface: #ffffff;
+  --color-text-primary: #494D5F;
+  --color-text-secondary: #6b7280;
+  --color-border: #D0BDF4;
+  --color-success: #10b981;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(73, 77, 95, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(73, 77, 95, 0.1), 0 2px 4px -1px rgba(73, 77, 95, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(73, 77, 95, 0.1), 0 4px 6px -2px rgba(73, 77, 95, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(73, 77, 95, 0.1), 0 10px 10px -5px rgba(73, 77, 95, 0.04);
+  
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 300ms ease;
+  --transition-slow: 500ms ease;
+}
+
+* {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  line-height: 1.6;
 }
 
 #root {
@@ -28,6 +76,129 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* Page Transition Animations */
+@keyframes pageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pageSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pageScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Apply page transitions to main containers */
+.home-container,
+.dashboardContainer,
+.portal-container,
+.edit-container,
+.errorPage,
+.successPage,
+.successEditPage,
+.supportPage,
+.adDetailsPage,
+.admin-page,
+.moderator-page {
+  animation: pageFadeIn 0.4s ease-out;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus visible styles for accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-pale-blue);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-lavender);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-purple);
+}
+
+/* Selection styling */
+::selection {
+  background: var(--color-lavender);
+  color: var(--color-dark-slate);
+}
+
+/* Icon base styles */
+.icon {
+  flex-shrink: 0;
+  transition: none;
+  pointer-events: none;
+}
+
+/* Button hover effects */
+button, .btn {
+  transition: all var(--transition-base);
+}
+
+/* Link transitions */
+a {
+  transition: color var(--transition-fast);
+}
+
+/* Card hover effect */
+.card-hover {
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-xl);
 }
