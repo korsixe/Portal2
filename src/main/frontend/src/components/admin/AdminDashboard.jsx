@@ -100,7 +100,7 @@ function AdminDashboard() {
     } catch (error) {
       console.error('Logout failed:', error);
     }
-    globalThis.location.href = '/login';
+    window.location.href = '/login';
   };
 
   if (accessDenied) {

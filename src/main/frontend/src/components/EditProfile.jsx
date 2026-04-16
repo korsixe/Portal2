@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import './EditProfile.css';
+import YandexLocationPicker from './YandexLocationPicker.jsx';
 
 const API_BASE_URL = 'http://localhost:8080';
 
 const EditProfile = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState({ text: '', type: '' });
-  const [passwordData, setPasswordData] = useState({
-    newPassword: '',
-    confirmPassword: ''
-  });
+   const [message, setMessage] = useState({ text: '', type: '' });
+   const [fieldErrors, setFieldErrors] = useState({});
+   const [passwordData, setPasswordData] = useState({
+     newPassword: '',
+     confirmPassword: ''
+   });
   const [formData, setFormData] = useState({
     name: '',
     addressFull: '',
@@ -66,11 +68,11 @@ const EditProfile = () => {
       });
 
     } catch (error) {
-      console.error('Ошибка загрузки пользователя:', error);
-      setMessage({
-        text: '❌ Ошибка соединения с сервером',
-        type: 'error'
-      });
+       console.error('Ошибка загрузки пользователя:', error);
+       setMessage({
+         text: 'Ошибка соединения с сервером',
+         type: 'error'
+       });
     } finally {
       setLoading(false);
     }
@@ -100,100 +102,159 @@ const EditProfile = () => {
     }
   };
 
-  const updateProfile = async (profileData) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/users/${user.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(profileData)
-      });
+   const updateProfile = async (profileData) => {
+     try {
+       const response = await fetch(`${API_BASE_URL}/api/users/${user.id}`, {
+         method: 'PUT',
+         headers: { 'Content-Type': 'application/json' },
+         credentials: 'include',
+         body: JSON.stringify(profileData)
+       });
 
-      if (response.ok) {
-        const updatedUser = await response.json();
-        setUser(updatedUser);
-        return { success: true, message: 'Профиль успешно обновлен' };
-      } else {
-        const errorMsg = await response.text();
-        return { success: false, message: errorMsg || 'Ошибка обновления профиля' };
-      }
-    } catch (error) {
-      console.error('Ошибка обновления профиля:', error);
-      return { success: false, message: 'Ошибка соединения' };
-    }
-  };
+       if (response.ok) {
+         const updatedUser = await response.json();
+         setUser(updatedUser);
+         return { success: true, message: 'Профиль успешно обновлен' };
+       } else {
+         let errorMsg = 'Ошибка обновления профиля';
+         let fieldError = null;
+         
+         try {
+           // Пробуем прочитать как JSON
+           const errorData = await response.json();
+           if (errorData && errorData.message) {
+             errorMsg = errorData.message;
+             fieldError = errorData.field;
+           } else {
+             errorMsg = 'Ошибка при обновлении профиля';
+           }
+         } catch (parseError) {
+           console.warn('Failed to parse error response as JSON:', parseError);
+           errorMsg = 'Ошибка при обновлении профиля';
+         }
+         
+         return { success: false, message: errorMsg, field: fieldError };
+       }
+     } catch (error) {
+       console.error('Ошибка обновления профиля:', error);
+       return { success: false, message: 'Ошибка соединения' };
+     }
+   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+   const handleInputChange = (e) => {
+     const { name, value } = e.target;
+     setFormData(prev => ({ ...prev, [name]: value }));
+     
+     // Валидация имени в реальном времени
+     if (name === 'name') {
+       if (!value.trim()) {
+         setFieldErrors(prev => ({ ...prev, name: 'Имя не может быть пустым' }));
+       } else if (value.includes(' ')) {
+         setFieldErrors(prev => ({ ...prev, name: 'Имя должно быть без пробелов!' }));
+       } else {
+         setFieldErrors(prev => ({ ...prev, name: '' }));
+       }
+     } else if (fieldErrors[name]) {
+       // Очищаем ошибку для других полей при редактировании
+       setFieldErrors(prev => ({ ...prev, [name]: '' }));
+     }
+   };
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
     setPasswordData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleAddressSelect = useCallback((address) => {
+    setFormData((prev) => ({
+      ...prev,
+      addressFull: address,
+      addressCity: '',
+      addressStreet: '',
+      addressHouseNumber: '',
+      addressBuilding: ''
+    }));
+  }, []);
 
-    // Валидация имени
-    if (!formData.name.trim()) {
-      setMessage({ text: '❌ Имя не может быть пустым', type: 'error' });
-      return;
-    }
+   const handleSubmit = async (e) => {
+     e.preventDefault();
+     setFieldErrors({});
 
-    // Проверка пароля
-    if (passwordData.newPassword) {
-      if (passwordData.newPassword !== passwordData.confirmPassword) {
-        setMessage({ text: '❌ Новые пароли не совпадают', type: 'error' });
-        return;
+     // Валидация имени
+     if (!formData.name.trim()) {
+       setFieldErrors(prev => ({ ...prev, name: 'Имя не может быть пустым' }));
+       setMessage({ text: 'Пожалуйста, заполните все обязательные поля', type: 'error' });
+       return;
+     }
+
+     // Проверка пароля
+     if (passwordData.newPassword) {
+       if (passwordData.newPassword !== passwordData.confirmPassword) {
+         setFieldErrors(prev => ({ 
+           ...prev, 
+           confirmPassword: 'Новые пароли не совпадают'
+         }));
+         setMessage({ text: 'Пароли не совпадают', type: 'error' });
+         return;
+       }
+       if (passwordData.newPassword.length < 8) {
+         setFieldErrors(prev => ({ 
+           ...prev, 
+           newPassword: 'Пароль должен содержать минимум 8 символов'
+         }));
+         setMessage({ text: 'Пароль слишком короткий', type: 'error' });
+         return;
+       }
+     }
+
+     setMessage({ text: 'Сохранение изменений...', type: 'info' });
+
+     // Сначала меняем пароль, если нужно
+     if (passwordData.newPassword) {
+       const passwordResult = await changePassword(passwordData.newPassword);
+
+       if (!passwordResult.success) {
+         setFieldErrors(prev => ({ ...prev, password: passwordResult.message }));
+         setMessage({ text: passwordResult.message, type: 'error' });
+         return;
+       }
+
+       setMessage({ text: 'Пароль успешно изменен!', type: 'success' });
+       setPasswordData({ newPassword: '', confirmPassword: '' });
+     }
+
+     // Обновляем данные профиля
+     const profileData = {
+       name: formData.name.trim(),
+       address: {
+         fullAddress: formData.addressFull,
+         city: formData.addressCity,
+         street: formData.addressStreet,
+         houseNumber: formData.addressHouseNumber,
+         building: formData.addressBuilding
+       },
+       studyProgram: formData.studyProgram,
+       course: parseInt(formData.course)
+     };
+
+      const profileResult = await updateProfile(profileData);
+
+      if (profileResult.success) {
+        setMessage({ text: 'Профиль успешно обновлен!', type: 'success' });
+        setFieldErrors({});
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 1500);
+      } else {
+        // Если есть конкретное поле с ошибкой, показываем её под полем
+        if (profileResult.field) {
+          setFieldErrors(prev => ({ ...prev, [profileResult.field]: profileResult.message }));
+        } else {
+          setFieldErrors(prev => ({ ...prev, general: profileResult.message }));
+        }
+        setMessage({ text: profileResult.message, type: 'error' });
       }
-      if (passwordData.newPassword.length < 8) {
-        setMessage({ text: '❌ Пароль должен содержать минимум 8 символов', type: 'error' });
-        return;
-      }
-    }
-
-    setMessage({ text: '⏳ Сохранение изменений...', type: 'info' });
-
-    // Сначала меняем пароль, если нужно
-    if (passwordData.newPassword) {
-      const passwordResult = await changePassword(passwordData.newPassword);
-
-      if (!passwordResult.success) {
-        setMessage({ text: `❌ ${passwordResult.message}`, type: 'error' });
-        return;
-      }
-
-      setMessage({ text: '✅ Пароль успешно изменен!', type: 'success' });
-      setPasswordData({ newPassword: '', confirmPassword: '' });
-    }
-
-    // Обновляем данные профиля
-    const profileData = {
-      name: formData.name.trim(),
-      address: {
-        fullAddress: formData.addressFull,
-        city: formData.addressCity,
-        street: formData.addressStreet,
-        houseNumber: formData.addressHouseNumber,
-        building: formData.addressBuilding
-      },
-      studyProgram: formData.studyProgram,
-      course: parseInt(formData.course)
-    };
-
-    const profileResult = await updateProfile(profileData);
-
-    if (profileResult.success) {
-      setMessage({ text: '✅ Профиль успешно обновлен!', type: 'success' });
-      setTimeout(() => {
-        window.location.href = '/dashboard';
-      }, 1500);
-    } else {
-      setMessage({ text: `❌ ${profileResult.message}`, type: 'error' });
-    }
-  };
+   };
 
   const handleLogout = async () => {
     try {
@@ -247,12 +308,6 @@ const EditProfile = () => {
         <div className="portal-logo">PORTAL</div>
         <div className="page-title">Редактирование профиля</div>
 
-        {message.text && (
-            <div className={`message ${message.type}`}>
-              {message.text}
-            </div>
-        )}
-
         <div className="current-info">
           <strong>Email:</strong> {user.email}<br />
           <strong>ID пользователя:</strong> {user.id}<br />
@@ -260,82 +315,35 @@ const EditProfile = () => {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="name">Имя пользователя *</label>
-            <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                placeholder="Введите ваше имя"
-                required
-            />
-          </div>
+           <div className="form-group">
+              <label htmlFor="name">Имя пользователя *</label>
+              <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="ivanov"
+                  className={fieldErrors.name ? 'error-field' : ''}
+                  required
+              />
+              {fieldErrors.name && (
+                  <small style={{ color: '#dc3545', marginTop: '5px', display: 'block' }}>
+                    {fieldErrors.name}
+                  </small>
+              )}
+            </div>
 
           <div className="address-section">
             <h3>📍 Адрес проживания</h3>
 
             <div className="form-group">
-              <label htmlFor="addressFull">Полный адрес</label>
-              <input
-                  type="text"
-                  id="addressFull"
-                  name="addressFull"
-                  value={formData.addressFull}
-                  onChange={handleInputChange}
-                  placeholder="г. Москва, ул. Примерная, д. 1"
-              />
-            </div>
-
-            <div className="row">
-              <div className="form-group">
-                <label htmlFor="addressCity">Город</label>
-                <input
-                    type="text"
-                    id="addressCity"
-                    name="addressCity"
-                    value={formData.addressCity}
-                    onChange={handleInputChange}
-                    placeholder="Москва"
-                />
+              <label>Адрес</label>
+              <div className="location-preview">
+                <span className="location-preview-label">Выбранный адрес:</span>
+                <span className="location-preview-value">{formData.addressFull || 'пока не выбран'}</span>
               </div>
-              <div className="form-group">
-                <label htmlFor="addressStreet">Улица</label>
-                <input
-                    type="text"
-                    id="addressStreet"
-                    name="addressStreet"
-                    value={formData.addressStreet}
-                    onChange={handleInputChange}
-                    placeholder="Примерная"
-                />
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="form-group">
-                <label htmlFor="addressHouseNumber">Дом</label>
-                <input
-                    type="text"
-                    id="addressHouseNumber"
-                    name="addressHouseNumber"
-                    value={formData.addressHouseNumber}
-                    onChange={handleInputChange}
-                    placeholder="1"
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="addressBuilding">Корпус</label>
-                <input
-                    type="text"
-                    id="addressBuilding"
-                    name="addressBuilding"
-                    value={formData.addressBuilding}
-                    onChange={handleInputChange}
-                    placeholder="2 (если есть)"
-                />
-              </div>
+              <YandexLocationPicker initialAddress={formData.addressFull} onAddressChange={handleAddressSelect} />
             </div>
           </div>
 
@@ -386,34 +394,45 @@ const EditProfile = () => {
                   placeholder="Оставьте пустым, если не хотите менять"
               />
             </div>
-            <div className="form-group">
-              <label htmlFor="confirmPassword">Подтверждение нового пароля</label>
-              <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={passwordData.confirmPassword}
-                  onChange={handlePasswordChange}
-                  style={{
-                    borderColor: !checkPasswordsMatch() && passwordData.confirmPassword ? '#dc3545' :
-                        passwordData.newPassword && passwordData.confirmPassword ? '#28a745' : ''
-                  }}
-              />
-              {!checkPasswordsMatch() && passwordData.confirmPassword && (
-                  <small style={{ color: '#dc3545', marginTop: '5px', display: 'block' }}>
-                    Пароли не совпадают
-                  </small>
-              )}
-            </div>
-          </div>
+             <div className="form-group">
+               <label htmlFor="confirmPassword">Подтверждение нового пароля</label>
+               <input
+                   type="password"
+                   id="confirmPassword"
+                   name="confirmPassword"
+                   value={passwordData.confirmPassword}
+                   onChange={handlePasswordChange}
+                   style={{
+                     borderColor: !checkPasswordsMatch() && passwordData.confirmPassword ? '#dc3545' :
+                         passwordData.newPassword && passwordData.confirmPassword ? '#28a745' : ''
+                   }}
+               />
+               {fieldErrors.confirmPassword && (
+                   <small style={{ color: '#dc3545', marginTop: '5px', display: 'block' }}>
+                     {fieldErrors.confirmPassword}
+                   </small>
+               )}
+               {!checkPasswordsMatch() && passwordData.confirmPassword && !fieldErrors.confirmPassword && (
+                   <small style={{ color: '#dc3545', marginTop: '5px', display: 'block' }}>
+                     Пароли не совпадают
+                   </small>
+               )}
+             </div>
+           </div>
 
-          <div className="button-group">
-            <button type="submit" className="btn btn-primary">Сохранить изменения</button>
-            <button type="button" onClick={handleLogout} className="btn btn-danger">Выйти</button>
-            <a href="/dashboard" className="btn btn-secondary">Отмена</a>
-          </div>
-        </form>
-      </div>
+           {message.text && (
+               <div className={`message ${message.type}`} style={{ marginBottom: '20px' }}>
+                 {message.text}
+               </div>
+           )}
+
+             <div className="button-group">
+               <button type="submit" className="btn btn-primary">Сохранить изменения</button>
+               <a href="/dashboard" className="btn btn-secondary">Отмена</a>
+               <button type="button" onClick={handleLogout} className="btn btn-secondary">Выйти</button>
+             </div>
+          </form>
+        </div>
   );
 };
 

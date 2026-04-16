@@ -108,16 +108,33 @@ public class UserController {
     currentUser.setStudyProgram(request.getStudyProgram());
     currentUser.setCourse(request.getCourse());
 
-    Optional<User> updated = userService.updateUser(currentUser);
+    try {
+      Optional<User> updated = userService.updateUser(currentUser);
 
-    if (updated.isPresent()) {
-      User user = updated.get();
-      user.setHashPassword(null);
-      user.setSalt(null);
-      session.setAttribute("user", user);
-      return ResponseEntity.ok(user);
-    } else {
-      return ResponseEntity.badRequest().body("Ошибка обновления профиля");
+      if (updated.isPresent()) {
+        User user = updated.get();
+        user.setHashPassword(null);
+        user.setSalt(null);
+        session.setAttribute("user", user);
+        return ResponseEntity.ok(user);
+      } else {
+        return ResponseEntity.badRequest().body("Ошибка обновления профиля");
+      }
+    } catch (IllegalArgumentException e) {
+      log.warn("Validation error during update: {}", e.getMessage());
+      
+      // Возвращаем JSON с ошибкой и полем
+      String errorMessage = e.getMessage();
+      String field = "general";
+      
+      if (errorMessage != null && errorMessage.contains("Имя")) {
+        field = "name";
+      } else if (errorMessage != null && errorMessage.contains("Почта")) {
+        field = "email";
+      }
+      
+      ErrorResponse errorResponse = new ErrorResponse(errorMessage, field, 400);
+      return ResponseEntity.badRequest().body(errorResponse);
     }
   }
 
