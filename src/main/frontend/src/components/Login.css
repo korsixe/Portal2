@@ -7,7 +7,7 @@
 }
 
 .container {
-  background: linear-gradient(135deg, var(--color-lavender) 0%, var(--color-purple) 100%);
+  background: var(--color-background);
   font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   min-height: 100vh;
   padding: 20px;
@@ -31,7 +31,7 @@
 .portal-logo {
   font-size: 2.8rem;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--color-purple), var(--color-lavender));
+  background: linear-gradient(135deg, var(--color-mint-dark), var(--color-mint));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -73,7 +73,7 @@
   outline: none;
   border-color: var(--color-purple);
   background: var(--color-surface);
-  box-shadow: 0 0 0 4px rgba(132, 88, 179, 0.1);
+  box-shadow: 0 0 0 4px rgba(110, 160, 134, 0.1);
 }
 
 .form-group input::placeholder {
@@ -101,14 +101,14 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--color-purple), var(--color-lavender));
+  background: linear-gradient(135deg, var(--color-mint-dark), var(--color-mint));
   color: white;
-  box-shadow: 0 4px 14px rgba(132, 88, 179, 0.25);
+  box-shadow: 0 4px 14px rgba(110, 160, 134, 0.25);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(132, 88, 179, 0.35);
+  box-shadow: 0 8px 20px rgba(110, 160, 134, 0.35);
 }
 
 .btn-secondary {
@@ -160,7 +160,7 @@
 .logo {
   font-size: 2.8rem;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--color-purple), var(--color-lavender));
+  background: linear-gradient(135deg, var(--color-mint-dark), var(--color-mint));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -202,7 +202,7 @@
   outline: none;
   border-color: var(--color-purple);
   background: var(--color-surface);
-  box-shadow: 0 0 0 4px rgba(132, 88, 179, 0.1);
+  box-shadow: 0 0 0 4px rgba(110, 160, 134, 0.1);
 }
 
 .buttonGroup {
@@ -226,14 +226,14 @@
 }
 
 .btnPrimary {
-  background: linear-gradient(135deg, var(--color-purple), var(--color-lavender));
+  background: linear-gradient(135deg, var(--color-mint-dark), var(--color-mint));
   color: white;
-  box-shadow: 0 4px 14px rgba(132, 88, 179, 0.25);
+  box-shadow: 0 4px 14px rgba(110, 160, 134, 0.25);
 }
 
 .btnPrimary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(132, 88, 179, 0.35);
+  box-shadow: 0 8px 20px rgba(110, 160, 134, 0.35);
 }
 
 .btnSecondary {

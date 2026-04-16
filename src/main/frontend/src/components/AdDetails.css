@@ -3,7 +3,7 @@
 .adDetailsPage {
   min-height: 100vh;
   padding: 0;
-  background: linear-gradient(135deg, var(--color-lavender) 0%, var(--color-purple) 100%);
+  background: var(--color-background);
 }
 
 .adDetailsLayout {
@@ -115,16 +115,16 @@
   border-radius: var(--radius-md);
   padding: 12px 18px;
   color: white;
-  background: linear-gradient(135deg, var(--color-purple), var(--color-lavender));
+  background: linear-gradient(135deg, var(--color-mint-dark), var(--color-mint));
   cursor: pointer;
   font-weight: 600;
   transition: all var(--transition-base);
-  box-shadow: 0 4px 14px rgba(132, 88, 179, 0.25);
+  box-shadow: 0 4px 14px rgba(110, 160, 134, 0.25);
 }
 
 .actions button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(132, 88, 179, 0.35);
+  box-shadow: 0 8px 20px rgba(110, 160, 134, 0.35);
 }
 
 .actions .secondary {
@@ -157,14 +157,14 @@
 .commentsCard textarea:focus {
   outline: none;
   border-color: var(--color-purple);
-  box-shadow: 0 0 0 4px rgba(132, 88, 179, 0.1);
+  box-shadow: 0 0 0 4px rgba(110, 160, 134, 0.1);
 }
 
 .commentsCard button {
   border: none;
   border-radius: var(--radius-md);
   padding: 10px 16px;
-  background: linear-gradient(135deg, var(--color-purple), var(--color-lavender));
+  background: linear-gradient(135deg, var(--color-mint-dark), var(--color-mint));
   color: white;
   cursor: pointer;
   font-weight: 600;
@@ -173,7 +173,7 @@
 
 .commentsCard button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(132, 88, 179, 0.25);
+  box-shadow: 0 4px 14px rgba(110, 160, 134, 0.25);
 }
 
 .commentFeedback {

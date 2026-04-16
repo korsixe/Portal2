@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: linear-gradient(135deg, var(--color-lavender) 0%, var(--color-purple) 100%);
+  background: var(--color-background);
 }
 
 .errorCard {
@@ -50,18 +50,18 @@
 .errorActions button {
   border: none;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--color-purple), var(--color-lavender));
+  background: linear-gradient(135deg, var(--color-mint-dark), var(--color-mint));
   color: white;
   padding: 14px 24px;
   cursor: pointer;
   font-weight: 600;
   transition: all var(--transition-base);
-  box-shadow: 0 4px 14px rgba(132, 88, 179, 0.25);
+  box-shadow: 0 4px 14px rgba(110, 160, 134, 0.25);
 }
 
 .errorActions button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(132, 88, 179, 0.35);
+  box-shadow: 0 8px 20px rgba(110, 160, 134, 0.35);
 }
 
 .errorActions .secondary {

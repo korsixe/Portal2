@@ -46,16 +46,16 @@
 .access-denied-button {
   display: inline-block;
   padding: 14px 28px;
-  background: linear-gradient(135deg, var(--color-purple), var(--color-lavender));
+  background: linear-gradient(135deg, var(--color-mint-dark), var(--color-mint));
   color: white;
   border-radius: var(--radius-md);
   text-decoration: none;
   font-weight: 600;
   transition: all var(--transition-base);
-  box-shadow: 0 4px 14px rgba(132, 88, 179, 0.25);
+  box-shadow: 0 4px 14px rgba(110, 160, 134, 0.25);
 }
 
 .access-denied-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(132, 88, 179, 0.35);
+  box-shadow: 0 8px 20px rgba(110, 160, 134, 0.35);
 }
