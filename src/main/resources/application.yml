@@ -37,9 +37,3 @@ logging:
 app:
   security:
     pepper: "szfdxghjdakslbnvcxagsftuyidolajskhdhsf123"
-
-
-telegram:
-  bot:
-    name: "PhystechPortalBot"
-    token: "8441149825:AAHWjnuLsOk2AZhctVFrppMgJvPWLD3J65I"
