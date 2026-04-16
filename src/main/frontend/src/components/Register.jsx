@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import './Register.css';
+import YandexLocationPicker from './YandexLocationPicker.jsx';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -17,10 +18,24 @@ const Register = () => {
   });
 
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const handleChange = (e) => {
     const value = e.target.name === 'course' ? parseInt(e.target.value) : e.target.value;
     setFormData({ ...formData, [e.target.name]: value });
+    
+    // Валидация имени в реальном времени
+    if (e.target.name === 'name') {
+      if (!value.trim()) {
+        setFieldErrors(prev => ({ ...prev, name: 'Имя не может быть пустым' }));
+      } else if (value.includes(' ')) {
+        setFieldErrors(prev => ({ ...prev, name: 'Имя должно быть без пробелов!' }));
+      } else {
+        setFieldErrors(prev => ({ ...prev, name: '' }));
+      }
+    } else if (fieldErrors[e.target.name]) {
+      setFieldErrors(prev => ({ ...prev, [e.target.name]: '' }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -71,16 +86,21 @@ const Register = () => {
     }
   };
 
+  const handleAddressSelect = useCallback((address) => {
+    setFormData((prev) => ({
+      ...prev,
+      addressFull: address,
+      addressCity: '',
+      addressStreet: '',
+      addressHouseNumber: '',
+      addressBuilding: ''
+    }));
+  }, []);
+
   return (
       <div className="portal-container loginContainer">
         <div className="portal-logo">PORTAL</div>
         <div className="portal-subtitle">Регистрация</div>
-
-        {message.text && (
-            <div className={`message ${message.type}`}>
-              {message.text}
-            </div>
-        )}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -90,7 +110,20 @@ const Register = () => {
 
           <div className="form-group">
             <label>Имя пользователя *</label>
-            <input type="text" name="name" placeholder="ivanov" required onChange={handleChange} />
+            <input 
+              type="text" 
+              name="name" 
+              placeholder="ivanov" 
+              value={formData.name}
+              onChange={handleChange}
+              className={fieldErrors.name ? 'error-field' : ''}
+              required 
+            />
+            {fieldErrors.name && (
+                <small style={{ color: '#dc3545', marginTop: '5px', display: 'block' }}>
+                  {fieldErrors.name}
+                </small>
+            )}
           </div>
 
           <div className="form-group">
@@ -111,29 +144,12 @@ const Register = () => {
             <h3>Адрес проживания</h3>
 
             <div className="form-group">
-              <label>Полный адрес</label>
-              <input type="text" name="addressFull" placeholder="г. Москва, ул. Примерная, д. 1" onChange={handleChange} />
-            </div>
-
-            <div className="form-group">
-              <label>Город</label>
-              <input type="text" name="addressCity" placeholder="Москва" onChange={handleChange} />
-            </div>
-
-            <div className="row">
-              <div className="form-group">
-                <label>Улица</label>
-                <input type="text" name="addressStreet" placeholder="Примерная" onChange={handleChange} />
+              <label>Адрес</label>
+              <div className="location-preview">
+                <span className="location-preview-label">Выбранный адрес:</span>
+                <span className="location-preview-value">{formData.addressFull || 'пока не выбран'}</span>
               </div>
-              <div className="form-group">
-                <label>Дом</label>
-                <input type="text" name="addressHouseNumber" placeholder="1" onChange={handleChange} />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Корпус</label>
-              <input type="text" name="addressBuilding" placeholder="2 (если есть)" onChange={handleChange} />
+              <YandexLocationPicker onAddressChange={handleAddressSelect} />
             </div>
           </div>
 
@@ -165,14 +181,20 @@ const Register = () => {
               <option value="5">5 курс</option>
               <option value="6">6 курс</option>
             </select>
-          </div>
+           </div>
 
-          <div className="button-group">
-            <button type="submit" className="btn btn-primary">Зарегистрироваться</button>
-            <a href="/login" className="btn btn-secondary">Войти</a>
-          </div>
-        </form>
-      </div>
+          {message.text && (
+              <div className={`message ${message.type}`} style={{ marginBottom: '20px' }}>
+                {message.text}
+              </div>
+          )}
+
+           <div className="button-group">
+             <button type="submit" className="btn btn-primary">Зарегистрироваться</button>
+             <a href="/login" className="btn btn-secondary">Войти</a>
+           </div>
+         </form>
+       </div>
   );
 };
 
