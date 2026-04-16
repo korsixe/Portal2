@@ -138,7 +138,7 @@ public class UserService {
   }
 
   @Transactional
-  public Optional<User> updateUser(User user) {
+  public Optional<User> updateUser(User user) throws IllegalArgumentException {
     try {
       Optional<User> existingUser = userRepository.findById(user.getId());
       if (existingUser.isEmpty()) {
@@ -160,7 +160,7 @@ public class UserService {
         userValidator.validateName(user.getName());
       } catch (IllegalArgumentException e) {
         log.warn("Update failed - validation error: {}", e.getMessage());
-        return Optional.empty();
+        throw e;
       }
 
       existing.setEmail(user.getEmail());
@@ -185,6 +185,9 @@ public class UserService {
       log.info("User updated successfully: {}", user.getEmail());
       return Optional.of(updatedUser);
 
+    } catch (IllegalArgumentException e) {
+      // Пробрасываем ошибку валидации наружу
+      throw e;
     } catch (Exception e) {
       log.error("Error during user update: {}", e.getMessage(), e);
       return Optional.empty();

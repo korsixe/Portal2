@@ -57,6 +57,10 @@ public class Announcement {
   @Column(name = "updated_at")
   private java.time.Instant updatedAt;
 
+  // Время отправки уведомления об архивации. Null — уведомление не отправлялось.
+  @Column(name = "notified_at")
+  private java.time.Instant notifiedAt;
+
   @Column(columnDefinition = "bytea")
   private byte[] photo;
 

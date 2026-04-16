@@ -63,6 +63,25 @@
   resize: vertical;
 }
 
+.location-preview {
+  margin-top: -2px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  font-size: 13px;
+  color: #1f2937;
+}
+
+.location-preview-label {
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+.location-preview-value {
+  word-break: break-word;
+}
+
 .editAdAlert {
   margin: 8px 0 14px;
   padding: 14px 18px;
