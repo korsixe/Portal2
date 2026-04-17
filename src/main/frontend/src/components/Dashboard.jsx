@@ -241,6 +241,10 @@ const Dashboard = () => {
                 </div>
               )}
 
+              <a href="/" className="db-nav-item">
+                Browse Marketplace
+              </a>
+
               <a href="/edit-profile" className="db-nav-item">
                 Edit Profile
               </a>

@@ -46,31 +46,30 @@ function AdminDashboard() {
         if (!active) return;
         if (err && (err.status === 401 || err.status === 403)) {
           setAccessDenied(true);
+        } else if (!err?.status) {
+          setAccessDenied(true);
         } else {
           setMessage('Не удалось загрузить панель администратора');
           setMessageType('error');
         }
         setLoading(false);
       });
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, []);
+
+  const showNotification = (text, type) => {
+    setMessage(text);
+    setMessageType(type || 'success');
+    setTimeout(() => { setMessage(''); setMessageType(''); }, 3000);
+  };
 
   const submitRole = async (userId, role, action) => {
     try {
-      const res = await apiPost('/api/admin/role', {
-        targetUserId: userId,
-        role,
-        action
-      });
-      setMessage(res.message || 'Готово');
-      setMessageType(res.success ? 'success' : 'error');
+      const res = await apiPost('/api/admin/role', { targetUserId: userId, role, action });
+      showNotification(res.message || 'Готово', res.success ? 'success' : 'error');
       await refreshDashboard();
     } catch (err) {
-      console.error('Failed to update role:', err);
-      setMessage('Не удалось обновить роль');
-      setMessageType('error');
+      showNotification('Не удалось обновить роль', 'error');
     }
   };
 
@@ -81,25 +80,17 @@ function AdminDashboard() {
         action,
         amount: Number(amount || 0)
       });
-      setMessage(res.message || 'Готово');
-      setMessageType(res.success ? 'success' : 'error');
+      showNotification(res.message || 'Готово', res.success ? 'success' : 'error');
       await refreshDashboard();
     } catch (err) {
-      console.error('Failed to update coins:', err);
-      setMessage('Не удалось обновить монеты');
-      setMessageType('error');
+      showNotification('Не удалось обновить монеты', 'error');
     }
   };
 
   const handleLogout = async () => {
     try {
-      await fetch('http://localhost:8080/api/users/logout', {
-        method: 'POST',
-        credentials: 'include'
-      });
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
+      await fetch('http://localhost:8080/api/users/logout', { method: 'POST', credentials: 'include' });
+    } catch {}
     window.location.href = '/login';
   };
 
@@ -116,140 +107,151 @@ function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="admin-page">
-        <h1>Панель администратора</h1>
-        <div className="alert">Загрузка...</div>
+      <div className="adm-wrap">
+        <div className="adm-shell">
+          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--color-text-secondary)' }}>Загрузка…</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="admin-page">
-      <h1>Панель администратора</h1>
+    <div className="adm-wrap">
+      <div className="adm-shell">
 
-      <div className="nav">
-        <a className="btn" href="/">На главную</a>
-        <a className="btn btn-primary" href="/dashboard">Личный кабинет</a>
-        <a className="btn" href="/moderator/dashboard">История модерации</a>
-        <button className="btn" type="button" onClick={handleLogout}>Выйти</button>
-      </div>
+        {/* Topbar */}
+        <header className="adm-topbar">
+          <a href="/" className="adm-brand">
+            <div className="adm-brand-mark"></div>
+            <span>PORTAL</span>
+          </a>
+          <span className="adm-topbar-title">Панель администратора</span>
+          <div className="adm-topbar-nav">
+            <a href="/dashboard" className="adm-btn">Личный кабинет</a>
+            <a href="/moderator/dashboard" className="adm-btn">История модерации</a>
+            <button className="adm-btn" type="button" onClick={handleLogout}>Выйти</button>
+          </div>
+        </header>
 
-      <div className="alert-slot">
-        {message && <div className={`alert ${messageType || ''}`}>{message}</div>}
-      </div>
+        {/* Toast */}
+        {message && (
+          <div className={`adm-toast adm-toast-${messageType}`}>{message}</div>
+        )}
 
-      <div className="stats">
-        <div className="stat-card">
-          <h3>Всего пользователей</h3>
-          <p>{stats?.totalUsers ?? 0}</p>
+        {/* Stats */}
+        <div className="adm-stats">
+          <div className="adm-stat">
+            <div className="adm-stat-num">{stats?.totalUsers ?? 0}</div>
+            <div className="adm-stat-label">Всего пользователей</div>
+          </div>
+          <div className="adm-stat">
+            <div className="adm-stat-num">{stats?.adminCount ?? 0}</div>
+            <div className="adm-stat-label">Администраторов</div>
+          </div>
+          <div className="adm-stat">
+            <div className="adm-stat-num">{stats?.moderatorCount ?? 0}</div>
+            <div className="adm-stat-label">Модераторов</div>
+          </div>
         </div>
-        <div className="stat-card">
-          <h3>Администраторов</h3>
-          <p>{stats?.adminCount ?? 0}</p>
-        </div>
-        <div className="stat-card">
-          <h3>Модераторов</h3>
-          <p>{stats?.moderatorCount ?? 0}</p>
-        </div>
-      </div>
 
-      <h2>Пользователи</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Email</th>
-            <th>Имя</th>
-            <th>Роли</th>
-            <th>Монеты</th>
-            <th>Действия</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.length === 0 && (
-            <tr>
-              <td colSpan="6">Пользователи не найдены</td>
-            </tr>
-          )}
-          {users.map((user) => {
-            const userRoles = new Set((user.roles || []).map(String));
-            const isModerator = userRoles.has('MODERATOR') || userRoles.has('ADMIN');
-            const isAdmin = userRoles.has('ADMIN');
-
-            return (
-              <tr key={user.id}>
-                <td>{user.id}</td>
-                <td>{user.email}</td>
-                <td>{user.name}</td>
-                <td>
-                  {(user.roles || []).map((role, index) => (
-                    <span key={`${user.id}-role-${index}`}>
-                      {getRoleLabel(role)}
-                      <br />
-                    </span>
-                  ))}
-                </td>
-                <td>{user.coins}</td>
-                <td>
-                  <div className="actions">
-                    <div>
-                      <button
-                        className="btn"
-                        type="button"
-                        onClick={() => submitRole(user.id, 'MODERATOR', isModerator ? 'revoke' : 'assign')}
-                      >
-                        {isModerator ? 'Снять модератора' : 'Назначить модератором'}
-                      </button>
-                    </div>
-                    <div>
-                      <button
-                        className="btn btn-primary"
-                        type="button"
-                        onClick={() => submitRole(user.id, 'ADMIN', isAdmin ? 'revoke' : 'assign')}
-                      >
-                        {isAdmin ? 'Снять админа' : 'Назначить админом'}
-                      </button>
-                    </div>
-                    <div className="inline-form">
-                      <input
-                        type="number"
-                        min="1"
-                        defaultValue="50"
-                        id={`coins-add-${user.id}`}
-                      />
-                      <button
-                        className="btn"
-                        type="button"
-                        onClick={() => submitCoins(user.id, 'add', document.getElementById(`coins-add-${user.id}`).value)}
-                      >
-                        + Монеты
-                      </button>
-                    </div>
-                    <div className="inline-form">
-                      <input
-                        type="number"
-                        min="1"
-                        defaultValue="20"
-                        id={`coins-deduct-${user.id}`}
-                      />
-                      <button
-                        className="btn btn-danger"
-                        type="button"
-                        onClick={() => submitCoins(user.id, 'deduct', document.getElementById(`coins-deduct-${user.id}`).value)}
-                      >
-                        - Монеты
-                      </button>
-                    </div>
-                  </div>
-                </td>
+        {/* Users table */}
+        <div className="adm-card">
+          <h2 className="adm-card-title">Пользователи</h2>
+          <table className="adm-table">
+            <thead>
+              <tr>
+                <th style={{ width: 50 }}>ID</th>
+                <th>Email</th>
+                <th>Имя</th>
+                <th style={{ width: 140 }}>Роли</th>
+                <th style={{ width: 80 }}>Монеты</th>
+                <th style={{ width: 320 }}>Действия</th>
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {users.length === 0 && (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center', color: 'var(--color-text-secondary)' }}>
+                    Пользователи не найдены
+                  </td>
+                </tr>
+              )}
+              {users.map((user) => {
+                const userRoles = new Set((user.roles || []).map(String));
+                const isModerator = userRoles.has('MODERATOR') || userRoles.has('ADMIN');
+                const isAdmin = userRoles.has('ADMIN');
+
+                return (
+                  <tr key={user.id}>
+                    <td>{user.id}</td>
+                    <td>{user.email}</td>
+                    <td>{user.name}</td>
+                    <td>
+                      {(user.roles || []).map((role, i) => (
+                        <span key={i} className="adm-role-badge">{getRoleLabel(role)}</span>
+                      ))}
+                    </td>
+                    <td>🪙 {user.coins}</td>
+                    <td>
+                      <div className="adm-actions">
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                          <button
+                            className="adm-btn"
+                            type="button"
+                            onClick={() => submitRole(user.id, 'MODERATOR', isModerator ? 'revoke' : 'assign')}
+                          >
+                            {isModerator ? 'Снять модератора' : 'Модератор'}
+                          </button>
+                          <button
+                            className={`adm-btn ${isAdmin ? 'adm-btn-danger' : 'adm-btn-primary'}`}
+                            type="button"
+                            onClick={() => submitRole(user.id, 'ADMIN', isAdmin ? 'revoke' : 'assign')}
+                          >
+                            {isAdmin ? 'Снять админа' : 'Сделать админом'}
+                          </button>
+                        </div>
+                        <div className="adm-inline-form">
+                          <input
+                            type="number"
+                            min="1"
+                            defaultValue="50"
+                            id={`coins-add-${user.id}`}
+                          />
+                          <button
+                            className="adm-btn adm-btn-primary"
+                            type="button"
+                            onClick={() => submitCoins(user.id, 'add', document.getElementById(`coins-add-${user.id}`).value)}
+                          >
+                            + Монеты
+                          </button>
+                        </div>
+                        <div className="adm-inline-form">
+                          <input
+                            type="number"
+                            min="1"
+                            defaultValue="20"
+                            id={`coins-deduct-${user.id}`}
+                          />
+                          <button
+                            className="adm-btn adm-btn-danger"
+                            type="button"
+                            onClick={() => submitCoins(user.id, 'deduct', document.getElementById(`coins-deduct-${user.id}`).value)}
+                          >
+                            − Монеты
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
     </div>
   );
 }
 
 export default AdminDashboard;
-

@@ -1,5 +1,6 @@
 package com.mipt.portal.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,7 +61,19 @@ public class SecurityConfig implements WebMvcConfigurer {
             .anyRequest().permitAll()
         )
         .formLogin(AbstractHttpConfigurer::disable)
-        .httpBasic(AbstractHttpConfigurer::disable);
+        .httpBasic(AbstractHttpConfigurer::disable)
+        .exceptionHandling(ex -> ex
+            .authenticationEntryPoint((request, response, e) -> {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\":\"Unauthorized\",\"status\":401}");
+            })
+            .accessDeniedHandler((request, response, e) -> {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\":\"Forbidden\",\"status\":403}");
+            })
+        );
 
     return http.build();
   }

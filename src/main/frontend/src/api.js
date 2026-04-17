@@ -3,8 +3,9 @@ export async function apiGet(path) {
     credentials: 'include'
   });
   if (!response.ok) {
-    const error = new Error(`Request failed: ${response.status}`);
+    const error = new Error(`Request failed: ${response.status} ${path}`);
     error.status = response.status;
+    error.path = path;
     throw error;
   }
   return response.json();
