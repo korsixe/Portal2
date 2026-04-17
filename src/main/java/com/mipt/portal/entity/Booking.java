@@ -22,4 +22,7 @@ public class Booking {
 
     @Column(name = "created_at", updatable = false)
     private Instant createdAt = Instant.now();
+
+    @Column(name = "notification_sent_at")
+    private Instant notificationSentAt;
 }

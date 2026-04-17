@@ -18,6 +18,14 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final AnnouncementRepository announcementRepository;
 
+    @Transactional(readOnly = true)
+    public java.util.List<com.mipt.portal.entity.Announcement> getBookedAdsForBuyer(Long buyerId) {
+        return bookingRepository.findAllByBuyerId(buyerId).stream()
+                .map(b -> announcementRepository.findById(b.getAnnouncementId()).orElse(null))
+                .filter(java.util.Objects::nonNull)
+                .toList();
+    }
+
     @Transactional
     public Booking bookAnnouncement(Long adId, Long buyerId) {
         log.info("Starting booking process for adId={} by buyerId={}", adId, buyerId);
@@ -40,7 +48,7 @@ public class BookingService {
         booking.setBuyerId(buyerId);
         Booking savedBooking = bookingRepository.save(booking);
 
-        ad.setStatus(AdStatus.ARCHIVED);
+        ad.setStatus(AdStatus.BOOKED);
         announcementRepository.save(ad);
 
         log.info("Successfully booked adId={} with bookingId={}", adId, savedBooking.getId());

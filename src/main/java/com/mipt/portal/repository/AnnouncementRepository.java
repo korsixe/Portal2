@@ -33,4 +33,6 @@ public interface AnnouncementRepository extends JpaRepository<Announcement, Long
     List<Announcement> findByAuthorId(Long authorId);
 
     List<Announcement> findByStatusAndUpdatedAtBefore(AdStatus status, Instant date);
+
+    List<Announcement> findByStatusAndNotifiedAtBefore(AdStatus status, Instant date);
 }

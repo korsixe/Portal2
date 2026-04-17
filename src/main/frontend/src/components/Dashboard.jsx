@@ -8,6 +8,7 @@ const Dashboard = () => {
   const [user, setUser]               = useState(null);
   const [ads, setAds]                 = useState([]);
   const [favoriteAds, setFavoriteAds] = useState([]);
+  const [bookedAds, setBookedAds]     = useState([]);
   const [loading, setLoading]         = useState(true);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage]     = useState('');
@@ -38,6 +39,9 @@ const Dashboard = () => {
 
       const favRes = await fetch('http://localhost:8080/api/favorites/ads', { credentials: 'include' });
       if (favRes.ok) setFavoriteAds(await favRes.json());
+
+      const bookedRes = await fetch('http://localhost:8080/api/v1/bookings/my', { credentials: 'include' });
+      if (bookedRes.ok) setBookedAds(await bookedRes.json());
     } catch { setErrorMessage('Failed to load data'); }
     finally { setLoading(false); }
   };
@@ -122,6 +126,7 @@ const Dashboard = () => {
                    : activeSection === 'drafts'     ? draftAds
                    : activeSection === 'archive'    ? archivedAds
                    : activeSection === 'favorites'  ? favoriteAds
+                   : activeSection === 'booked'     ? bookedAds
                    : ads;
 
   const sectionTitle = activeSection === 'active'     ? 'Active listings'
@@ -129,6 +134,7 @@ const Dashboard = () => {
                      : activeSection === 'drafts'     ? 'Drafts'
                      : activeSection === 'archive'    ? 'Archive'
                      : activeSection === 'favorites'  ? 'Favorites'
+                     : activeSection === 'booked'     ? 'Booked'
                      : 'All listings';
 
   const openModal  = (name) => setActiveModal(name);
@@ -262,6 +268,13 @@ const Dashboard = () => {
                 ♡ Favorites <span className="db-count">{favoriteAds.length}</span>
               </button>
 
+              <button
+                className={`db-nav-item${activeSection === 'booked' ? ' active' : ''}`}
+                onClick={() => selectSection('booked')}
+              >
+                🔖 Booked <span className="db-count">{bookedAds.length}</span>
+              </button>
+
               <a href="/" className="db-nav-item">
                 Browse Marketplace
               </a>
@@ -309,6 +322,7 @@ const Dashboard = () => {
                    activeSection === 'archive'   ? 'Your archive is empty.' :
                    activeSection === 'active'    ? 'No active listings yet.' :
                    activeSection === 'favorites' ? 'No saved listings yet. Click the heart on any ad!' :
+                   activeSection === 'booked'    ? 'You have no booked items.' :
                    'Create your first listing!'}
                 </p>
               </div>
@@ -353,7 +367,7 @@ const Dashboard = () => {
                         <span className="db-ad-views">👁 {ad.viewCount || 0}</span>
                         <span className="db-ad-date">{formatDate(ad.createdAt)}</span>
                       </div>
-                      {activeSection !== 'favorites' && (
+                      {activeSection !== 'favorites' && activeSection !== 'booked' && (
                         <div className="db-ad-actions" onClick={e => e.stopPropagation()}>
                           <button className="db-btn-edit" onClick={() => window.location.href = `/edit-ad?adId=${ad.id}`}>Edit</button>
                           <button className="db-btn-danger" onClick={() => handleDeleteAd(ad.id)}>Delete</button>

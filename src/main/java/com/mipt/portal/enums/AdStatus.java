@@ -7,6 +7,7 @@ public enum AdStatus {
   DRAFT("Черновик"),
   UNDER_MODERATION("На модерации"),
   ACTIVE("Активно"),
+  BOOKED("Забронировано"),
   REJECTED("Отклонено"),   // Добавили статус отклонения модератором
   ARCHIVED("Архив"),
   DELETED("Удалено");      // Полезно для "мягкого" удаления (soft-delete)
