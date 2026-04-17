@@ -1,9 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
-import Icon from './Icon';
 
 const API_BASE = 'http://localhost:8080';
-const FALLBACK_IMAGE = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='480'%3E%3Crect width='100%25' height='100%25' fill='%23E5EAF5'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dominant-baseline='middle' fill='%238458B3' font-size='28' font-family='Inter,sans-serif'%3ENo photo%3C/text%3E%3C/svg%3E";
+
+const CATEGORY_COLORS = {
+  ELECTRONICS: '#d7eaf3',
+  CLOTHING:    '#f8dfd1',
+  HOME:        '#dceef4',
+  AUTO:        '#f6e3b8',
+  SERVICES:    '#dceddf',
+  OTHER:       '#e8dbf6',
+};
+
+const CONDITION_COLORS = {
+  NEW:    '#dceddf',
+  USED:   '#f8dfd1',
+  BROKEN: '#ffe4e4',
+};
+
+const categoryLabel = (c) => ({
+  ELECTRONICS: 'Electronics', CLOTHING: 'Clothing', HOME: 'Home',
+  AUTO: 'Auto', SERVICES: 'Services', OTHER: 'Other',
+}[c] || c);
+
+const conditionLabel = (c) => ({ NEW: 'New', USED: 'Used', BROKEN: 'Broken' }[c] || c);
 
 const Home = () => {
     const [ads, setAds] = useState([]);
@@ -14,12 +34,18 @@ const Home = () => {
         category: '',
         condition: ''
     });
+    const [loading, setLoading] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
         fetchAds();
-    }, []);
+        fetch(`${API_BASE}/api/users/me`, { credentials: 'include' })
+            .then(r => setIsLoggedIn(r.ok))
+            .catch(() => {});
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const fetchAds = async () => {
+        setLoading(true);
         try {
             const queryParams = new URLSearchParams({
                 text: filters.searchQuery,
@@ -29,16 +55,16 @@ const Home = () => {
                 condition: filters.condition
             });
 
-            const response = await fetch(`http://localhost:8080/api/announcements/search?${queryParams}`);
+            const response = await fetch(`${API_BASE}/api/announcements/search?${queryParams}`);
 
             if (response.ok) {
                 const data = await response.json();
                 setAds(data);
-            } else {
-                console.error("Server error while loading ads");
             }
         } catch (error) {
-            console.error("Network error:", error);
+            console.error('Network error:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -51,146 +77,207 @@ const Home = () => {
         setFilters({ ...filters, [e.target.name]: e.target.value });
     };
 
+    const handleReset = () => {
+        const empty = { searchQuery: '', minPrice: '', maxPrice: '', category: '', condition: '' };
+        setFilters(empty);
+        setTimeout(() => fetchAds(), 0);
+    };
+
+    const formatPrice = (price) => {
+        if (price === null || price === undefined) return 'Price on request';
+        if (price === 0) return 'Free';
+        if (price < 0) return 'Negotiable';
+        return `${price.toLocaleString('ru-RU')} ₽`;
+    };
+
     return (
-        <div className="home-container">
-            {/* Header with search */}
-            <div className="header">
-                <div className="portal-logo">PORTAL</div>
-                <div className="search-section">
-                    <form className="search-form" onSubmit={handleFilterSubmit}>
+        <div className="portal-wrap">
+            <div className="portal-shell">
+
+                {/* Top bar */}
+                <header className="portal-topbar">
+                    <a href="/" className="portal-brand">
+                        <div className="portal-brand-mark"></div>
+                        <span>PORTAL</span>
+                    </a>
+
+                    <form className="portal-search" onSubmit={handleFilterSubmit}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" strokeWidth="2" className="search-icon">
+                            <circle cx="11" cy="11" r="7"/>
+                            <path d="M20 20L17 17"/>
+                        </svg>
                         <input
                             type="text"
-                            className="search-input"
-                            placeholder="Search ads..."
+                            placeholder="Search ads by title, category, location…"
                             name="searchQuery"
                             value={filters.searchQuery}
                             onChange={handleChange}
                         />
-                        <button type="submit" className="search-btn">Search</button>
                     </form>
-                </div>
-                <div className="auth-buttons">
-                    <a href="/login" className="btn btn-secondary">Sign In</a>
-                    <a href="/register" className="btn btn-primary">Register</a>
-                </div>
-            </div>
 
-            {/* Sidebar with filters */}
-            <div className="filters-sidebar">
-                <h2 className="filters-title">
-                    <Icon name="filter" size={24} />
-                    Filters
-                </h2>
-                <form onSubmit={handleFilterSubmit}>
-                    <div className="filter-section">
-                        <div className="filter-label">
-                            <Icon name="price" size={20} />
-                            Price
-                        </div>
-                        <div className="price-inputs">
-                            <input type="number" className="price-input" placeholder="From" name="minPrice" value={filters.minPrice} onChange={handleChange} />
-                        </div>
-                        <div className="price-inputs">
-                            <input type="number" className="price-input" placeholder="To" name="maxPrice" value={filters.maxPrice} onChange={handleChange} />
-                        </div>
-                    </div>
+                    {isLoggedIn
+                        ? <a href="/dashboard" className="topbar-link">Profile</a>
+                        : <a href="/login"     className="topbar-link">Sign In</a>
+                    }
+                </header>
 
-                    <div className="filter-section">
-                        <div className="filter-label">
-                            <Icon name="category" size={20} />
-                            Category
-                        </div>
-                        <select className="filter-select" name="category" value={filters.category} onChange={handleChange}>
-                            <option value="">All categories</option>
-                            <option value="ELECTRONICS">Electronics</option>
-                            <option value="CLOTHING">Clothing & Shoes</option>
-                            <option value="HOME">Home & Garden</option>
-                            <option value="AUTO">Auto</option>
-                            <option value="SERVICES">Services</option>
-                            <option value="OTHER">Other</option>
-                        </select>
-                    </div>
+                {/* Body: sidebar + content */}
+                <div className="portal-body">
 
-                    <div className="filter-section">
-                        <div className="filter-label">
-                            <Icon name="condition" size={20} />
-                            Condition
-                        </div>
-                        <div className="filter-options">
-                            <label className="filter-option">
-                                <input type="radio" name="condition" value="" checked={filters.condition === ''} onChange={handleChange} />
-                                <span>All conditions</span>
-                            </label>
-                            <label className="filter-option">
-                                <input type="radio" name="condition" value="NEW" checked={filters.condition === 'NEW'} onChange={handleChange} />
-                                <span>New</span>
-                            </label>
-                            <label className="filter-option">
-                                <input type="radio" name="condition" value="USED" checked={filters.condition === 'USED'} onChange={handleChange} />
-                                <span>Used</span>
-                            </label>
-                            <label className="filter-option">
-                                <input type="radio" name="condition" value="BROKEN" checked={filters.condition === 'BROKEN'} onChange={handleChange} />
-                                <span>Not working</span>
-                            </label>
-                        </div>
-                    </div>
+                    {/* Filters sidebar */}
+                    <aside className="portal-sidebar">
+                        <h2 className="sidebar-title">Filters</h2>
+                        <form onSubmit={handleFilterSubmit}>
 
-                    <div className="filter-actions">
-                        <button type="submit" className="btn-apply">Apply Filters</button>
-                        <button type="button" className="btn-reset" onClick={() => {
-                            setFilters({searchQuery: '', minPrice: '', maxPrice: '', category: '', condition: ''});
-                            fetchAds();
-                        }}>Reset</button>
-                    </div>
-                </form>
-            </div>
-
-            {/* Main content (Ads grid) */}
-            <div className="main-content">
-                <div className="content-header">
-                    <h1 className="section-title">
-                        <Icon name="target" size={28} />
-                        Ads
-                    </h1>
-                    <div className="results-count">Found: {ads.length} ads</div>
-                </div>
-
-                {ads.length === 0 ? (
-                    <div className="no-ads">
-                        <Icon name="empty-box" size={80} className="no-ads-icon" />
-                        <h3>No ads found</h3>
-                        <p>Try adjusting your search filters or check back later.</p>
-                    </div>
-                ) : (
-                    <div className="ads-grid">
-                        {ads.map(ad => (
-                            <div key={ad.id} className="ad-card" onClick={() => window.location.href=`/ad/${ad.id}`}>
-                                <div className="ad-image">
-                                    <img
-                                        src={`${API_BASE}/ad-photo?adId=${ad.id}&photoIndex=0`}
-                                        alt={ad.title || 'ad-photo'}
-                                        onError={(e) => {
-                                            e.currentTarget.onerror = null;
-                                            e.currentTarget.src = FALLBACK_IMAGE;
-                                        }}
-                                    />
+                            <div className="filter-block">
+                                <div className="filter-block-label">Price, ₽</div>
+                                <div className="price-row">
+                                    <input className="price-field" type="number" placeholder="From"
+                                           name="minPrice" value={filters.minPrice} onChange={handleChange} />
+                                    <input className="price-field" type="number" placeholder="To"
+                                           name="maxPrice" value={filters.maxPrice} onChange={handleChange} />
                                 </div>
-                                <div className="ad-title">{ad.title}</div>
-                                <div className="ad-price">{ad.price > 0 ? `${ad.price} RUB` : (ad.price === 0 ? 'Free' : 'Negotiable')}</div>
-                                <div className="ad-meta">
-                                    <span className="ad-category">{ad.category}</span>
-                                    <span className="ad-condition">{ad.condition}</span>
-                                </div>
-                                <div className="ad-location">
-                                    <Icon name="location" size={16} />
-                                    {ad.location}
-                                </div>
-                                <div className="ad-description">{ad.description}</div>
                             </div>
-                        ))}
+
+                            <div className="filter-block">
+                                <div className="filter-block-label">Category</div>
+                                <select className="filter-select" name="category"
+                                        value={filters.category} onChange={handleChange}>
+                                    <option value="">All categories</option>
+                                    <option value="ELECTRONICS">Electronics</option>
+                                    <option value="CLOTHING">Clothing &amp; Shoes</option>
+                                    <option value="HOME">Home &amp; Garden</option>
+                                    <option value="AUTO">Auto</option>
+                                    <option value="SERVICES">Services</option>
+                                    <option value="OTHER">Other</option>
+                                </select>
+                            </div>
+
+                            <div className="filter-block">
+                                <div className="filter-block-label">Condition</div>
+                                <div className="condition-options">
+                                    {[
+                                        { value: '',       label: 'All' },
+                                        { value: 'NEW',    label: 'New' },
+                                        { value: 'USED',   label: 'Used' },
+                                        { value: 'BROKEN', label: 'Not working' },
+                                    ].map(opt => (
+                                        <label key={opt.value}
+                                               className={`condition-opt${filters.condition === opt.value ? ' active' : ''}`}>
+                                            <input type="radio" name="condition" value={opt.value}
+                                                   checked={filters.condition === opt.value}
+                                                   onChange={handleChange} />
+                                            {opt.label}
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="filter-actions">
+                                <button type="submit" className="btn-apply">Apply</button>
+                                <button type="button" className="btn-reset" onClick={handleReset}>Reset</button>
+                            </div>
+                        </form>
+                    </aside>
+
+                    {/* Main content */}
+                    <main className="portal-main">
+                        <div className="main-head">
+                            <h1 className="main-title">Listings</h1>
+                            <span className="results-badge">{ads.length} found</span>
+                        </div>
+
+                        {loading ? (
+                            <div className="loading-state">
+                                <div className="spinner"></div>
+                                <p>Loading ads…</p>
+                            </div>
+                        ) : ads.length === 0 ? (
+                            <div className="empty-state">
+                                <div className="empty-icon">🛍️</div>
+                                <h3>No listings found</h3>
+                                <p>Try adjusting your filters or check back later.</p>
+                                <button className="btn-apply" onClick={handleReset} style={{ marginTop: 12 }}>
+                                    Clear filters
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="ads-grid">
+                                {ads.map(ad => (
+                                    <article
+                                        key={ad.id}
+                                        className="ad-card"
+                                        onClick={() => window.location.href = `/ad/${ad.id}`}
+                                    >
+                                        <div className="ad-image-wrap">
+                                            <img
+                                                src={`${API_BASE}/ad-photo?adId=${ad.id}&photoIndex=0`}
+                                                alt={ad.title || 'Ad photo'}
+                                                onError={(e) => {
+                                                    e.currentTarget.style.display = 'none';
+                                                    e.currentTarget.nextSibling.style.display = 'flex';
+                                                }}
+                                            />
+                                            <div className="ad-image-fallback"
+                                                 style={{ background: CATEGORY_COLORS[ad.category] || '#f0e8df' }}>
+                                                <span className="fallback-emoji">
+                                                    {ad.category === 'ELECTRONICS' ? '💻' :
+                                                     ad.category === 'CLOTHING'    ? '👕' :
+                                                     ad.category === 'HOME'        ? '🏠' :
+                                                     ad.category === 'AUTO'        ? '🚗' :
+                                                     ad.category === 'SERVICES'    ? '🔧' : '📦'}
+                                                </span>
+                                            </div>
+                                            {ad.condition && (
+                                                <span className="ad-condition-badge"
+                                                      style={{ background: CONDITION_COLORS[ad.condition] || '#f0e8df' }}>
+                                                    {conditionLabel(ad.condition)}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="ad-body">
+                                            <div className="ad-price">{formatPrice(ad.price)}</div>
+                                            <h3 className="ad-title">{ad.title}</h3>
+                                            {ad.description && (
+                                                <p className="ad-description">{ad.description}</p>
+                                            )}
+                                            <div className="ad-footer">
+                                                {ad.category && (
+                                                    <span className="ad-category-tag"
+                                                          style={{ background: CATEGORY_COLORS[ad.category] || '#f0e8df' }}>
+                                                        {categoryLabel(ad.category)}
+                                                    </span>
+                                                )}
+                                                {ad.location && (
+                                                    <span className="ad-location">
+                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                                             stroke="currentColor" strokeWidth="2">
+                                                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>
+                                                            <circle cx="12" cy="10" r="3"/>
+                                                        </svg>
+                                                        {ad.location}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </article>
+                                ))}
+                            </div>
+                        )}
+                    </main>
+                </div>
+
+                {/* CTA footer */}
+                <section className="portal-cta">
+                    <div className="cta-text">
+                        <h3>Have something to sell?</h3>
+                        <p>Post your first listing — it's free and takes 2 minutes.</p>
                     </div>
-                )}
+                    <a href="/create-ad" className="cta-link">Start selling →</a>
+                </section>
+
             </div>
         </div>
     );

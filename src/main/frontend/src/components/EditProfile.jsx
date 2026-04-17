@@ -310,7 +310,6 @@ const EditProfile = () => {
 
         <div className="current-info">
           <strong>Email:</strong> {user.email}<br />
-          <strong>ID пользователя:</strong> {user.id}<br />
           <strong>Количество объявлений:</strong> {user.adList?.length || 0}
         </div>
 

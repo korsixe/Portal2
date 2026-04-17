@@ -5,531 +5,370 @@ import NotificationBell from './NotificationBell';
 import Icon from './Icon';
 
 const Dashboard = () => {
-  const [user, setUser] = useState(null);
-  const [ads, setAds] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser]               = useState(null);
+  const [ads, setAds]                 = useState([]);
+  const [loading, setLoading]         = useState(true);
   const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage]     = useState('');
   const [activeModal, setActiveModal] = useState(null);
   const [deletePassword, setDeletePassword] = useState('');
+  const [activeSection, setActiveSection]   = useState('all');
+  const [adsOpen, setAdsOpen]         = useState(false);
+
+  useEffect(() => { loadUserData(); }, []);
 
   useEffect(() => {
-    loadUserData();
-  }, []);
+    if (successMessage) { const t = setTimeout(() => setSuccessMessage(''), 3000); return () => clearTimeout(t); }
+  }, [successMessage]);
 
   useEffect(() => {
-    if (successMessage) {
-      const timer = setTimeout(() => setSuccessMessage(''), 3000);
-      return () => clearTimeout(timer);
-    }
-    if (errorMessage) {
-      const timer = setTimeout(() => setErrorMessage(''), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [successMessage, errorMessage]);
+    if (errorMessage) { const t = setTimeout(() => setErrorMessage(''), 3000); return () => clearTimeout(t); }
+  }, [errorMessage]);
 
   const loadUserData = async () => {
     setLoading(true);
     try {
-      const userResponse = await fetch('http://localhost:8080/api/users/me', {
-        method: 'GET',
-        credentials: 'include'
-      });
+      const userRes = await fetch('http://localhost:8080/api/users/me', { credentials: 'include' });
+      if (!userRes.ok) { if (userRes.status === 401) window.location.href = '/login'; return; }
+      setUser(await userRes.json());
 
-      if (!userResponse.ok) {
-        if (userResponse.status === 401) {
-          window.location.href = '/login';
-          return;
-        }
-        setErrorMessage('Error loading user data');
-        return;
-      }
-      const userData = await userResponse.json();
-      setUser(userData);
-
-      const adsResponse = await fetch('http://localhost:8080/api/announcements/my', {
-        method: 'GET',
-        credentials: 'include'
-      });
-
-      if (adsResponse.ok) {
-        const adsData = await adsResponse.json();
-        const activeAds = adsData.filter(ad => ad.status !== 'DELETED');
-        setAds(activeAds);
-      }
-    } catch (error) {
-      console.error('Error loading data:', error);
-      setErrorMessage('Failed to load data');
-    } finally {
-      setLoading(false);
-    }
+      const adsRes = await fetch('http://localhost:8080/api/announcements/my', { credentials: 'include' });
+      if (adsRes.ok) setAds((await adsRes.json()).filter(a => a.status !== 'DELETED'));
+    } catch { setErrorMessage('Failed to load data'); }
+    finally { setLoading(false); }
   };
 
   const handlePasswordChanged = async (currentPassword, newPassword, confirmPassword) => {
-    if (newPassword !== confirmPassword) {
-      setErrorMessage('Passwords do not match!');
-      return false;
-    }
-    if (newPassword.length < 8) {
-      setErrorMessage('Password must be at least 8 characters!');
-      return false;
-    }
-
+    if (newPassword !== confirmPassword) { setErrorMessage('Passwords do not match!'); return false; }
+    if (newPassword.length < 8) { setErrorMessage('Password must be at least 8 characters!'); return false; }
     try {
-      const response = await fetch('http://localhost:8080/api/users/change-password', {
-        method: 'POST',
+      const res = await fetch('http://localhost:8080/api/users/change-password', {
+        method: 'POST', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          currentPassword: currentPassword,
-          newPassword: newPassword,
-          confirmPassword: confirmPassword
-        }),
-        credentials: 'include'
+        body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
       });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setSuccessMessage(data.message || 'Password changed successfully!');
-        if (data.user) {
-          setUser(data.user);
-        }
-        return true;
-      } else {
-        setErrorMessage(data.message || 'Error changing password');
-        return false;
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      setErrorMessage('Error changing password');
-      return false;
-    }
+      const data = await res.json();
+      if (res.ok && data.success) { setSuccessMessage(data.message || 'Password changed!'); if (data.user) setUser(data.user); return true; }
+      setErrorMessage(data.message || 'Error changing password'); return false;
+    } catch { setErrorMessage('Error changing password'); return false; }
   };
 
   const handleDeleteAccount = async (e) => {
     e.preventDefault();
-    const confirm = window.confirm('Are you sure you want to delete your account? This action cannot be undone!');
-    if (!confirm) return;
-
+    if (!window.confirm('Are you sure? This cannot be undone.')) return;
     try {
-      const response = await fetch('http://localhost:8080/api/users/delete-account', {
-        method: 'DELETE',
+      const res = await fetch('http://localhost:8080/api/users/delete-account', {
+        method: 'DELETE', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: deletePassword }),
-        credentials: 'include'
       });
-
-      if (response.ok) {
-        setSuccessMessage('Account deleted successfully');
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 2000);
-      } else {
-        const error = await response.text();
-        setErrorMessage('Error: ' + error);
-      }
-    } catch (error) {
-      setErrorMessage('Error deleting account');
-    }
+      if (res.ok) { setSuccessMessage('Account deleted'); setTimeout(() => window.location.href = '/login', 2000); }
+      else setErrorMessage('Error: ' + await res.text());
+    } catch { setErrorMessage('Error deleting account'); }
   };
 
   const handleLogout = async () => {
-    try {
-      await fetch('http://localhost:8080/api/users/logout', {
-        method: 'POST',
-        credentials: 'include'
-      });
-      window.location.href = '/login';
-    } catch (error) {
-      console.error('Logout error:', error);
-      window.location.href = '/login';
-    }
+    try { await fetch('http://localhost:8080/api/users/logout', { method: 'POST', credentials: 'include' }); }
+    catch {}
+    window.location.href = '/login';
   };
 
   const handleDeleteAd = async (adId) => {
-    if (!window.confirm('Are you sure you want to delete this ad?')) return;
-
+    if (!window.confirm('Delete this ad?')) return;
     try {
-      const response = await fetch(`http://localhost:8080/api/announcements/${adId}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-
-      if (response.ok) {
-        setSuccessMessage('Ad deleted');
-        loadUserData();
-      } else {
-        setErrorMessage('Error deleting ad');
-      }
-    } catch (error) {
-      setErrorMessage('Error deleting ad');
-    }
-  };
-
-  const getStatusClass = (status) => {
-    const statusMap = {
-      'ACTIVE': 'statusActive',
-      'DRAFT': 'statusDraft',
-      'UNDER_MODERATION': 'statusModeration',
-      'ARCHIVED': 'statusArchived',
-      'DELETED': 'statusDeleted'
-    };
-    return statusMap[status] || 'statusDraft';
+      const res = await fetch(`http://localhost:8080/api/announcements/${adId}`, { method: 'DELETE', credentials: 'include' });
+      if (res.ok) { setSuccessMessage('Ad deleted'); loadUserData(); }
+      else setErrorMessage('Error deleting ad');
+    } catch { setErrorMessage('Error deleting ad'); }
   };
 
   const formatPrice = (price) => {
     if (price === -1) return 'Negotiable';
-    if (price === 0) return 'Free';
-    return `${price.toLocaleString()} RUB`;
+    if (price === 0)  return 'Free';
+    return `${price.toLocaleString()} ₽`;
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Not specified';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US');
-  };
+  const formatDate = (d) => d ? new Date(d).toLocaleDateString('ru-RU') : '—';
 
   const formatAddress = (address) => {
     if (!address) return 'Not specified';
     if (typeof address === 'string') return address;
-    if (address.fullAddress && String(address.fullAddress).trim()) return address.fullAddress;
-
-    const parts = [address.city, address.street, address.houseNumber, address.building]
-      .filter(Boolean)
-      .map((v) => String(v).trim())
-      .filter(Boolean);
-    return parts.length ? parts.join(', ') : 'Not specified';
+    if (address.fullAddress?.trim()) return address.fullAddress;
+    return [address.city, address.street, address.houseNumber].filter(Boolean).join(', ') || 'Not specified';
   };
 
-  const getCategoryDisplayName = (category) => {
-    const categoryMap = {
-      'ELECTRONICS': 'Electronics',
-      'CLOTHING': 'Clothing',
-      'BOOKS': 'Books',
-      'FURNITURE': 'Furniture',
-      'SPORTS': 'Sports',
-      'OTHER': 'Other'
-    };
-    return categoryMap[category] || category;
+  const STATUS_LABEL = { ACTIVE: 'Active', DRAFT: 'Draft', UNDER_MODERATION: 'Moderation', ARCHIVED: 'Archived', DELETED: 'Deleted' };
+  const STATUS_CLASS = { ACTIVE: 'statusActive', DRAFT: 'statusDraft', UNDER_MODERATION: 'statusModeration', ARCHIVED: 'statusArchived', DELETED: 'statusDeleted' };
+
+  const activeAds      = ads.filter(a => a.status === 'ACTIVE');
+  const moderationAds  = ads.filter(a => a.status === 'UNDER_MODERATION');
+  const draftAds       = ads.filter(a => a.status === 'DRAFT');
+  const archivedAds    = ads.filter(a => a.status === 'ARCHIVED');
+
+  const visibleAds = activeSection === 'active'     ? activeAds
+                   : activeSection === 'moderation' ? moderationAds
+                   : activeSection === 'drafts'     ? draftAds
+                   : activeSection === 'archive'    ? archivedAds
+                   : ads;
+
+  const sectionTitle = activeSection === 'active'     ? 'Active listings'
+                     : activeSection === 'moderation' ? 'Under review'
+                     : activeSection === 'drafts'     ? 'Drafts'
+                     : activeSection === 'archive'    ? 'Archive'
+                     : 'All listings';
+
+  const openModal  = (name) => setActiveModal(name);
+  const closeModal = ()     => setActiveModal(null);
+
+  const selectSection = (section) => {
+    setActiveSection(section);
+    if (['active','drafts','archive','all'].includes(section)) setAdsOpen(true);
   };
 
-  const getConditionDisplayName = (condition) => {
-    const conditionMap = {
-      'NEW': 'New',
-      'LIKE_NEW': 'Like New',
-      'GOOD': 'Good',
-      'FAIR': 'Fair',
-      'POOR': 'Poor'
-    };
-    return conditionMap[condition] || condition;
-  };
+  if (loading) return (
+    <div className="loadingContainer">
+      <div className="loader"></div>
+      <p>Loading…</p>
+    </div>
+  );
 
-  const getStatusDisplayName = (status) => {
-    const statusMap = {
-      'ACTIVE': 'Active',
-      'DRAFT': 'Draft',
-      'UNDER_MODERATION': 'Under Moderation',
-      'ARCHIVED': 'Archived',
-      'DELETED': 'Deleted'
-    };
-    return statusMap[status] || status;
-  };
-
-  const openModal = (modalName) => setActiveModal(modalName);
-  const closeModals = () => setActiveModal(null);
-
-  if (loading) {
-    return (
-        <div className="loadingContainer">
-          <div className="loader"></div>
-          <p>Loading...</p>
-        </div>
-    );
-  }
-
-  if (!user) {
-    return (
-        <div className="errorContainer">
-          <p>Failed to load user data</p>
-          <button onClick={() => window.location.href = '/login'} className="btnPrimary">
-            Sign In Again
-          </button>
-        </div>
-    );
-  }
+  if (!user) return (
+    <div className="loadingContainer">
+      <p>Failed to load user data</p>
+      <button onClick={() => window.location.href = '/login'} className="db-btn-primary" style={{ marginTop: 16 }}>
+        Sign In Again
+      </button>
+    </div>
+  );
 
   return (
-      <div className="dashboardContainer">
-        {successMessage && (
-            <div className="successMessage">
-              <Icon name="success" size={24} className="successIcon" />
-              <span>{successMessage}</span>
-            </div>
-        )}
+    <div className="dash-wrap">
+      <div className="dash-shell">
 
-        {errorMessage && (
-            <div className="errorMessage">
-              <Icon name="error" size={24} className="errorIcon" />
-              <span>{errorMessage}</span>
-            </div>
-        )}
+        {/* Toast messages */}
+        {successMessage && <div className="db-toast db-toast-success">{successMessage}</div>}
+        {errorMessage   && <div className="db-toast db-toast-error">{errorMessage}</div>}
 
-        <div className="header">
-          <div className="headerTop">
-            <div className="portalLogo">PORTAL</div>
+        {/* Top bar */}
+        <header className="dash-topbar">
+          <a href="/" className="dash-brand">
+            <div className="dash-brand-mark"></div>
+            <span>PORTAL</span>
+          </a>
+          <div className="dash-topbar-right">
+            <NotificationBell adIds={ads.map(a => a.id)} />
+            <button className="db-btn-ghost" onClick={handleLogout}>Sign Out</button>
           </div>
-        </div>
+        </header>
 
-        <div className="headerBell">
-          <div className="headerTopBell">
-            <div className="notificationLeft">
-              <NotificationBell adIds={ads.map((ad) => ad.id)} />
+        <div className="dash-body">
+
+          {/* ── Sidebar ── */}
+          <aside className="dash-sidebar">
+
+            {/* Avatar */}
+            <div className="db-avatar-block">
+              <div className="db-avatar">
+                <Icon name="user" size={36} />
+              </div>
+              <div className="db-avatar-name">{user.name || 'User'}</div>
+              <div className="db-avatar-email">{user.email}</div>
             </div>
 
-            <div className="avatarCenter">
-              <div className="avatarCircle">
-                <Icon name="user" size={40} className="avatarIcon" />
-                <div className="onlineStatus"></div>
+            {/* About Me */}
+            <div className="db-info-section">
+              <div className="db-section-label">About Me</div>
+
+              <div className="db-info-group">
+                <div className="db-info-label">Basic info</div>
+                <div className="db-info-row"><span>Name</span><span>{user.name || '—'}</span></div>
+                <div className="db-info-row"><span>Email</span><span className="db-info-ellipsis">{user.email}</span></div>
+                <div className="db-info-row"><span>Address</span><span className="db-info-ellipsis">{formatAddress(user.address)}</span></div>
+              </div>
+
+              <div className="db-info-group">
+                <div className="db-info-label">Academic</div>
+                <div className="db-info-row"><span>Program</span><span>{user.studyProgram || '—'}</span></div>
+                <div className="db-info-row"><span>Course</span><span>{user.course ? `${user.course} year` : '—'}</span></div>
+              </div>
+
+              <div className="db-info-group">
+                <div className="db-info-label">Rating &amp; Coins</div>
+                <div className="db-info-row">
+                  <span>Rating</span>
+                  <span className="db-stars">
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i} className={i < Math.round(user.rating || 0) ? 'star-filled' : 'star-empty'}>★</span>
+                    ))}
+                    <span className="db-rating-num">({(user.rating || 0).toFixed(1)})</span>
+                  </span>
+                </div>
+                <div className="db-info-row">
+                  <span>Coins</span>
+                  <span className="db-coins">🪙 {user.coins || 0}</span>
+                </div>
               </div>
             </div>
 
-            <div className="buttonsVertical">
-              <button onClick={() => window.location.href = '/edit-profile'} className="btnPrimary">
-                <Icon name="edit" size={18} className="btnIcon" />
-                Edit Profile
+            {/* Nav */}
+            <nav className="db-nav">
+
+              {/* Listings collapsible */}
+              <button
+                className={`db-nav-item db-nav-group-toggle${adsOpen ? ' open' : ''}`}
+                onClick={() => setAdsOpen(o => !o)}
+              >
+                <span>Listings</span>
+                <span className="db-chevron">{adsOpen ? '▲' : '▼'}</span>
               </button>
-              <button onClick={() => openModal('account')} className="btnPrimary">
-                <Icon name="settings" size={18} className="btnIcon" />
+              {adsOpen && (
+                <div className="db-subnav">
+                  <button className={`db-subnav-item${activeSection === 'all' ? ' active' : ''}`} onClick={() => selectSection('all')}>
+                    All <span className="db-count">{ads.length}</span>
+                  </button>
+                  <button className={`db-subnav-item${activeSection === 'active' ? ' active' : ''}`} onClick={() => selectSection('active')}>
+                    Active <span className="db-count">{activeAds.length}</span>
+                  </button>
+                  <button className={`db-subnav-item${activeSection === 'moderation' ? ' active' : ''}`} onClick={() => selectSection('moderation')}>
+                    Under review <span className="db-count">{moderationAds.length}</span>
+                  </button>
+                  <button className={`db-subnav-item${activeSection === 'drafts' ? ' active' : ''}`} onClick={() => selectSection('drafts')}>
+                    Drafts <span className="db-count">{draftAds.length}</span>
+                  </button>
+                  <button className={`db-subnav-item${activeSection === 'archive' ? ' active' : ''}`} onClick={() => selectSection('archive')}>
+                    Archive <span className="db-count">{archivedAds.length}</span>
+                  </button>
+                </div>
+              )}
+
+              <a href="/edit-profile" className="db-nav-item">
+                Edit Profile
+              </a>
+
+              <button className="db-nav-item" onClick={() => openModal('account')}>
                 Account Settings
               </button>
-            </div>
-          </div>
-        </div>
 
-        <div className="profileActions">
-          {user.moderator && (
-              <button onClick={() => window.location.href = '/moderator/dashboard'} className="btnModerator">
-                Moderator Panel
+              <a href="/support" className="db-nav-item db-nav-muted">
+                Support
+              </a>
+
+              {user.moderator && (
+                <button className="db-nav-item db-nav-role db-nav-moderator" onClick={() => window.location.href = '/moderator/dashboard'}>
+                  Moderator Panel
+                </button>
+              )}
+              {user.admin && (
+                <button className="db-nav-item db-nav-role db-nav-admin" onClick={() => window.location.href = '/admin/dashboard'}>
+                  Admin Panel
+                </button>
+              )}
+            </nav>
+          </aside>
+
+          {/* ── Main content ── */}
+          <main className="dash-main">
+            <div className="dash-main-head">
+              <h2>{sectionTitle}</h2>
+              <button className="db-btn-primary" onClick={() => window.location.href = '/create-ad'}>
+                + New listing
               </button>
-          )}
-          {user.admin && (
-              <button onClick={() => window.location.href = '/admin/dashboard'} className="btnAdmin">
-                Admin Panel
-              </button>
-          )}
-        </div>
+            </div>
 
-        <div className="stats">
-          <div className="statCard">
-            <div className="statNumber">{ads.length}</div>
-            <div className="statLabel">Ads</div>
-          </div>
-          <div className="statCard">
-            <div className="statNumber">{user.rating?.toFixed(1) || '0.0'}</div>
-            <div className="statLabel">Rating</div>
-          </div>
-          <div className="statCard">
-            <div className="statNumber">{user.coins || 0}</div>
-            <div className="statLabel">Coins</div>
-          </div>
-          <div className="statCard">
-            <div className="statNumber">{user.course || 1}</div>
-            <div className="statLabel">Course</div>
-          </div>
-        </div>
-
-        <div className="userInfo">
-          <div className="infoCard">
-            <h3>
-              <Icon name="user" size={24} />
-              Basic Information
-            </h3>
-            <div className="infoItem">
-              <span className="infoLabel">Name:</span>
-              <span className="infoValue">{user.name || 'Not specified'}</span>
-            </div>
-            <div className="infoItem">
-              <span className="infoLabel">Email:</span>
-              <span className="infoValue">{user.email}</span>
-            </div>
-            <div className="infoItem">
-              <span className="infoLabel">Address:</span>
-              <span className="infoValue">{formatAddress(user.address)}</span>
-            </div>
-          </div>
-
-          <div className="infoCard">
-            <h3>
-              <Icon name="graduation" size={24} />
-              Academic Information
-            </h3>
-            <div className="infoItem">
-              <span className="infoLabel">Study Program:</span>
-              <span className="infoValue">{user.studyProgram || 'Not specified'}</span>
-            </div>
-            <div className="infoItem">
-              <span className="infoLabel">Course:</span>
-              <span className="infoValue">{user.course || 1} year</span>
-            </div>
-          </div>
-
-          <div className="infoCard">
-            <h3>
-              <Icon name="star" size={24} />
-              Rating & Coins
-            </h3>
-            <div className="infoItem">
-              <span className="infoLabel">Rating:</span>
-              <span className="infoValue">
-              <span className="ratingStars">
-                {[...Array(5)].map((_, i) => (
-                    <span key={i}>{i < Math.round(user.rating || 0) ? '\u2605' : '\u2606'}</span>
-                ))}
-              </span>
-              ({(user.rating || 0).toFixed(1)})
-            </span>
-            </div>
-            <div className="infoItem">
-              <span className="infoLabel">Coins:</span>
-              <span className="infoValue coins">
-                {user.coins || 0}
-                <Icon name="coin" size={18} />
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="adsSection">
-          <h3>
-            <Icon name="list" size={24} />
-            My Ads
-            <button onClick={() => window.location.href = '/create-ad'} className="btnSuccess">
-              + Create Ad
-            </button>
-          </h3>
-
-          <div className="adList">
-            {ads.length === 0 ? (
-                <div className="noAds">
-                  <h4>You have no ads yet</h4>
-                  <p>Create your first ad to start selling or trading items!</p>
-                </div>
+            {visibleAds.length === 0 ? (
+              <div className="db-empty">
+                <div className="db-empty-icon">📦</div>
+                <h3>No listings here</h3>
+                <p>
+                  {activeSection === 'drafts'  ? 'You have no drafts.' :
+                   activeSection === 'archive' ? 'Your archive is empty.' :
+                   activeSection === 'active'  ? 'No active listings yet.' :
+                   'Create your first listing!'}
+                </p>
+              </div>
             ) : (
-                ads.map(ad => (
-                    <div key={ad.id} className="adItem">
-                      <div className="adTitle">{ad.title}</div>
-                      <div className="adMeta">
-                        <span className="adCategory">{getCategoryDisplayName(ad.category)}</span>
-                        <span className="adCondition">{getConditionDisplayName(ad.condition)}</span>
-                        <span className={`adStatus ${getStatusClass(ad.status)}`}>
-                    {getStatusDisplayName(ad.status)}
-                  </span>
+              <div className="db-ad-grid">
+                {visibleAds.map(ad => (
+                  <div key={ad.id} className="db-ad-card" onClick={() => window.location.href = `/ad/${ad.id}`}>
+                    <div className="db-ad-image">
+                      <img
+                        src={`http://localhost:8080/ad-photo?adId=${ad.id}&photoIndex=0`}
+                        alt={ad.title}
+                        onError={e => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'flex'; }}
+                      />
+                      <div className="db-ad-image-fallback" style={{ display: 'none' }}>📦</div>
+                      <span className={`db-ad-status ${STATUS_CLASS[ad.status] || ''}`}>
+                        {STATUS_LABEL[ad.status] || ad.status}
+                      </span>
+                    </div>
+                    <div className="db-ad-body">
+                      <div className="db-ad-price">{formatPrice(ad.price)}</div>
+                      <div className="db-ad-title">{ad.title}</div>
+                      {ad.location && (
+                        <div className="db-ad-location">
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+                          </svg>
+                          {ad.location}
+                        </div>
+                      )}
+                      <div className="db-ad-meta">
+                        <span className="db-ad-views">👁 {ad.viewCount || 0}</span>
+                        <span className="db-ad-date">{formatDate(ad.createdAt)}</span>
                       </div>
-                      <div className="adPrice">{formatPrice(ad.price)}</div>
-                      <div className="adLocation">
-                        <Icon name="location" size={16} />
-                        {ad.location || 'Not specified'}
-                      </div>
-                      <div className="adDescription">{ad.description}</div>
-                      <div className="adViews">
-                        <Icon name="view" size={14} />
-                        {ad.viewCount || 0} views
-                      </div>
-                      <div className="adDate">
-                        <Icon name="calendar" size={14} />
-                        {formatDate(ad.createdAt)}
-                      </div>
-                      <div className="adActions">
-                        <button onClick={() => window.location.href = `/edit-ad?adId=${ad.id}`} className="btnEdit">
-                          Edit
-                        </button>
-                        <button onClick={() => handleDeleteAd(ad.id)} className="btnDanger">
-                          Delete
-                        </button>
+                      <div className="db-ad-actions" onClick={e => e.stopPropagation()}>
+                        <button className="db-btn-edit" onClick={() => window.location.href = `/edit-ad?adId=${ad.id}`}>Edit</button>
+                        <button className="db-btn-danger" onClick={() => handleDeleteAd(ad.id)}>Delete</button>
                       </div>
                     </div>
-                ))
+                  </div>
+                ))}
+              </div>
             )}
+          </main>
+        </div>
+      </div>
+
+      {/* Account modal */}
+      {activeModal === 'account' && (
+        <div className="db-modal" onClick={e => e.target === e.currentTarget && closeModal()}>
+          <div className="db-modal-content">
+            <button className="db-modal-close" onClick={closeModal}>×</button>
+            <h3>Account Settings</h3>
+            <div className="db-modal-actions">
+              <button className="db-btn-primary" onClick={() => openModal('password')}>Change Password</button>
+              <button className="db-btn-danger"  onClick={() => openModal('delete')}>Delete Account</button>
+            </div>
           </div>
         </div>
+      )}
 
-        <div className="actionButtons">
-          <button onClick={() => window.location.href = '/support'} className="btnPrimary">
-            Support
-          </button>
-          <button onClick={() => window.location.href = '/'} className="btnPrimary">
-            Home
-          </button>
-          <button onClick={handleLogout} className="btnSecondary">
-            Sign Out
-          </button>
+      {activeModal === 'password' && (
+        <ChangePasswordModal onClose={closeModal} onChangePassword={handlePasswordChanged} />
+      )}
+
+      {activeModal === 'delete' && (
+        <div className="db-modal" onClick={e => e.target === e.currentTarget && closeModal()}>
+          <div className="db-modal-content">
+            <button className="db-modal-close" onClick={closeModal}>×</button>
+            <h3>Delete Account</h3>
+            <div className="db-warning-box">
+              This action is irreversible. All your data and listings will be permanently deleted.
+            </div>
+            <form onSubmit={handleDeleteAccount}>
+              <div className="db-form-group">
+                <label>Confirm with your password</label>
+                <input type="password" required value={deletePassword} onChange={e => setDeletePassword(e.target.value)} />
+              </div>
+              <div className="db-modal-actions">
+                <button type="submit"  className="db-btn-danger">Delete Account</button>
+                <button type="button" className="db-btn-secondary" onClick={closeModal}>Cancel</button>
+              </div>
+            </form>
+          </div>
         </div>
-
-        {/* Account Management Modal */}
-        {activeModal === 'account' && (
-            <div className="modal" onClick={(e) => e.target === e.currentTarget && closeModals()}>
-              <div className="modalContent">
-                <span className="close" onClick={closeModals}>&times;</span>
-                <h3>
-                  <Icon name="settings" size={28} />
-                  Account Management
-                </h3>
-                <div className="buttonGroup">
-                  <button onClick={() => openModal('password')} className="btnPrimary">
-                    Change Password
-                  </button>
-                  <button onClick={() => openModal('delete')} className="btnDanger">
-                    Delete Account
-                  </button>
-                </div>
-              </div>
-            </div>
-        )}
-
-        {/* Change Password Modal */}
-        {activeModal === 'password' && (
-            <ChangePasswordModal
-                onClose={closeModals}
-                onChangePassword={handlePasswordChanged}
-            />
-        )}
-
-        {/* Delete Account Modal */}
-        {activeModal === 'delete' && (
-            <div className="modal" onClick={(e) => e.target === e.currentTarget && closeModals()}>
-              <div className="modalContent">
-                <span className="close" onClick={closeModals}>&times;</span>
-                <h3>
-                  <Icon name="delete" size={28} />
-                  Delete Account
-                </h3>
-                <div className="warningBox">
-                  <h4>
-                    <Icon name="warning" size={20} />
-                    Warning!
-                  </h4>
-                  <p>This action is irreversible. All your data, including ads, will be permanently deleted.</p>
-                </div>
-                <p>Enter your password to confirm:</p>
-                <form onSubmit={handleDeleteAccount}>
-                  <div className="formGroup">
-                    <label>Current Password</label>
-                    <input
-                        type="password"
-                        required
-                        value={deletePassword}
-                        onChange={(e) => setDeletePassword(e.target.value)}
-                    />
-                  </div>
-                  <div className="buttonGroup">
-                    <button type="submit" className="btnDanger">Delete Account</button>
-                    <button type="button" onClick={closeModals} className="btnSecondary">Cancel</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-        )}
-      </div>
+      )}
+    </div>
   );
 };
 
