@@ -372,6 +372,31 @@ public class UserService {
     }
   }
 
+  @Transactional
+  public boolean toggleFavorite(Long userId, Long adId) {
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+    if (user.getAdList() == null) {
+      user.setAdList(new ArrayList<>());
+    }
+    boolean liked;
+    if (user.getAdList().contains(adId)) {
+      user.getAdList().remove(adId);
+      liked = false;
+    } else {
+      user.getAdList().add(adId);
+      liked = true;
+    }
+    userRepository.save(user);
+    return liked;
+  }
+
+  public List<Long> getFavoriteIds(Long userId) {
+    return userRepository.findById(userId)
+        .map(u -> u.getAdList() != null ? u.getAdList() : List.<Long>of())
+        .orElse(List.of());
+  }
+
   public boolean existsByEmail(String email) {
     try {
       return userRepository.existsByEmail(email);

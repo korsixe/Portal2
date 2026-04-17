@@ -32,13 +32,39 @@ const Home = () => {
     });
     const [loading, setLoading] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [favorites, setFavorites] = useState(new Set());
 
     useEffect(() => {
         fetchAds();
         fetch(`${API_BASE}/api/users/me`, { credentials: 'include' })
-            .then(r => setIsLoggedIn(r.ok))
+            .then(r => {
+                setIsLoggedIn(r.ok);
+                if (r.ok) {
+                    return fetch(`${API_BASE}/api/favorites`, { credentials: 'include' })
+                        .then(fr => fr.ok ? fr.json() : [])
+                        .then(ids => setFavorites(new Set(ids)));
+                }
+            })
             .catch(() => {});
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const toggleFavorite = async (e, adId) => {
+        e.stopPropagation();
+        if (!isLoggedIn) { window.location.href = '/login'; return; }
+        try {
+            const res = await fetch(`${API_BASE}/api/favorites/${adId}`, {
+                method: 'POST', credentials: 'include'
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setFavorites(prev => {
+                    const next = new Set(prev);
+                    data.liked ? next.add(adId) : next.delete(adId);
+                    return next;
+                });
+            }
+        } catch {}
+    };
 
     const fetchAds = async () => {
         setLoading(true);
@@ -210,7 +236,7 @@ const Home = () => {
                                     <article
                                         key={ad.id}
                                         className="ad-card"
-                                        onClick={() => window.location.href = `/ad/${ad.id}`}
+                                        onClick={() => window.open(`/ad/${ad.id}`, '_blank')}
                                     >
                                         <div className="ad-image-wrap">
                                             <img
@@ -237,6 +263,15 @@ const Home = () => {
                                                     {conditionLabel(ad.condition)}
                                                 </span>
                                             )}
+                                            <button
+                                                className={`ad-like-btn${favorites.has(ad.id) ? ' liked' : ''}`}
+                                                onClick={(e) => toggleFavorite(e, ad.id)}
+                                                title={favorites.has(ad.id) ? 'Remove from favorites' : 'Add to favorites'}
+                                            >
+                                                <svg viewBox="0 0 24 24" width="18" height="18">
+                                                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                                </svg>
+                                            </button>
                                         </div>
 
                                         <div className="ad-body">

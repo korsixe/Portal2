@@ -88,6 +88,12 @@ public class AnnouncementService {
     }
 
     @Transactional(readOnly = true)
+    public List<Announcement> findAllByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) return List.of();
+        return repository.findAllById(ids);
+    }
+
+    @Transactional(readOnly = true)
     public List<Announcement> searchApproved(AnnouncementFilterDto filter, String sortBy, String direction) {
         return repository.searchApproved(filter, sortBy, direction);
     }

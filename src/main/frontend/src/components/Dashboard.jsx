@@ -9,6 +9,8 @@ const Dashboard = () => {
   const { t, language } = useI18n();
   const [user, setUser]               = useState(null);
   const [ads, setAds]                 = useState([]);
+  const [favoriteAds, setFavoriteAds] = useState([]);
+  const [bookedAds, setBookedAds]     = useState([]);
   const [loading, setLoading]         = useState(true);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage]     = useState('');
@@ -36,6 +38,12 @@ const Dashboard = () => {
 
       const adsRes = await fetch('http://localhost:8080/api/announcements/my', { credentials: 'include' });
       if (adsRes.ok) setAds((await adsRes.json()).filter(a => a.status !== 'DELETED'));
+
+      const favRes = await fetch('http://localhost:8080/api/favorites/ads', { credentials: 'include' });
+      if (favRes.ok) setFavoriteAds(await favRes.json());
+
+      const bookedRes = await fetch('http://localhost:8080/api/v1/bookings/my', { credentials: 'include' });
+      if (bookedRes.ok) setBookedAds(await bookedRes.json());
     } catch { setErrorMessage(t('dashboard.loadDataError', 'Failed to load data')); }
     finally { setLoading(false); }
   };
@@ -73,6 +81,14 @@ const Dashboard = () => {
     try { await fetch('http://localhost:8080/api/users/logout', { method: 'POST', credentials: 'include' }); }
     catch {}
     window.location.href = '/login';
+  };
+
+  const handleUnfavorite = async (e, adId) => {
+    e.stopPropagation();
+    try {
+      const res = await fetch(`http://localhost:8080/api/favorites/${adId}`, { method: 'POST', credentials: 'include' });
+      if (res.ok) setFavoriteAds(prev => prev.filter(a => a.id !== adId));
+    } catch { setErrorMessage('Error updating favorites'); }
   };
 
   const handleDeleteAd = async (adId) => {
@@ -117,20 +133,25 @@ const Dashboard = () => {
                    : activeSection === 'moderation' ? moderationAds
                    : activeSection === 'drafts'     ? draftAds
                    : activeSection === 'archive'    ? archivedAds
+                   : activeSection === 'favorites'  ? favoriteAds
+                   : activeSection === 'booked'     ? bookedAds
                    : ads;
 
-  const sectionTitle = activeSection === 'active'     ? t('dashboard.sectionActive', 'Active listings')
-                     : activeSection === 'moderation' ? t('dashboard.sectionModeration', 'Under review')
-                     : activeSection === 'drafts'     ? t('dashboard.sectionDrafts', 'Drafts')
-                     : activeSection === 'archive'    ? t('dashboard.sectionArchive', 'Archive')
-                     : t('dashboard.sectionAll', 'All listings');
+    const sectionTitle = activeSection === 'active'     ? t('dashboard.sectionActive', 'Active listings')
+                    : activeSection === 'moderation' ? t('dashboard.sectionModeration', 'Under review')
+                    : activeSection === 'drafts'     ? t('dashboard.sectionDrafts', 'Drafts')
+                    : activeSection === 'archive'    ? t('dashboard.sectionArchive', 'Archive')
+                    : activeSection === 'favorites'  ? 'Favorites'
+                        : activeSection === 'booked' ? 'Booked'
+                    : t('dashboard.sectionAll', 'All listings');
+
 
   const openModal  = (name) => setActiveModal(name);
   const closeModal = ()     => setActiveModal(null);
 
   const selectSection = (section) => {
     setActiveSection(section);
-    if (['active','drafts','archive','all'].includes(section)) setAdsOpen(true);
+    if (['active','drafts','archive','all','moderation'].includes(section)) setAdsOpen(true);
   };
 
   if (loading) return (
@@ -233,6 +254,20 @@ const Dashboard = () => {
                 </div>
               )}
 
+              <button
+                className={`db-nav-item${activeSection === 'favorites' ? ' active' : ''}`}
+                onClick={() => selectSection('favorites')}
+              >
+                ♡ Favorites <span className="db-count">{favoriteAds.length}</span>
+              </button>
+
+              <button
+                className={`db-nav-item${activeSection === 'booked' ? ' active' : ''}`}
+                onClick={() => selectSection('booked')}
+              >
+                🔖 Booked <span className="db-count">{bookedAds.length}</span>
+              </button>
+
               <a href="/" className="db-nav-item">
                 {t('dashboard.browseMarketplace', 'Browse Marketplace')}
               </a>
@@ -279,13 +314,15 @@ const Dashboard = () => {
                   {activeSection === 'drafts'  ? t('dashboard.noDrafts', 'You have no drafts.') :
                    activeSection === 'archive' ? t('dashboard.archiveEmpty', 'Your archive is empty.') :
                    activeSection === 'active'  ? t('dashboard.noActive', 'No active listings yet.') :
+                   activeSection === 'favorites' ? 'No saved listings yet. Click the heart on any ad!' :
+                   activeSection === 'booked'    ? 'You have no booked items.' :
                    t('dashboard.createFirst', 'Create your first listing!')}
                 </p>
               </div>
             ) : (
               <div className="db-ad-grid">
                 {visibleAds.map(ad => (
-                  <div key={ad.id} className="db-ad-card" onClick={() => window.location.href = `/ad/${ad.id}`}>
+                  <div key={ad.id} className="db-ad-card" onClick={() => window.open(`/ad/${ad.id}`, '_blank')}>
                     <div className="db-ad-image">
                       <img
                         src={`http://localhost:8080/ad-photo?adId=${ad.id}&photoIndex=0`}
@@ -296,6 +333,17 @@ const Dashboard = () => {
                       <span className={`db-ad-status ${STATUS_CLASS[ad.status] || ''}`}>
                         {STATUS_LABEL[ad.status] || ad.status}
                       </span>
+                      {activeSection === 'favorites' && (
+                        <button
+                          className="db-like-btn liked"
+                          onClick={(e) => handleUnfavorite(e, ad.id)}
+                          title="Remove from favorites"
+                        >
+                          <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                          </svg>
+                        </button>
+                      )}
                     </div>
                     <div className="db-ad-body">
                       <div className="db-ad-price">{formatPrice(ad.price)}</div>
@@ -312,10 +360,12 @@ const Dashboard = () => {
                         <span className="db-ad-views">👁 {ad.viewCount || 0}</span>
                         <span className="db-ad-date">{formatDate(ad.createdAt)}</span>
                       </div>
-                      <div className="db-ad-actions" onClick={e => e.stopPropagation()}>
-                        <button className="db-btn-edit" onClick={() => window.location.href = `/edit-ad?adId=${ad.id}`}>{t('dashboard.edit', 'Edit')}</button>
-                        <button className="db-btn-danger" onClick={() => handleDeleteAd(ad.id)}>{t('dashboard.delete', 'Delete')}</button>
-                      </div>
+                      {activeSection !== 'favorites' && activeSection !== 'booked' && (
+                        <div className="db-ad-actions" onClick={e => e.stopPropagation()}>
+                            <button className="db-btn-edit" onClick={() => window.location.href = `/edit-ad?adId=${ad.id}`}>{t('dashboard.edit', 'Edit')}</button>
+                            <button className="db-btn-danger" onClick={() => handleDeleteAd(ad.id)}>{t('dashboard.delete', 'Delete')}</button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
