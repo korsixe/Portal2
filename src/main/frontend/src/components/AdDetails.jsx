@@ -27,6 +27,7 @@ const AdDetails = () => {
   const [commentText, setCommentText] = useState('');
   const [commentFeedback, setCommentFeedback] = useState({ type: '', text: '' });
   const [hasPhoto, setHasPhoto] = useState(false);
+  const [liked, setLiked] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -55,6 +56,12 @@ const AdDetails = () => {
       setDetails(detailsData);
       setComments(Array.isArray(commentsData) ? commentsData : []);
       setHasPhoto(Number(detailsData.photoCount || 0) > 0);
+
+      const favRes = await fetch(`${API_BASE}/api/favorites`, { credentials: 'include' });
+      if (favRes.ok) {
+        const ids = await favRes.json();
+        setLiked(ids.includes(Number(id)));
+      }
     } catch (e) {
       setError(e.message || 'Ошибка загрузки');
     } finally {
@@ -68,6 +75,17 @@ const AdDetails = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  const toggleFavorite = async () => {
+    const res = await fetch(`${API_BASE}/api/favorites/${id}`, {
+      method: 'POST', credentials: 'include'
+    });
+    if (res.status === 401) { navigate('/login'); return; }
+    if (res.ok) {
+      const data = await res.json();
+      setLiked(data.liked);
+    }
+  };
 
   const addComment = async (e) => {
     e.preventDefault();
@@ -116,7 +134,18 @@ const AdDetails = () => {
     <div className="adDetailsPage">
       <div className="adDetailsLayout">
         <div className="adDetailsCard">
-          <h1>{announcement.title}</h1>
+          <div className="adTitleRow">
+            <h1>{announcement.title}</h1>
+            <button
+              className={`adLikeBtn${liked ? ' liked' : ''}`}
+              onClick={toggleFavorite}
+              title={liked ? 'Убрать из избранного' : 'Добавить в избранное'}
+            >
+              <svg viewBox="0 0 24 24" width="22" height="22">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+            </button>
+          </div>
           <div className="price">{formatPrice(announcement.price)}</div>
 
           <div className="metaRow">
