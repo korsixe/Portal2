@@ -141,8 +141,8 @@ const Dashboard = () => {
                     : activeSection === 'moderation' ? t('dashboard.sectionModeration', 'Under review')
                     : activeSection === 'drafts'     ? t('dashboard.sectionDrafts', 'Drafts')
                     : activeSection === 'archive'    ? t('dashboard.sectionArchive', 'Archive')
-                    : activeSection === 'favorites'  ? 'Favorites'
-                        : activeSection === 'booked' ? 'Booked'
+                    : activeSection === 'favorites'  ? t('dashboard.sectionFavorites', 'Favorites')
+                        : activeSection === 'booked' ? t('dashboard.sectionBooked', 'Booked')
                     : t('dashboard.sectionAll', 'All listings');
 
 
@@ -258,14 +258,14 @@ const Dashboard = () => {
                 className={`db-nav-item${activeSection === 'favorites' ? ' active' : ''}`}
                 onClick={() => selectSection('favorites')}
               >
-                ♡ Favorites <span className="db-count">{favoriteAds.length}</span>
+                ♡ {t('dashboard.filterFavorites', 'Favorites')} <span className="db-count">{favoriteAds.length}</span>
               </button>
 
               <button
                 className={`db-nav-item${activeSection === 'booked' ? ' active' : ''}`}
                 onClick={() => selectSection('booked')}
               >
-                🔖 Booked <span className="db-count">{bookedAds.length}</span>
+                🔖 {t('dashboard.filterBooked', 'Booked')} <span className="db-count">{bookedAds.length}</span>
               </button>
 
               <a href="/" className="db-nav-item">
@@ -314,8 +314,8 @@ const Dashboard = () => {
                   {activeSection === 'drafts'  ? t('dashboard.noDrafts', 'You have no drafts.') :
                    activeSection === 'archive' ? t('dashboard.archiveEmpty', 'Your archive is empty.') :
                    activeSection === 'active'  ? t('dashboard.noActive', 'No active listings yet.') :
-                   activeSection === 'favorites' ? 'No saved listings yet. Click the heart on any ad!' :
-                   activeSection === 'booked'    ? 'You have no booked items.' :
+                   activeSection === 'favorites' ? t('dashboard.noFavorites', 'No saved listings yet. Click the heart on any ad!') :
+                   activeSection === 'booked'    ? t('dashboard.noBooked', 'You have no booked items.') :
                    t('dashboard.createFirst', 'Create your first listing!')}
                 </p>
               </div>
@@ -337,7 +337,7 @@ const Dashboard = () => {
                         <button
                           className="db-like-btn liked"
                           onClick={(e) => handleUnfavorite(e, ad.id)}
-                          title="Remove from favorites"
+                          title={t('dashboard.removeFromFavorites', 'Remove from favorites')}
                         >
                           <svg viewBox="0 0 24 24" width="16" height="16">
                             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
