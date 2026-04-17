@@ -35,11 +35,16 @@ const CreateAd = () => {
     const [categories, setCategories] = useState([]);
     const [subcategories, setSubcategories] = useState([]);
     const [submitting, setSubmitting] = useState(false);
+    const [currentUserId, setCurrentUserId] = useState(null);
 
     useEffect(() => {
         fetch(`${API_BASE}/api/announcements/categories`, { credentials: 'include' })
             .then(r => r.ok ? r.json() : [])
             .then(data => setCategories(Array.isArray(data) ? data : []))
+            .catch(() => {});
+        fetch(`${API_BASE}/api/users/me`, { credentials: 'include' })
+            .then(r => r.ok ? r.json() : null)
+            .then(u => { if (u?.id) setCurrentUserId(u.id); })
             .catch(() => {});
     }, []);
 
@@ -129,6 +134,7 @@ const CreateAd = () => {
             location:    formData.location,
             condition:   formData.condition,
             price:       parseInt(finalPrice) || 0,
+            authorId:    currentUserId,
         };
 
         try {
