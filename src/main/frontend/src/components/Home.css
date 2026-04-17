@@ -40,6 +40,17 @@
   white-space: nowrap;
 }
 
+.portal-brand-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.portal-brand-wrap .lang-toggle {
+  margin-left: 6px;
+}
+
 .portal-brand-mark {
   width: 38px;
   height: 38px;
@@ -612,6 +623,9 @@
   .portal-brand {
     grid-column: 1 / -1;
     font-size: 1.2rem;
+  }
+  .portal-brand-wrap {
+    grid-column: 1 / -1;
   }
   .portal-search {
     grid-column: 1 / -1;

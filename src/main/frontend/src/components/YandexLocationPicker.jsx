@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './YandexLocationPicker.css';
 import { geocodeAddress, loadYandexMapsApi, reverseGeocode } from '../utils/yandexMaps';
+import { useI18n } from '../i18n/I18nProvider';
 
 const DEFAULT_CENTER = [55.92986, 37.52036]; // МФТИ (Долгопрудный)
 const DEFAULT_ZOOM = 15;
@@ -48,6 +49,7 @@ const hideYandexPromoNodes = (container) => {
 };
 
 const YandexLocationPicker = ({ onAddressChange, initialAddress = '' }) => {
+  const { t } = useI18n();
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
@@ -160,7 +162,7 @@ const YandexLocationPicker = ({ onAddressChange, initialAddress = '' }) => {
         });
       } catch (mapError) {
         if (isMounted) {
-          setError(mapError.message || 'Карта временно недоступна');
+          setError(mapError.message || t('yandexMap.unavailable'));
         }
       } finally {
         if (isMounted) {
@@ -190,11 +192,10 @@ const YandexLocationPicker = ({ onAddressChange, initialAddress = '' }) => {
   return (
     <div className="yandex-map-picker">
       <div ref={mapContainerRef} className="yandex-map-container" />
-      {loading && <p className="yandex-map-hint">Загрузка карты...</p>}
-      {!loading && <p className="yandex-map-hint">Нажмите на карту, чтобы выбрать адрес.</p>}
+      {loading && <p className="yandex-map-hint">{t('yandexMap.loading')}</p>}
+      {!loading && <p className="yandex-map-hint">{t('yandexMap.clickHint')}</p>}
     </div>
   );
 };
 
 export default YandexLocationPicker;
-

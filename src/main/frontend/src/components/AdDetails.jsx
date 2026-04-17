@@ -1,32 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './AdDetails.css';
+import { useI18n } from '../i18n/I18nProvider';
 
 const API_BASE = 'http://localhost:8080';
 
-const formatPrice = (price) => {
-  if (price === -1) return 'Договорная';
-  if (price === 0) return 'Бесплатно';
-  return `${Number(price || 0).toLocaleString('ru-RU')} руб.`;
-};
-
-const formatDate = (value) => {
-  if (!value) return 'Не указано';
-  return new Date(value).toLocaleString('ru-RU');
-};
-
 const AdDetails = () => {
+  const { t, language } = useI18n();
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [announcement, setAnnouncement] = useState(null);
-  const [details, setDetails] = useState({ authorName: 'Неизвестный пользователь', photoCount: 0 });
+  const [details, setDetails] = useState({ authorName: '', photoCount: 0 });
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
   const [commentFeedback, setCommentFeedback] = useState({ type: '', text: '' });
   const [hasPhoto, setHasPhoto] = useState(false);
+
+  const formatPrice = (price) => {
+    if (price === -1) return t('home.negotiable');
+    if (price === 0) return t('home.free');
+    return `${Number(price || 0).toLocaleString(language === 'ru' ? 'ru-RU' : 'en-US')} ₽`;
+  };
+
+  const formatDate = (value) => {
+    if (!value) return t('adDetails.notSpecified', 'Not specified');
+    return new Date(value).toLocaleString(language === 'ru' ? 'ru-RU' : 'en-US');
+  };
 
   const loadData = async () => {
     setLoading(true);
@@ -40,15 +42,15 @@ const AdDetails = () => {
 
       if (!adResp.ok) {
         if (adResp.status === 404) {
-          navigate('/error?code=404&message=Объявление не найдено');
+          navigate(`/error?code=404&message=${encodeURIComponent(t('adDetails.notFound', 'Listing not found'))}`);
           return;
         }
-        setError('Ошибка загрузки объявления');
+        setError(t('adDetails.loadError', 'Failed to load listing'));
         return;
       }
 
       const adData = await adResp.json();
-      const detailsData = detailsResp.ok ? await detailsResp.json() : { authorName: 'Неизвестный пользователь', photoCount: 0 };
+      const detailsData = detailsResp.ok ? await detailsResp.json() : { authorName: t('adDetails.unknownUser', 'Unknown user'), photoCount: 0 };
       const commentsData = commentsResp.ok ? await commentsResp.json() : [];
 
       setAnnouncement(adData);
@@ -56,7 +58,7 @@ const AdDetails = () => {
       setComments(Array.isArray(commentsData) ? commentsData : []);
       setHasPhoto(Number(detailsData.photoCount || 0) > 0);
     } catch (e) {
-      setError(e.message || 'Ошибка загрузки');
+      setError(e.message || t('adDetails.loadError', 'Failed to load listing'));
     } finally {
       setLoading(false);
     }
@@ -91,13 +93,13 @@ const AdDetails = () => {
       const message = await response.text();
       setCommentFeedback({
         type: 'error',
-        text: message || 'Не удалось добавить комментарий'
+        text: message || t('adDetails.commentAddError', 'Failed to add comment')
       });
       return;
     }
 
     setCommentText('');
-    setCommentFeedback({ type: 'success', text: 'Комментарий добавлен' });
+    setCommentFeedback({ type: 'success', text: t('adDetails.commentAdded', 'Comment added') });
     const commentsResp = await fetch(`${API_BASE}/api/announcements/${id}/comments`, { credentials: 'include' });
     if (commentsResp.ok) {
       setComments(await commentsResp.json());
@@ -105,11 +107,11 @@ const AdDetails = () => {
   };
 
   if (loading) {
-    return <div className="adDetailsPage"><div className="adDetailsCard">Загрузка...</div></div>;
+    return <div className="adDetailsPage"><div className="adDetailsCard">{t('common.loading')}</div></div>;
   }
 
   if (!announcement) {
-    return <div className="adDetailsPage"><div className="adDetailsCard">Объявление не найдено</div></div>;
+    return <div className="adDetailsPage"><div className="adDetailsCard">{t('adDetails.notFound', 'Listing not found')}</div></div>;
   }
 
   return (
@@ -120,9 +122,9 @@ const AdDetails = () => {
           <div className="price">{formatPrice(announcement.price)}</div>
 
           <div className="metaRow">
-            <span>Категория: {announcement.category}</span>
-            <span>Состояние: {announcement.condition}</span>
-            <span>Автор: {details.authorName}</span>
+            <span>{t('adDetails.category', 'Category')}: {announcement.category}</span>
+            <span>{t('adDetails.condition', 'Condition')}: {announcement.condition}</span>
+            <span>{t('adDetails.author', 'Author')}: {details.authorName || t('adDetails.unknownUser', 'Unknown user')}</span>
           </div>
 
           <div className="photoSection">
@@ -130,39 +132,39 @@ const AdDetails = () => {
               <img
                 className="mainPhoto"
                 src={`${API_BASE}/ad-photo?adId=${announcement.id}&photoIndex=0`}
-                alt="Фото объявления"
+                alt={t('home.adPhotoAlt')}
                 onError={() => setHasPhoto(false)}
               />
             ) : (
-              <div className="emptyPhoto">Фотографии отсутствуют</div>
+              <div className="emptyPhoto">{t('adDetails.noPhotos', 'No photos available')}</div>
             )}
           </div>
 
-          <h3>Описание</h3>
-          <p className="description">{announcement.description || 'Описание отсутствует'}</p>
+          <h3>{t('adDetails.description', 'Description')}</h3>
+          <p className="description">{announcement.description || t('adDetails.noDescription', 'Description is missing')}</p>
 
           <div className="infoGrid">
-            <div>Локация: {announcement.location || 'Не указано'}</div>
-            <div>Подкатегория: {announcement.subcategory || 'Не указано'}</div>
-            <div>Просмотры: {announcement.viewCount || 0}</div>
-            <div>Создано: {formatDate(announcement.createdAt)}</div>
+            <div>{t('adDetails.location', 'Location')}: {announcement.location || t('adDetails.notSpecified', 'Not specified')}</div>
+            <div>{t('adDetails.subcategory', 'Subcategory')}: {announcement.subcategory || t('adDetails.notSpecified', 'Not specified')}</div>
+            <div>{t('adDetails.views', 'Views')}: {announcement.viewCount || 0}</div>
+            <div>{t('adDetails.createdAt', 'Created')}: {formatDate(announcement.createdAt)}</div>
           </div>
 
           {error && <div className="errorText">{error}</div>}
 
           <div className="actions">
-            <button onClick={() => navigate(-1)} className="secondary">Назад</button>
-            <button onClick={() => navigate('/dashboard')}>В кабинет</button>
+            <button onClick={() => navigate(-1)} className="secondary">{t('common.back')}</button>
+            <button onClick={() => navigate('/dashboard')}>{t('login.goToDashboard')}</button>
           </div>
         </div>
 
         <div className="commentsCard">
-          <h3>Комментарии ({comments.length})</h3>
+          <h3>{t('adDetails.comments', 'Comments')} ({comments.length})</h3>
           <form onSubmit={addComment}>
             <textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
-              placeholder="Напишите комментарий"
+              placeholder={t('adDetails.commentPlaceholder', 'Write a comment')}
               required
             />
             {commentFeedback.text && (
@@ -170,12 +172,12 @@ const AdDetails = () => {
                 {commentFeedback.text}
               </div>
             )}
-            <button type="submit">Добавить</button>
+            <button type="submit">{t('adDetails.addComment', 'Add')}</button>
           </form>
 
           <div className="commentsList">
             {comments.length === 0 ? (
-              <div className="emptyComments">Пока нет комментариев</div>
+              <div className="emptyComments">{t('adDetails.noComments', 'No comments yet')}</div>
             ) : (
               comments.map((comment) => (
                 <div key={comment.id} className="commentItem">
@@ -195,4 +197,3 @@ const AdDetails = () => {
 };
 
 export default AdDetails;
-

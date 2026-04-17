@@ -1,8 +1,10 @@
 import React, { useCallback, useState } from 'react';
 import './Register.css';
 import YandexLocationPicker from './YandexLocationPicker.jsx';
+import { useI18n } from '../i18n/I18nProvider';
 
 const Register = () => {
+  const { t } = useI18n();
   const [formData, setFormData] = useState({
     email: '',
     name: '',
@@ -27,9 +29,9 @@ const Register = () => {
     // Валидация имени в реальном времени
     if (e.target.name === 'name') {
       if (!value.trim()) {
-        setFieldErrors(prev => ({ ...prev, name: 'Имя не может быть пустым' }));
+        setFieldErrors(prev => ({ ...prev, name: t('register.errors.emptyName', 'Name cannot be empty') }));
       } else if (value.includes(' ')) {
-        setFieldErrors(prev => ({ ...prev, name: 'Имя должно быть без пробелов!' }));
+        setFieldErrors(prev => ({ ...prev, name: t('register.errors.nameNoSpaces', 'Name must not contain spaces') }));
       } else {
         setFieldErrors(prev => ({ ...prev, name: '' }));
       }
@@ -42,7 +44,7 @@ const Register = () => {
     e.preventDefault();
 
     if (formData.password !== formData.passwordAgain) {
-      setMessage({ type: 'error', text: 'Пароли не совпадают!' });
+      setMessage({ type: 'error', text: t('register.errors.passwordMismatch', 'Passwords do not match') });
       return;
     }
 
@@ -71,18 +73,18 @@ const Register = () => {
       });
 
       if (response.ok) {
-        setMessage({ type: 'success', text: 'Регистрация прошла успешно! Вы будете перенаправлены на страницу входа.' });
+        setMessage({ type: 'success', text: t('register.success', 'Registration successful! Redirecting to sign in page.') });
         setTimeout(() => {
           window.location.href = '/login';
         }, 2000);
       } else {
         const errorData = await response.text();
         console.error('Server response:', errorData);
-        setMessage({ type: 'error', text: errorData || 'Ошибка регистрации. Проверьте данные.' });
+        setMessage({ type: 'error', text: errorData || t('register.errors.submit', 'Registration failed. Please check your data.') });
       }
     } catch (error) {
       console.error('Network error:', error);
-      setMessage({ type: 'error', text: 'Ошибка сети. Сервер недоступен.' });
+      setMessage({ type: 'error', text: t('register.errors.network', 'Network error. Server unavailable.') });
     }
   };
 
@@ -100,7 +102,7 @@ const Register = () => {
   return (
       <div className="portal-container loginContainer">
         <div className="portal-logo">PORTAL</div>
-        <div className="portal-subtitle">Регистрация</div>
+        <div className="portal-subtitle">{t('register.title', 'Register')}</div>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -109,7 +111,7 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <label>Имя пользователя *</label>
+            <label>{t('register.username', 'Username')} *</label>
             <input 
               type="text" 
               name="name" 
@@ -127,36 +129,36 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <label>Пароль *</label>
+            <label>{t('register.password', 'Password')} *</label>
             <div className="password-info">
-              Пароль должен содержать минимум 8 символов.
+              {t('register.passwordHint', 'Password must contain at least 8 characters.')}
             </div>
             <input type="password" name="password" required onChange={handleChange} />
           </div>
 
           <div className="form-group">
-            <label>Подтверждение пароля *</label>
+            <label>{t('register.confirmPassword', 'Confirm password')} *</label>
             <input type="password" name="passwordAgain" required onChange={handleChange}
                    style={{ borderColor: formData.passwordAgain && formData.password !== formData.passwordAgain ? '#dc3545' : '' }} />
           </div>
 
           <div className="address-section">
-            <h3>Адрес проживания</h3>
+            <h3>{t('register.addressSection', 'Home address')}</h3>
 
             <div className="form-group">
-              <label>Адрес</label>
+              <label>{t('register.address', 'Address')}</label>
               <div className="location-preview">
-                <span className="location-preview-label">Выбранный адрес:</span>
-                <span className="location-preview-value">{formData.addressFull || 'пока не выбран'}</span>
+                <span className="location-preview-label">{t('register.selectedAddress', 'Selected address:')}</span>
+                <span className="location-preview-value">{formData.addressFull || t('register.notSelected', 'not selected yet')}</span>
               </div>
               <YandexLocationPicker onAddressChange={handleAddressSelect} />
             </div>
           </div>
 
           <div className="form-group">
-            <label>Учебная программа *</label>
+            <label>{t('register.studyProgram', 'Study program')} *</label>
             <select name="studyProgram" required onChange={handleChange}>
-              <option value="Не указывать">Не указывать</option>
+              <option value="Не указывать">{t('register.notSpecify', 'Do not specify')}</option>
               <option value="ФПМИ">ФПМИ</option>
               <option value="ВШПИ">ВШПИ</option>
               <option value="ФРКТ">ФРКТ</option>
@@ -171,15 +173,15 @@ const Register = () => {
           </div>
 
           <div className="form-group">
-            <label>Курс *</label>
+            <label>{t('register.course', 'Course')} *</label>
             <select name="course" required onChange={handleChange}>
-              <option value="0">Не указывать</option>
-              <option value="1">1 курс</option>
-              <option value="2">2 курс</option>
-              <option value="3">3 курс</option>
-              <option value="4">4 курс</option>
-              <option value="5">5 курс</option>
-              <option value="6">6 курс</option>
+              <option value="0">{t('register.notSpecify', 'Do not specify')}</option>
+              <option value="1">{t('register.courseN', 'Year {{n}}').replace('{{n}}', '1')}</option>
+              <option value="2">{t('register.courseN', 'Year {{n}}').replace('{{n}}', '2')}</option>
+              <option value="3">{t('register.courseN', 'Year {{n}}').replace('{{n}}', '3')}</option>
+              <option value="4">{t('register.courseN', 'Year {{n}}').replace('{{n}}', '4')}</option>
+              <option value="5">{t('register.courseN', 'Year {{n}}').replace('{{n}}', '5')}</option>
+              <option value="6">{t('register.courseN', 'Year {{n}}').replace('{{n}}', '6')}</option>
             </select>
            </div>
 
@@ -190,8 +192,8 @@ const Register = () => {
           )}
 
            <div className="button-group">
-             <button type="submit" className="btn btn-primary">Зарегистрироваться</button>
-             <a href="/login" className="btn btn-secondary">Войти</a>
+             <button type="submit" className="btn btn-primary">{t('register.submit', 'Register')}</button>
+             <a href="/login" className="btn btn-secondary">{t('common.signIn')}</a>
            </div>
          </form>
        </div>

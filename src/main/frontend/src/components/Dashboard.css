@@ -1,4 +1,4 @@
-/* Dashboard – sidebar layout */
+/* Dashboard - sidebar layout */
 
 /* Loading */
 .loadingContainer {
@@ -226,20 +226,6 @@
   max-width: 130px;
 }
 
-.db-stars {
-  display: flex;
-  align-items: center;
-  gap: 1px;
-}
-
-.star-filled { color: #f59e0b; font-size: 0.85rem; }
-.star-empty  { color: #d1cbc6; font-size: 0.85rem; }
-.db-rating-num { font-size: 0.78rem; color: var(--color-text-secondary); margin-left: 4px; }
-
-.db-coins {
-  font-weight: 600;
-  color: #d97706;
-}
 
 /* Nav */
 .db-nav {

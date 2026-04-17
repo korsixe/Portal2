@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Home.css';
+import { useI18n } from '../i18n/I18nProvider';
+import LanguageToggle from './LanguageToggle';
 
 const API_BASE = 'http://localhost:8080';
 
@@ -18,14 +20,8 @@ const CONDITION_COLORS = {
   BROKEN: '#ffe4e4',
 };
 
-const categoryLabel = (c) => ({
-  ELECTRONICS: 'Electronics', CLOTHING: 'Clothing', HOME: 'Home',
-  AUTO: 'Auto', SERVICES: 'Services', OTHER: 'Other',
-}[c] || c);
-
-const conditionLabel = (c) => ({ NEW: 'New', USED: 'Used', BROKEN: 'Broken' }[c] || c);
-
 const Home = () => {
+    const { t, language } = useI18n();
     const [ads, setAds] = useState([]);
     const [filters, setFilters] = useState({
         searchQuery: '',
@@ -84,11 +80,14 @@ const Home = () => {
     };
 
     const formatPrice = (price) => {
-        if (price === null || price === undefined) return 'Price on request';
-        if (price === 0) return 'Free';
-        if (price < 0) return 'Negotiable';
-        return `${price.toLocaleString('ru-RU')} ₽`;
+        if (price === null || price === undefined) return t('home.priceOnRequest');
+        if (price === 0) return t('home.free');
+        if (price < 0) return t('home.negotiable');
+        return `${price.toLocaleString(language === 'ru' ? 'ru-RU' : 'en-US')} ₽`;
     };
+
+    const categoryLabel = (category) => t(`enums.category.${category}`, category);
+    const conditionLabel = (condition) => t(`enums.condition.${condition}`, condition);
 
     return (
         <div className="portal-wrap">
@@ -96,10 +95,13 @@ const Home = () => {
 
                 {/* Top bar */}
                 <header className="portal-topbar">
-                    <a href="/" className="portal-brand">
-                        <div className="portal-brand-mark"></div>
-                        <span>PORTAL</span>
-                    </a>
+                    <div className="portal-brand-wrap">
+                        <a href="/" className="portal-brand">
+                            <div className="portal-brand-mark"></div>
+                            <span>PORTAL</span>
+                        </a>
+                        <LanguageToggle />
+                    </div>
 
                     <form className="portal-search" onSubmit={handleFilterSubmit}>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -109,7 +111,7 @@ const Home = () => {
                         </svg>
                         <input
                             type="text"
-                            placeholder="Search ads by title, category, location…"
+                            placeholder={t('home.searchPlaceholder')}
                             name="searchQuery"
                             value={filters.searchQuery}
                             onChange={handleChange}
@@ -117,8 +119,8 @@ const Home = () => {
                     </form>
 
                     {isLoggedIn
-                        ? <a href="/dashboard" className="topbar-link">Profile</a>
-                        : <a href="/login"     className="topbar-link">Sign In</a>
+                        ? <a href="/dashboard" className="topbar-link">{t('common.profile')}</a>
+                        : <a href="/login"     className="topbar-link">{t('common.signIn')}</a>
                     }
                 </header>
 
@@ -127,41 +129,41 @@ const Home = () => {
 
                     {/* Filters sidebar */}
                     <aside className="portal-sidebar">
-                        <h2 className="sidebar-title">Filters</h2>
+                        <h2 className="sidebar-title">{t('home.filters')}</h2>
                         <form onSubmit={handleFilterSubmit}>
 
                             <div className="filter-block">
-                                <div className="filter-block-label">Price, ₽</div>
+                                <div className="filter-block-label">{t('home.price')}</div>
                                 <div className="price-row">
-                                    <input className="price-field" type="number" placeholder="From"
+                                    <input className="price-field" type="number" placeholder={t('home.from')}
                                            name="minPrice" value={filters.minPrice} onChange={handleChange} />
-                                    <input className="price-field" type="number" placeholder="To"
+                                    <input className="price-field" type="number" placeholder={t('home.to')}
                                            name="maxPrice" value={filters.maxPrice} onChange={handleChange} />
                                 </div>
                             </div>
 
                             <div className="filter-block">
-                                <div className="filter-block-label">Category</div>
+                                <div className="filter-block-label">{t('home.category')}</div>
                                 <select className="filter-select" name="category"
                                         value={filters.category} onChange={handleChange}>
-                                    <option value="">All categories</option>
-                                    <option value="ELECTRONICS">Electronics</option>
-                                    <option value="CLOTHING">Clothing &amp; Shoes</option>
-                                    <option value="HOME">Home &amp; Garden</option>
-                                    <option value="AUTO">Auto</option>
-                                    <option value="SERVICES">Services</option>
-                                    <option value="OTHER">Other</option>
+                                    <option value="">{t('home.allCategories')}</option>
+                                    <option value="ELECTRONICS">{t('enums.category.ELECTRONICS')}</option>
+                                    <option value="CLOTHING">{t('home.clothingShoes')}</option>
+                                    <option value="HOME">{t('home.homeGarden')}</option>
+                                    <option value="AUTO">{t('enums.category.AUTO')}</option>
+                                    <option value="SERVICES">{t('enums.category.SERVICES')}</option>
+                                    <option value="OTHER">{t('enums.category.OTHER')}</option>
                                 </select>
                             </div>
 
                             <div className="filter-block">
-                                <div className="filter-block-label">Condition</div>
+                                <div className="filter-block-label">{t('home.condition')}</div>
                                 <div className="condition-options">
                                     {[
-                                        { value: '',       label: 'All' },
-                                        { value: 'NEW',    label: 'New' },
-                                        { value: 'USED',   label: 'Used' },
-                                        { value: 'BROKEN', label: 'Not working' },
+                                        { value: '',       label: t('home.all') },
+                                        { value: 'NEW',    label: t('enums.condition.NEW') },
+                                        { value: 'USED',   label: t('enums.condition.USED') },
+                                        { value: 'BROKEN', label: t('home.notWorking') },
                                     ].map(opt => (
                                         <label key={opt.value}
                                                className={`condition-opt${filters.condition === opt.value ? ' active' : ''}`}>
@@ -175,8 +177,8 @@ const Home = () => {
                             </div>
 
                             <div className="filter-actions">
-                                <button type="submit" className="btn-apply">Apply</button>
-                                <button type="button" className="btn-reset" onClick={handleReset}>Reset</button>
+                                <button type="submit" className="btn-apply">{t('home.apply')}</button>
+                                <button type="button" className="btn-reset" onClick={handleReset}>{t('home.reset')}</button>
                             </div>
                         </form>
                     </aside>
@@ -184,22 +186,22 @@ const Home = () => {
                     {/* Main content */}
                     <main className="portal-main">
                         <div className="main-head">
-                            <h1 className="main-title">Listings</h1>
-                            <span className="results-badge">{ads.length} found</span>
+                            <h1 className="main-title">{t('home.listings')}</h1>
+                            <span className="results-badge">{ads.length} {t('home.found')}</span>
                         </div>
 
                         {loading ? (
                             <div className="loading-state">
                                 <div className="spinner"></div>
-                                <p>Loading ads…</p>
+                                <p>{t('home.loadingAds')}</p>
                             </div>
                         ) : ads.length === 0 ? (
                             <div className="empty-state">
                                 <div className="empty-icon">🛍️</div>
-                                <h3>No listings found</h3>
-                                <p>Try adjusting your filters or check back later.</p>
+                                <h3>{t('home.noListings')}</h3>
+                                <p>{t('home.adjustFilters')}</p>
                                 <button className="btn-apply" onClick={handleReset} style={{ marginTop: 12 }}>
-                                    Clear filters
+                                    {t('home.clearFilters')}
                                 </button>
                             </div>
                         ) : (
@@ -213,7 +215,7 @@ const Home = () => {
                                         <div className="ad-image-wrap">
                                             <img
                                                 src={`${API_BASE}/ad-photo?adId=${ad.id}&photoIndex=0`}
-                                                alt={ad.title || 'Ad photo'}
+                                                alt={ad.title || t('home.adPhotoAlt')}
                                                 onError={(e) => {
                                                     e.currentTarget.style.display = 'none';
                                                     e.currentTarget.nextSibling.style.display = 'flex';
@@ -272,10 +274,10 @@ const Home = () => {
                 {/* CTA footer */}
                 <section className="portal-cta">
                     <div className="cta-text">
-                        <h3>Have something to sell?</h3>
-                        <p>Post your first listing — it's free and takes 2 minutes.</p>
+                        <h3>{t('home.haveSomethingToSell')}</h3>
+                        <p>{t('home.ctaText')}</p>
                     </div>
-                    <a href="/create-ad" className="cta-link">Start selling →</a>
+                    <a href="/create-ad" className="cta-link">{t('home.startSelling')} →</a>
                 </section>
 
             </div>
