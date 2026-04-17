@@ -5,87 +5,75 @@ import './ModeratorDashboard.css';
 
 const API_BASE = 'http://localhost:8080';
 
-const CATEGORY_LABELS = {
-  ELECTRONICS: 'Электроника',
-  CLOTHING: 'Одежда',
-  BOOKS: 'Книги',
-  FURNITURE: 'Мебель',
-  SPORTS: 'Спорт',
-  OTHER: 'Другое'
-};
-
 const ACTION_CONFIGS = {
   approve: {
-    icon: '✅',
-    title: 'Одобрение объявления',
-    message: (title) => `Вы уверены, что хотите одобрить объявление "${title}"?`,
+    icon: '✓',
+    title: 'Approve listing',
+    message: (title) => `Approve "${title}"?`,
     confirmClass: 'approve',
-    successMessage: 'Объявление успешно одобрено'
+    successMessage: 'Listing approved'
   },
   reject: {
-    icon: '⚠️',
-    title: 'Отозвать объявление',
-    message: (title) => `Вы уверены, что хотите отозвать объявление "${title}" на доработку?`,
+    icon: '↩',
+    title: 'Send back for revision',
+    message: (title) => `Send "${title}" back for revision?`,
     confirmClass: 'reject',
-    successMessage: 'Объявление отозвано на доработку'
+    successMessage: 'Listing sent back for revision'
   },
   delete: {
-    icon: '🗑️',
-    title: 'Удаление объявления',
-    message: (title) => `Вы уверены, что хотите удалить объявление "${title}"? Это действие нельзя отменить.`,
+    icon: '✕',
+    title: 'Delete listing',
+    message: (title) => `Delete "${title}"? This cannot be undone.`,
     confirmClass: 'delete',
-    successMessage: 'Объявление удалено'
+    successMessage: 'Listing deleted'
   }
 };
 
 const REJECT_REASONS = [
-  'Неполная или некорректная информация',
-  'Несоответствие категории, подкатегории, тегам',
-  'Нарушение правил платформы'
+  'Incomplete or incorrect information',
+  'Wrong category / subcategory / tags',
+  'Platform rules violation'
 ];
 
 const DELETE_REASONS = [
-  'Нарушение правил платформы',
-  'Мошенничество или обман',
-  'Нецензурная лексика, оскорбления',
-  'Спам'
+  'Platform rules violation',
+  'Fraud or deception',
+  'Offensive content',
+  'Spam'
 ];
 
 function formatDate(value) {
   if (!value) return '';
-  const date = new Date(value);
-  const options = {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  };
-  return date.toLocaleString('ru-RU', options);
+  return new Date(value).toLocaleString('ru-RU', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
 }
 
-function getCategoryLabel(category) {
-  return CATEGORY_LABELS[category] || category || '—';
+function formatPrice(price) {
+  if (price === -1) return 'Negotiable';
+  if (price === 0)  return 'Free';
+  return `${price?.toLocaleString()} ₽`;
 }
 
 function ModeratorDashboard() {
-  const [ads, setAds] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [moderator, setModerator] = useState(null);
-  const [message, setMessage] = useState('');
+  const [ads, setAds]               = useState([]);
+  const [stats, setStats]           = useState(null);
+  const [moderator, setModerator]   = useState(null);
+  const [message, setMessage]       = useState('');
   const [messageType, setMessageType] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading]       = useState(true);
   const [accessDenied, setAccessDenied] = useState(false);
 
-  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [reasonModalOpen, setReasonModalOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen]   = useState(false);
+  const [reasonOpen, setReasonOpen]     = useState(false);
   const [currentAction, setCurrentAction] = useState(null);
-  const [currentAd, setCurrentAd] = useState(null);
+  const [currentAd, setCurrentAd]       = useState(null);
   const [currentReason, setCurrentReason] = useState('');
   const [customReason, setCustomReason] = useState('');
   const [reasonRequired, setReasonRequired] = useState(false);
-  const [historyOpen, setHistoryOpen] = useState({});
-  const [historyData, setHistoryData] = useState({});
+  const [historyOpen, setHistoryOpen]   = useState({});
+  const [historyData, setHistoryData]   = useState({});
 
   const reasons = useMemo(() => {
     if (currentAction === 'reject') return REJECT_REASONS;
@@ -103,10 +91,13 @@ function ModeratorDashboard() {
         setLoading(false);
       })
       .catch((err) => {
+        console.error('[ModeratorDashboard] load error:', err, 'status:', err?.status);
         if (err && (err.status === 401 || err.status === 403)) {
           setAccessDenied(true);
+        } else if (!err?.status) {
+          setAccessDenied(true);
         } else {
-          setMessage('Не удалось загрузить кабинет модератора');
+          setMessage(`Failed to load moderator panel (status: ${err.status}, path: ${err.path})`);
           setMessageType('error');
         }
         setLoading(false);
@@ -115,116 +106,74 @@ function ModeratorDashboard() {
 
   useEffect(() => {
     load();
-    const interval = setInterval(() => {
-      load();
-    }, 30000);
+    const interval = setInterval(load, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const showNotification = (text, type) => {
     setMessage(text);
     setMessageType(type || 'info');
-    setTimeout(() => {
-      setMessage('');
-      setMessageType('');
-    }, 3000);
+    setTimeout(() => { setMessage(''); setMessageType(''); }, 3000);
   };
 
-  const openConfirm = (action, ad) => {
-    setCurrentAction(action);
-    setCurrentAd(ad);
-    setConfirmModalOpen(true);
-  };
-
-  const openReasonModal = (action, ad) => {
-    setCurrentAction(action);
-    setCurrentAd(ad);
-    setCurrentReason('');
-    setCustomReason('');
-    setReasonRequired(false);
-    setReasonModalOpen(true);
-  };
-
-  const closeConfirm = () => {
-    setConfirmModalOpen(false);
-  };
-
-  const closeReason = () => {
-    setReasonModalOpen(false);
+  const openConfirm = (action, ad) => { setCurrentAction(action); setCurrentAd(ad); setConfirmOpen(true); };
+  const openReason  = (action, ad) => {
+    setCurrentAction(action); setCurrentAd(ad);
+    setCurrentReason(''); setCustomReason(''); setReasonRequired(false);
+    setReasonOpen(true);
   };
 
   const handleActionClick = (action, ad) => {
-    if (action === 'approve') {
-      openConfirm(action, ad);
-    } else {
-      openReasonModal(action, ad);
-    }
+    if (action === 'approve') openConfirm(action, ad);
+    else openReason(action, ad);
   };
 
   const confirmWithReason = () => {
-    if (!currentReason && !customReason.trim()) {
-      setReasonRequired(true);
-      return;
-    }
-    const reason = currentReason || customReason.trim();
-    setCurrentReason(reason);
-    closeReason();
+    if (!currentReason && !customReason.trim()) { setReasonRequired(true); return; }
+    setCurrentReason(currentReason || customReason.trim());
+    setReasonOpen(false);
     openConfirm(currentAction, currentAd);
   };
 
   const executeAction = async () => {
     if (!currentAction || !currentAd) return;
-    const action = currentAction;
-    const adId = currentAd.id;
-
     try {
-      const res = await apiPost(`/api/moderator/${action}`, {
-        adId,
-        reason: action === 'approve' ? null : currentReason
+      const res = await apiPost(`/api/moderator/${currentAction}`, {
+        adId: currentAd.id,
+        reason: currentAction === 'approve' ? null : currentReason
       });
-      showNotification(ACTION_CONFIGS[action].successMessage, res.success ? 'success' : 'error');
-      closeConfirm();
-      setCurrentAction(null);
-      setCurrentAd(null);
-      setCurrentReason('');
+      showNotification(ACTION_CONFIGS[currentAction].successMessage, res.success ? 'success' : 'error');
+      setConfirmOpen(false);
+      setCurrentAction(null); setCurrentAd(null); setCurrentReason('');
       load();
-    } catch (err) {
-      console.error('Failed to execute action:', err);
-      showNotification('Не удалось выполнить действие', 'error');
-      closeConfirm();
+    } catch {
+      showNotification('Failed to execute action', 'error');
+      setConfirmOpen(false);
     }
   };
 
   const toggleHistory = async (adId) => {
-    setHistoryOpen((prev) => ({ ...prev, [adId]: !prev[adId] }));
+    setHistoryOpen(prev => ({ ...prev, [adId]: !prev[adId] }));
     if (historyData[adId]) return;
     try {
       const data = await apiGet(`/api/announcements/${adId}/history`);
-      setHistoryData((prev) => ({ ...prev, [adId]: data || [] }));
-    } catch (err) {
-      console.error('Failed to fetch history:', err);
-      setHistoryData((prev) => ({ ...prev, [adId]: [] }));
+      setHistoryData(prev => ({ ...prev, [adId]: data || [] }));
+    } catch {
+      setHistoryData(prev => ({ ...prev, [adId]: [] }));
     }
   };
 
   const handleLogout = async () => {
-    try {
-      await fetch('http://localhost:8080/api/users/logout', {
-        method: 'POST',
-        credentials: 'include'
-      });
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
+    try { await fetch(`${API_BASE}/api/users/logout`, { method: 'POST', credentials: 'include' }); } catch {}
     window.location.href = '/login';
   };
 
   if (accessDenied) {
     return (
       <AccessDenied
-        title="Доступ к модерации запрещен"
-        message="У вашей учетной записи нет прав модератора."
-        actionLabel="В личный кабинет"
+        title="Access denied"
+        message="Your account does not have moderator rights."
+        actionLabel="Go to Dashboard"
         actionHref="/dashboard"
       />
     );
@@ -232,182 +181,141 @@ function ModeratorDashboard() {
 
   if (loading) {
     return (
-      <div className="moderator-page">
-        <div className="container">
-          <div className="header">
-            <div className="portal-logo">PORTAL</div>
-          </div>
-          <div className="content">
-            <div className="message info">Загрузка...</div>
-          </div>
+      <div className="mod-wrap">
+        <div className="mod-shell">
+          <div className="mod-loading">Loading…</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="moderator-page">
-      <div className="container">
-        <div className="header">
-          <div className="portal-logo">PORTAL</div>
-          <div className="moderator-info">
-            <h2>Кабинет модератора</h2>
-            <p>{moderator?.email || 'Модератор'}</p>
+    <div className="mod-wrap">
+      <div className="mod-shell">
+
+        {/* Top bar */}
+        <header className="mod-topbar">
+          <a href="/" className="mod-brand">
+            <div className="mod-brand-mark"></div>
+            <span>PORTAL</span>
+          </a>
+          <span className="mod-topbar-title">Moderation Panel</span>
+          <div className="mod-topbar-nav">
+            <a href="/dashboard" className="mod-btn mod-btn-ghost">Dashboard</a>
+            <button className="mod-btn mod-btn-ghost" onClick={handleLogout}>Sign Out</button>
           </div>
-          <div className="nav-group header-nav">
-            <a href="/" className="btn btn-primary">На главную</a>
-            <a href="/dashboard" className="btn btn-secondary">Личный кабинет</a>
-            <button type="button" className="btn btn-secondary" onClick={handleLogout}>Выйти</button>
-          </div>
-        </div>
+        </header>
 
-        <div className="content">
-          {message && (
-            <div className={`notification ${messageType}`} style={{ display: 'block', marginBottom: '10px' }}>
-              {message}
-            </div>
-          )}
+        {/* Toast */}
+        {message && (
+          <div className={`mod-toast mod-toast-${messageType}`}>{message}</div>
+        )}
 
-          <h2 className="section-title">Панель модерации</h2>
+        <div className="mod-card">
 
-          <div className="stats-cards">
-            <div className="stat-card">
-              <div className="stat-number">{ads.length}</div>
-              <div className="stat-label">Ожидают модерации</div>
+          {/* Stats */}
+          <div className="mod-stats">
+            <div className="mod-stat">
+              <div className="mod-stat-num">{ads.length}</div>
+              <div className="mod-stat-label">Awaiting review</div>
             </div>
-            <div className="stat-card dark-card">
-              <div className="stat-number">{stats?.totalUsers ?? 0}</div>
-              <div className="stat-label">Всего пользователей</div>
+            <div className="mod-stat">
+              <div className="mod-stat-num">{stats?.totalUsers ?? 0}</div>
+              <div className="mod-stat-label">Total users</div>
             </div>
-            <div className="stat-card blue-card">
-              <div className="stat-number">{stats?.adminCount ?? 0}</div>
-              <div className="stat-label">Администраторов</div>
+            <div className="mod-stat">
+              <div className="mod-stat-num">{stats?.moderatorCount ?? 0}</div>
+              <div className="mod-stat-label">Moderators</div>
             </div>
-            <div className="stat-card green-card">
-              <div className="stat-number">{stats?.moderatorCount ?? 0}</div>
-              <div className="stat-label">Модераторов</div>
+            <div className="mod-stat">
+              <div className="mod-stat-num">{stats?.adminCount ?? 0}</div>
+              <div className="mod-stat-label">Admins</div>
             </div>
           </div>
 
-          {moderator && (
-            <div className="moderator-info profile-info">
-              <h3>Ваш профиль (как у обычного пользователя)</h3>
-              <p>{moderator.name} — {moderator.email}</p>
-              <p>
-                Монеты: {moderator.coins} · Роли:{' '}
-                {(moderator.roles || []).map((role, index) => (
-                  <span key={`${moderator.id}-role-${index}`} className="role-chip">
-                    {typeof role === 'string' ? role : role.displayName || role.name}
-                  </span>
-                ))}
-              </p>
-              <div className="profile-actions">
-                <a href="/dashboard" className="btn btn-home">Открыть личный кабинет</a>
-                <a href="/" className="btn btn-secondary">Лента объявлений</a>
-              </div>
+          <h3 className="mod-section-title">Listings under review</h3>
+
+          {ads.length === 0 ? (
+            <div className="mod-empty">
+              <div className="mod-empty-icon">📋</div>
+              <h3>Nothing to review</h3>
+              <p>All listings have been processed.</p>
             </div>
-          )}
+          ) : (
+            <div className="mod-ads-list">
+              {ads.map(ad => (
+                <div className="mod-ad-card" key={ad.id}>
 
-          <h3 className="section-title">Объявления на модерации</h3>
-
-          {ads.length === 0 && (
-            <div className="empty-state">
-              <div>📋</div>
-              <p>Нет объявлений для модерации</p>
-              <p className="empty-sub">Все объявления проверены и обработаны</p>
-            </div>
-          )}
-
-          {ads.length > 0 && (
-            <div className="ads-list">
-              {ads.map((ad) => (
-                <div className="ad-card" key={ad.id}>
-                  <div className="ad-photo-section">
-                    <div className="ad-photo-container">
-                      <img
-                        src={`${API_BASE}/ad-photo?adId=${ad.id}&photoIndex=0`}
-                        className="ad-photo"
-                        alt={ad.title}
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          const parent = e.currentTarget.parentElement;
-                          if (parent) {
-                            parent.innerHTML = '<div class="photo-placeholder"><span style="font-size:3rem">📷</span><span style="font-size:0.9rem;margin-top:5px">Нет фото</span></div>';
-                          }
-                        }}
-                      />
-                    </div>
+                  {/* Photo */}
+                  <div className="mod-ad-photo-wrap">
+                    <img
+                      src={`${API_BASE}/ad-photo?adId=${ad.id}&photoIndex=0`}
+                      alt={ad.title}
+                      onError={e => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.parentElement.innerHTML =
+                          '<div class="mod-ad-photo-fallback"><span>📷</span><span>No photo</span></div>';
+                      }}
+                    />
                   </div>
 
-                  <div className="ad-content">
-                    <div className="ad-title">
-                      {ad.title}
-                      <span className="status-badge status-pending">На модерац��и</span>
+                  {/* Content */}
+                  <div className="mod-ad-body">
+                    <div className="mod-ad-top">
+                      <a className="mod-ad-title" href={`/ad/${ad.id}`} target="_blank" rel="noreferrer">{ad.title}</a>
+                      <span className="mod-status-badge">Under review</span>
                     </div>
 
-                    <div className="ad-meta">
-                      <span>Категория: {getCategoryLabel(ad.category)}</span>
-                      <span>Подкатегория: {ad.subcategory || '—'}</span>
-                      <span>Дата: {formatDate(ad.createdAt)}</span>
+                    <div className="mod-ad-price">{formatPrice(ad.price)}</div>
+
+                    <div className="mod-ad-meta">
+                      {ad.category    && <span>{ad.category}</span>}
+                      {ad.subcategory && <span>{ad.subcategory}</span>}
+                      {ad.createdAt   && <span>{formatDate(ad.createdAt)}</span>}
                     </div>
 
-                    <div className="ad-price">{ad.price} руб.</div>
-
-                    <div className="ad-location">
-                      <span style={{ fontSize: '1.1rem' }}>📍</span> {ad.location || 'Не указано'}
-                    </div>
-
-                    <div className="ad-description">{ad.description}</div>
-
-                    <div className="ad-footer">
-                      <div className="ad-views">
-                        <span style={{ fontSize: '1.1rem' }}>👁️</span> {ad.viewCount || 0} просмотров
+                    {ad.location && (
+                      <div className="mod-ad-location">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        {ad.location}
                       </div>
-                    </div>
+                    )}
 
-                    <div className="moderation-actions">
-                      <button
-                        type="button"
-                        className="btn btn-approve"
-                        onClick={() => handleActionClick('approve', ad)}
-                      >
-                        Одобрить
+                    {ad.description && (
+                      <div className="mod-ad-desc">{ad.description}</div>
+                    )}
+
+                    <div className="mod-ad-views">👁 {ad.viewCount || 0} views</div>
+
+                    <div className="mod-actions">
+                      <button className="mod-btn-approve" onClick={() => handleActionClick('approve', ad)}>
+                        Approve
                       </button>
-
-                      <button
-                        type="button"
-                        className="btn btn-reject"
-                        onClick={() => handleActionClick('reject', ad)}
-                      >
-                        Отозвать на доработку
+                      <button className="mod-btn-reject" onClick={() => handleActionClick('reject', ad)}>
+                        Send back for revision
                       </button>
-
-                      <button
-                        type="button"
-                        className="btn btn-secondary"
-                        style={{ marginLeft: 'auto' }}
-                        onClick={() => toggleHistory(ad.id)}
-                      >
-                        История модерации
+                      <button className="mod-btn-history" onClick={() => toggleHistory(ad.id)}>
+                        {historyOpen[ad.id] ? 'Hide history' : 'History'}
                       </button>
                     </div>
 
                     {historyOpen[ad.id] && (
-                      <div className="history-box" style={{ display: 'block' }}>
-                        {historyData[ad.id] && historyData[ad.id].length > 0 ? (
-                          historyData[ad.id].map((item, index) => (
-                            <div className="history-entry" key={`${ad.id}-history-${index}`}>
-                              <div>
-                                <strong>{item.fromStatus || '—'}</strong> → <strong>{item.toStatus}</strong>
-                              </div>
-                              <div className="history-meta">
-                                {formatDate(item.createdAt)} {item.moderatorId ? `Модератор: ${item.moderatorId}` : ''}
+                      <div className="mod-history-box">
+                        {(historyData[ad.id] || []).length > 0 ? (
+                          historyData[ad.id].map((item, i) => (
+                            <div className="mod-history-entry" key={i}>
+                              <div><strong>{item.fromStatus || '—'}</strong> → <strong>{item.toStatus}</strong></div>
+                              <div className="mod-history-meta">
+                                {formatDate(item.createdAt)}
+                                {item.moderatorId ? ` · Moderator: ${item.moderatorId}` : ''}
                               </div>
                               {item.reason && <div>{item.reason}</div>}
                             </div>
                           ))
                         ) : (
-                          <div className="history-entry">Пока нет записей</div>
+                          <div className="mod-history-entry">No records yet</div>
                         )}
                       </div>
                     )}
@@ -419,75 +327,55 @@ function ModeratorDashboard() {
         </div>
       </div>
 
-      {confirmModalOpen && currentAction && currentAd && (
-        <div className="modal" style={{ display: 'block' }}>
-          <div className="modal-content">
-            <div className="modal-icon">{ACTION_CONFIGS[currentAction].icon}</div>
-            <h3 className="modal-title">{ACTION_CONFIGS[currentAction].title}</h3>
-            <p className="modal-message">{ACTION_CONFIGS[currentAction].message(currentAd.title)}</p>
-            <div className="modal-actions">
-              <button type="button" className="modal-btn modal-btn-cancel" onClick={closeConfirm}>Отменить</button>
-              <button
-                type="button"
-                className={`modal-btn modal-btn-confirm ${ACTION_CONFIGS[currentAction].confirmClass}`}
-                onClick={executeAction}
-              >
-                Подтвердить
+      {/* Confirm modal */}
+      {confirmOpen && currentAction && currentAd && (
+        <div className="mod-modal" onClick={e => e.target === e.currentTarget && setConfirmOpen(false)}>
+          <div className="mod-modal-box">
+            <div className="mod-modal-icon">{ACTION_CONFIGS[currentAction].icon}</div>
+            <div className="mod-modal-title">{ACTION_CONFIGS[currentAction].title}</div>
+            <div className="mod-modal-msg">{ACTION_CONFIGS[currentAction].message(currentAd.title)}</div>
+            <div className="mod-modal-actions">
+              <button className="mod-modal-cancel" onClick={() => setConfirmOpen(false)}>Cancel</button>
+              <button className={`mod-modal-confirm ${ACTION_CONFIGS[currentAction].confirmClass}`} onClick={executeAction}>
+                Confirm
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {reasonModalOpen && currentAction && currentAd && (
-        <div className="modal" style={{ display: 'block' }}>
-          <div className="reason-modal-content">
-            <div className="modal-icon">📝</div>
-            <h3 className="modal-title">Выберите причину</h3>
-
-            <div className="reason-section">
-              <div className="reason-title">Выберите одну из причин:</div>
-              <div className="reason-buttons" style={{ display: 'grid' }}>
-                {reasons.map((reason) => (
+      {/* Reason modal */}
+      {reasonOpen && currentAction && currentAd && (
+        <div className="mod-modal" onClick={e => e.target === e.currentTarget && setReasonOpen(false)}>
+          <div className="mod-reason-box">
+            <div className="mod-modal-title">Select a reason</div>
+            <div style={{ textAlign: 'left' }}>
+              <div className="mod-reason-label">Choose one:</div>
+              <div className="mod-reason-btns">
+                {reasons.map(r => (
                   <button
-                    key={reason}
-                    type="button"
-                    className={`reason-btn ${currentReason === reason ? 'selected' : ''}`}
-                    onClick={() => {
-                      setCurrentReason(reason);
-                      setCustomReason('');
-                      setReasonRequired(false);
-                    }}
+                    key={r}
+                    className={`mod-reason-btn${currentReason === r ? ' selected' : ''}`}
+                    onClick={() => { setCurrentReason(r); setCustomReason(''); setReasonRequired(false); }}
                   >
-                    {reason}
+                    {r}
                   </button>
                 ))}
               </div>
-
-              <div className="custom-reason-section">
-                <div className="reason-title">Или введите свою причину:</div>
-                <textarea
-                  className="custom-reason-input"
-                  placeholder="Введите свою причину..."
-                  value={customReason}
-                  onChange={(event) => {
-                    setCustomReason(event.target.value);
-                    setCurrentReason('');
-                    setReasonRequired(false);
-                  }}
-                />
-              </div>
-
+              <div className="mod-reason-label">Or enter your own:</div>
+              <textarea
+                className="mod-reason-textarea"
+                placeholder="Enter reason…"
+                value={customReason}
+                onChange={e => { setCustomReason(e.target.value); setCurrentReason(''); setReasonRequired(false); }}
+              />
               {reasonRequired && (
-                <div className="reason-required" style={{ display: 'block' }}>
-                  Пожалуйста, выберите причину или введите свою
-                </div>
+                <div className="mod-reason-error">Please select or enter a reason</div>
               )}
             </div>
-
-            <div className="modal-actions">
-              <button type="button" className="modal-btn modal-btn-cancel" onClick={closeReason}>Отменить</button>
-              <button type="button" className="modal-btn modal-btn-confirm" onClick={confirmWithReason}>Продолжить</button>
+            <div className="mod-modal-actions" style={{ marginTop: 20 }}>
+              <button className="mod-modal-cancel" onClick={() => setReasonOpen(false)}>Cancel</button>
+              <button className="mod-modal-confirm" onClick={confirmWithReason}>Continue</button>
             </div>
           </div>
         </div>
