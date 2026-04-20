@@ -6,12 +6,13 @@ spring:
   mvc:
     view:
       suffix: .jsp
-
   datasource:
-    url: jdbc:postgresql://localhost:5433/myproject
+    url: jdbc:postgresql://localhost:5433/myproject?useUnicode=true&characterEncoding=UTF-8&charSet=UTF-8
     username: myuser
     password: ${DB_PASSWORD:mypassword}
     driver-class-name: org.postgresql.Driver
+  main:
+    allow-bean-definition-overriding: true
 
   sql:
     init:
@@ -43,6 +44,11 @@ server:
   port: 8080
   tomcat:
     uri-encoding: UTF-8
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 
 # Логирование
 logging:
