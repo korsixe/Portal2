@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import './NotificationBell.css';
+import { useI18n } from '../i18n/I18nProvider';
 
 const API_BASE = 'http://localhost:8080';
 
 const NotificationBell = ({ adIds = [] }) => {
+  const { t } = useI18n();
   const normalizedAdIds = useMemo(() => adIds.filter(Boolean), [adIds]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -94,10 +96,10 @@ const NotificationBell = ({ adIds = [] }) => {
   };
 
   const getTitle = (action) => {
-    if (action === 'approve') return 'Объявление одобрено';
-    if (action === 'reject') return 'Требуется доработка';
-    if (action === 'delete') return 'Объявление отклонено';
-    return 'Уведомление';
+    if (action === 'approve') return t('notifications.approve', 'Listing approved');
+    if (action === 'reject') return t('notifications.reject', 'Needs revision');
+    if (action === 'delete') return t('notifications.delete', 'Listing rejected');
+    return t('notifications.title', 'Notification');
   };
 
   return (
@@ -116,23 +118,23 @@ const NotificationBell = ({ adIds = [] }) => {
       {isOpen && (
         <div className="notificationDropdown">
           <div className="notificationHeader">
-            <h4>Уведомления</h4>
+            <h4>{t('notifications.title', 'Notifications')}</h4>
             {unreadCount > 0 && (
-              <button className="markAllBtn" onClick={markAllAsRead}>Прочитать все</button>
+              <button className="markAllBtn" onClick={markAllAsRead}>{t('notifications.readAll', 'Mark all as read')}</button>
             )}
           </div>
 
           {loading ? (
-            <div className="notificationEmpty">Загрузка...</div>
+            <div className="notificationEmpty">{t('common.loading')}</div>
           ) : notifications.length === 0 ? (
-            <div className="notificationEmpty">Нет уведомлений</div>
+            <div className="notificationEmpty">{t('notifications.empty', 'No notifications')}</div>
           ) : (
             <div className="notificationList">
               {notifications.map((item) => (
                 <div key={item.id} className={`notificationItem ${item.isRead ? 'read' : 'unread'}`}>
                   <div className="notificationBody" onClick={() => !item.isRead && markAsRead(item.id)}>
                     <div className="notificationTitle">{getTitle(item.action)}</div>
-                    <div className="notificationText">{item.reason || 'Статус объявления изменен модератором'}</div>
+                    <div className="notificationText">{item.reason || t('notifications.defaultText', 'Listing status was changed by moderator')}</div>
                   </div>
                   <button className="deleteBtn" onClick={() => removeNotification(item.id)}>×</button>
                 </div>
@@ -146,4 +148,3 @@ const NotificationBell = ({ adIds = [] }) => {
 };
 
 export default NotificationBell;
-

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './CreateAd.css';
 import ProfanityWarningModal from './ProfanityWarningModal';
 import YandexLocationPicker from './YandexLocationPicker.jsx';
+import { useI18n } from '../i18n/I18nProvider';
 
 const API_BASE = 'http://localhost:8080';
 
@@ -14,6 +15,7 @@ const STEPS = [
 
 const CreateAd = () => {
     const navigate = useNavigate();
+    const { t } = useI18n();
     const [step, setStep] = useState(1);
 
     const [formData, setFormData] = useState({
@@ -92,14 +94,14 @@ const CreateAd = () => {
 
     const validate = (s) => {
         if (s === 1) {
-            if (!formData.title.trim())       { setMessage({ type: 'error', text: 'Please enter a title.' }); return false; }
-            if (!formData.description.trim()) { setMessage({ type: 'error', text: 'Please enter a description.' }); return false; }
+            if (!formData.title.trim())       { setMessage({ type: 'error', text: t('createAd.errors.enterTitle', 'Please enter a title.') }); return false; }
+            if (!formData.description.trim()) { setMessage({ type: 'error', text: t('createAd.errors.enterDescription', 'Please enter a description.') }); return false; }
             return true;
         }
         if (s === 2) {
-            if (!formData.categoryId)   { setMessage({ type: 'error', text: 'Please choose a category.' }); return false; }
-            if (!formData.subcategory)  { setMessage({ type: 'error', text: 'Please choose a subcategory.' }); return false; }
-            if (!formData.location)     { setMessage({ type: 'error', text: 'Please pick a location on the map.' }); return false; }
+            if (!formData.categoryId)   { setMessage({ type: 'error', text: t('createAd.errors.chooseCategory', 'Please choose a category.') }); return false; }
+            if (!formData.subcategory)  { setMessage({ type: 'error', text: t('createAd.errors.chooseSubcategory', 'Please choose a subcategory.') }); return false; }
+            if (!formData.location)     { setMessage({ type: 'error', text: t('createAd.errors.chooseLocation', 'Please pick a location on the map.') }); return false; }
             return true;
         }
         return true;
@@ -145,7 +147,7 @@ const CreateAd = () => {
                 body: JSON.stringify(dto)
             });
 
-            if (!r.ok) { setMessage({ type: 'error', text: 'Error creating ad.' }); setSubmitting(false); return; }
+            if (!r.ok) { setMessage({ type: 'error', text: t('createAd.errors.createFailed', 'Error creating ad.') }); setSubmitting(false); return; }
 
             const created = await r.json();
 
@@ -166,7 +168,7 @@ const CreateAd = () => {
 
             navigate(`/ad/${created.id}`);
         } catch {
-            setMessage({ type: 'error', text: 'Network error. Server unavailable.' });
+            setMessage({ type: 'error', text: t('createAd.errors.network', 'Network error. Server unavailable.') });
             setSubmitting(false);
         }
     };
@@ -185,7 +187,7 @@ const CreateAd = () => {
                 </div>
 
                 <div className="ca-card">
-                    <h1 className="ca-title">New listing</h1>
+                    <h1 className="ca-title">{t('createAd.title', 'New listing')}</h1>
 
                     {/* Step indicator */}
                     <div className="ca-stepper">
@@ -211,23 +213,23 @@ const CreateAd = () => {
                     {step === 1 && (
                         <div className="ca-step-body">
                             <div className="form-group">
-                                <label className="required">Title</label>
+                                <label className="required">{t('createAd.fields.title', 'Title')}</label>
                                 <input
                                     type="text"
                                     name="title"
                                     className="form-control"
                                     value={formData.title}
-                                    placeholder="What are you selling?"
+                                    placeholder={t('createAd.placeholders.title', 'What are you selling?')}
                                     onChange={handleChange}
                                 />
                             </div>
                             <div className="form-group">
-                                <label className="required">Description</label>
+                                <label className="required">{t('createAd.fields.description', 'Description')}</label>
                                 <textarea
                                     name="description"
                                     className="form-control"
                                     value={formData.description}
-                                    placeholder="Describe the item: condition, features, reason for selling…"
+                                    placeholder={t('createAd.placeholders.description', 'Describe the item: condition, features, reason for selling…')}
                                     onChange={handleChange}
                                 />
                             </div>
@@ -238,14 +240,14 @@ const CreateAd = () => {
                     {step === 2 && (
                         <div className="ca-step-body">
                             <div className="form-group">
-                                <label className="required">Category</label>
+                                <label className="required">{t('createAd.fields.category', 'Category')}</label>
                                 <select name="categoryId" className="form-control" value={formData.categoryId} onChange={handleChange}>
-                                    <option value="">Choose a category</option>
+                                    <option value="">{t('createAd.chooseCategory', 'Choose a category')}</option>
                                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                 </select>
                             </div>
                             <div className="form-group">
-                                <label className="required">Subcategory</label>
+                                <label className="required">{t('createAd.fields.subcategory', 'Subcategory')}</label>
                                 <select
                                     name="subcategory"
                                     className="form-control"
@@ -253,12 +255,12 @@ const CreateAd = () => {
                                     onChange={handleChange}
                                     disabled={!formData.categoryId}
                                 >
-                                    <option value="">Choose a subcategory</option>
+                                    <option value="">{t('createAd.chooseSubcategory', 'Choose a subcategory')}</option>
                                     {subcategories.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
                                 </select>
                             </div>
                             <div className="form-group">
-                                <label className="required">Location</label>
+                                <label className="required">{t('createAd.fields.location', 'Location')}</label>
                                 {formData.location && (
                                     <div className="ca-location-badge">📍 {formData.location}</div>
                                 )}
@@ -271,9 +273,9 @@ const CreateAd = () => {
                     {step === 3 && (
                         <div className="ca-step-body">
                             <div className="form-group">
-                                <label className="required">Condition</label>
+                                <label className="required">{t('createAd.fields.condition', 'Condition')}</label>
                                 <div className="radio-group">
-                                    {[['NEW','New'],['USED','Used'],['BROKEN','For parts']].map(([val, lbl]) => (
+                                    {[[ 'NEW', t('enums.condition.NEW') ], [ 'USED', t('enums.condition.USED') ], [ 'BROKEN', t('home.notWorking') ]].map(([val, lbl]) => (
                                         <label key={val} className={`radio-item${formData.condition === val ? ' selected' : ''}`}>
                                             <input type="radio" name="condition" value={val} checked={formData.condition === val} onChange={handleChange} />
                                             <span>{lbl}</span>
@@ -283,9 +285,9 @@ const CreateAd = () => {
                             </div>
 
                             <div className="form-group">
-                                <label className="required">Price type</label>
+                                <label className="required">{t('createAd.fields.priceType', 'Price type')}</label>
                                 <div className="radio-group">
-                                    {[['fixed','Fixed price'],['negotiable','Negotiable'],['free','Free']].map(([val, lbl]) => (
+                                    {[[ 'fixed', t('createAd.fixedPrice', 'Fixed price') ], [ 'negotiable', t('home.negotiable') ], [ 'free', t('home.free') ]].map(([val, lbl]) => (
                                         <label key={val} className={`radio-item${formData.priceType === val ? ' selected' : ''}`}>
                                             <input type="radio" name="priceType" value={val} checked={formData.priceType === val} onChange={handleChange} />
                                             <span>{lbl}</span>
@@ -296,14 +298,24 @@ const CreateAd = () => {
 
                             {formData.priceType === 'fixed' && (
                                 <div className="form-group">
-                                    <label>Price (₽)</label>
+                                    <label>{t('createAd.fields.price', 'Price (₽)')}</label>
                                     <input type="number" name="price" className="form-control" value={formData.price} onChange={handleChange} required />
                                 </div>
                             )}
 
                             <div className="form-group">
-                                <label>Photo (optional)</label>
-                                <input type="file" accept="image/*" className="form-control" onChange={handlePhotoChange} />
+                                <label>{t('createAd.fields.photoOptional', 'Photo (optional)')}</label>
+                                <div className="file-upload-row">
+                                    <input
+                                        id="create-ad-photo-input"
+                                        type="file"
+                                        accept="image/*"
+                                        className="file-input-hidden"
+                                        onChange={handlePhotoChange}
+                                    />
+                                    <label htmlFor="create-ad-photo-input" className="file-trigger-btn">{t('createAd.chooseFile', 'Choose file')}</label>
+                                    <span className="file-name">{photo ? photo.name : t('createAd.noFile', 'No file chosen')}</span>
+                                </div>
                                 {photoPreview && (
                                     <div className="ca-photo-preview">
                                         <img src={photoPreview} alt="preview" />
@@ -312,9 +324,9 @@ const CreateAd = () => {
                             </div>
 
                             <div className="form-group">
-                                <label className="required">After creating</label>
+                                <label className="required">{t('createAd.fields.afterCreate', 'After creating')}</label>
                                 <div className="radio-group">
-                                    {[['draft','Save as draft'],['publish','Send to moderation']].map(([val, lbl]) => (
+                                    {[[ 'draft', t('createAd.saveAsDraft', 'Save as draft') ], [ 'publish', t('createAd.sendToModeration', 'Send to moderation') ]].map(([val, lbl]) => (
                                         <label key={val} className={`radio-item${formData.action === val ? ' selected' : ''}`}>
                                             <input type="radio" name="action" value={val} checked={formData.action === val} onChange={handleChange} />
                                             <span>{lbl}</span>
@@ -328,11 +340,11 @@ const CreateAd = () => {
                     {/* Navigation buttons */}
                     <div className="ca-nav-btns">
                         {step === 1
-                            ? <a href="/" className="btn btn-outline">Cancel</a>
-                            : <button type="button" className="btn btn-outline" onClick={goBack}>← Back</button>
+                            ? <a href="/" className="btn btn-outline">{t('common.cancel')}</a>
+                            : <button type="button" className="btn btn-outline" onClick={goBack}>← {t('common.back')}</button>
                         }
                         {step < 3
-                            ? <button type="button" className="btn btn-primary" onClick={goNext}>Next →</button>
+                            ? <button type="button" className="btn btn-primary" onClick={goNext}>{t('createAd.next', 'Next')} →</button>
                             : (
                                 <button
                                     type="button"
@@ -340,7 +352,7 @@ const CreateAd = () => {
                                     onClick={handleSubmit}
                                     disabled={submitting}
                                 >
-                                    {submitting ? 'Creating…' : '✓ Create listing'}
+                                    {submitting ? t('createAd.creating', 'Creating…') : `✓ ${t('createAd.createListing', 'Create listing')}`}
                                 </button>
                             )
                         }

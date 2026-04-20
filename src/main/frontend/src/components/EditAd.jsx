@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import './EditAd.css';
 import ProfanityWarningModal from './ProfanityWarningModal';
 import YandexLocationPicker from './YandexLocationPicker.jsx';
+import { useI18n } from '../i18n/I18nProvider';
 
 const API_BASE = 'http://localhost:8080';
 
@@ -31,6 +32,7 @@ const categoryOptions = [
 ];
 
 const EditAd = () => {
+  const { t } = useI18n();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const adId = useMemo(() => params.get('adId') || params.get('id'), [params]);
@@ -39,6 +41,8 @@ const EditAd = () => {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [showProfanityWarning, setShowProfanityWarning] = useState(false);
+  const [photo, setPhoto] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -67,7 +71,7 @@ const EditAd = () => {
 
   useEffect(() => {
     if (!adId) {
-      setMessage({ type: 'error', text: 'Не указан id объявления' });
+      setMessage({ type: 'error', text: t('editAd.errors.missingId', 'Ad id is missing') });
       setLoading(false);
       return;
     }
@@ -79,7 +83,7 @@ const EditAd = () => {
         });
 
         if (!response.ok) {
-          setMessage({ type: 'error', text: 'Не удалось загрузить объявление' });
+          setMessage({ type: 'error', text: t('editAd.errors.loadFailed', 'Failed to load listing') });
           return;
         }
 
@@ -106,7 +110,7 @@ const EditAd = () => {
           action: 'draft'
         });
       } catch (e) {
-        setMessage({ type: 'error', text: e.message || 'Ошибка загрузки объявления' });
+        setMessage({ type: 'error', text: e.message || t('editAd.errors.loadFailed', 'Failed to load listing') });
       } finally {
         setLoading(false);
       }
@@ -123,6 +127,12 @@ const EditAd = () => {
   const handleAddressSelect = useCallback((address) => {
     setFormData((prev) => ({ ...prev, location: address }));
   }, []);
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0] ?? null;
+    setPhoto(file);
+    setPhotoPreview(file ? URL.createObjectURL(file) : null);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -162,11 +172,26 @@ const EditAd = () => {
 
       if (!response.ok) {
         const text = await response.text();
-        setMessage({ type: 'error', text: text || 'Ошибка при сохранении' });
+        setMessage({ type: 'error', text: text || t('editAd.errors.saveFailed', 'Error while saving') });
         return;
       }
 
       const savedAd = await response.json();
+
+      if (photo && savedAd?.id) {
+        const fd = new FormData();
+        fd.append('photo', photo);
+        const uploadResponse = await fetch(`${API_BASE}/api/announcements/${savedAd.id}/photo`, {
+          method: 'POST',
+          body: fd,
+          credentials: 'include'
+        });
+        if (!uploadResponse.ok) {
+          setMessage({ type: 'error', text: t('editAd.errors.photoUpdateFailed', 'Listing saved, but photo update failed') });
+          return;
+        }
+      }
+
       navigate('/successful-edit-ad', {
         state: {
           announcement: savedAd,
@@ -174,21 +199,21 @@ const EditAd = () => {
         }
       });
     } catch (e) {
-      setMessage({ type: 'error', text: e.message || 'Ошибка при сохранении' });
+      setMessage({ type: 'error', text: e.message || t('editAd.errors.saveFailed', 'Error while saving') });
     } finally {
       setSaving(false);
     }
   };
 
   if (loading) {
-    return <div className="editAdPage"><div className="editAdCard">Загрузка...</div></div>;
+    return <div className="editAdPage"><div className="editAdCard">{t('common.loading')}</div></div>;
   }
 
   return (
     <div className="editAdPage">
       <ProfanityWarningModal open={showProfanityWarning} onClose={() => setShowProfanityWarning(false)} />
       <div className="editAdCard">
-        <h1>Редактировать объявление</h1>
+        <h1>{t('editAd.title', 'Edit listing')}</h1>
 
         {message.text && (
           <div className={`editAdAlert ${message.type === 'success' ? 'success' : 'error'}`}>
@@ -197,46 +222,46 @@ const EditAd = () => {
         )}
 
         <form onSubmit={handleSubmit}>
-          <label>Заголовок</label>
+          <label>{t('editAd.fields.title', 'Title')}</label>
           <input name="title" value={formData.title} onChange={handleChange} required />
 
-          <label>Описание</label>
+          <label>{t('editAd.fields.description', 'Description')}</label>
           <textarea name="description" value={formData.description} onChange={handleChange} required />
 
-          <label>Категория</label>
+          <label>{t('editAd.fields.category', 'Category')}</label>
           <select name="category" value={formData.category} onChange={handleChange} required>
             {categoryOptions.map((option) => (
               <option key={option.value} value={option.value}>{option.label}</option>
             ))}
           </select>
 
-          <label>Подкатегория</label>
+          <label>{t('editAd.fields.subcategory', 'Subcategory')}</label>
           <input name="subcategory" value={formData.subcategory} onChange={handleChange} required />
 
-          <label>Местоположение</label>
+          <label>{t('editAd.fields.location', 'Location')}</label>
           <div className="location-preview">
-            <span className="location-preview-label">Выбранный адрес:</span>
-            <span className="location-preview-value">{formData.location || 'пока не выбран'}</span>
+            <span className="location-preview-label">{t('editAd.selectedAddress', 'Selected address:')}</span>
+            <span className="location-preview-value">{formData.location || t('editAd.notSelected', 'not selected yet')}</span>
           </div>
           <YandexLocationPicker onAddressChange={handleAddressSelect} />
 
-          <label>Состояние</label>
+          <label>{t('editAd.fields.condition', 'Condition')}</label>
           <select name="condition" value={formData.condition} onChange={handleChange}>
-            <option value="USED">б/у</option>
-            <option value="NEW">Новое</option>
-            <option value="BROKEN">Не работает</option>
+            <option value="USED">{t('enums.condition.USED')}</option>
+            <option value="NEW">{t('enums.condition.NEW')}</option>
+            <option value="BROKEN">{t('home.notWorking')}</option>
           </select>
 
-          <label>Тип цены</label>
+          <label>{t('editAd.fields.priceType', 'Price type')}</label>
           <select name="priceType" value={formData.priceType} onChange={handleChange}>
-            <option value="fixed">Указать цену</option>
-            <option value="negotiable">Договорная</option>
-            <option value="free">Бесплатно</option>
+            <option value="fixed">{t('editAd.fixedPrice', 'Fixed price')}</option>
+            <option value="negotiable">{t('home.negotiable')}</option>
+            <option value="free">{t('home.free')}</option>
           </select>
 
           {formData.priceType === 'fixed' && (
             <>
-              <label>Цена</label>
+              <label>{t('editAd.fields.price', 'Price')}</label>
               <input
                 type="number"
                 name="price"
@@ -249,15 +274,33 @@ const EditAd = () => {
             </>
           )}
 
-          <label>После сохранения</label>
+          <label>{t('editAd.fields.photoOptional', 'Photo (optional)')}</label>
+          <div className="file-upload-row">
+            <input
+              id="edit-ad-photo-input"
+              type="file"
+              accept="image/*"
+              className="file-input-hidden"
+              onChange={handlePhotoChange}
+            />
+            <label htmlFor="edit-ad-photo-input" className="file-trigger-btn">{t('editAd.chooseFile', 'Choose file')}</label>
+            <span className="file-name">{photo ? photo.name : t('editAd.noFile', 'No file chosen')}</span>
+          </div>
+          {photoPreview && (
+            <div className="edit-photo-preview">
+              <img src={photoPreview} alt="preview" />
+            </div>
+          )}
+
+          <label>{t('editAd.fields.afterSave', 'After save')}</label>
           <select name="action" value={formData.action} onChange={handleChange}>
-            <option value="draft">Сохранить как черновик</option>
-            <option value="publish">Отправить на модерацию</option>
+            <option value="draft">{t('editAd.saveAsDraft', 'Save as draft')}</option>
+            <option value="publish">{t('editAd.sendToModeration', 'Send to moderation')}</option>
           </select>
 
           <div className="editAdActions">
-            <button type="button" className="secondary" onClick={() => navigate('/dashboard')}>Отмена</button>
-            <button type="submit" disabled={saving}>{saving ? 'Сохранение...' : 'Сохранить'}</button>
+            <button type="button" className="secondary" onClick={() => navigate('/dashboard')}>{t('common.cancel')}</button>
+            <button type="submit" disabled={saving}>{saving ? t('dashboard.saving') : t('common.save')}</button>
           </div>
         </form>
       </div>
@@ -266,4 +309,3 @@ const EditAd = () => {
 };
 
 export default EditAd;
-

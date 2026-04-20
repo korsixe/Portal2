@@ -39,6 +39,10 @@
   letter-spacing: 1px;
 }
 
+.loginContainer .lang-toggle {
+  margin: 0 auto 12px;
+}
+
 .portal-subtitle {
   color: var(--color-text-secondary);
   font-size: 1.1rem;

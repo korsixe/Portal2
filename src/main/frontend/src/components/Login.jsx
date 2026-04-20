@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './Login.css';
 import Icon from './Icon';
+import { useI18n } from '../i18n/I18nProvider';
+import LanguageToggle from './LanguageToggle';
 
 const Login = () => {
+  const { t } = useI18n();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -46,17 +49,17 @@ const Login = () => {
 
       if (response.ok) {
         setMessageType('success');
-        setMessage('Login successful!');
+        setMessage(t('login.success'));
         setTimeout(() => {
           window.location.href = '/dashboard';
         }, 1000);
       } else {
         setMessageType('error');
-        setMessage('Invalid email or password');
+        setMessage(t('login.invalidCreds'));
       }
     } catch (error) {
       setMessageType('error');
-      setMessage('Network error. Server unavailable.');
+      setMessage(t('login.networkError'));
     } finally {
       setLoading(false);
     }
@@ -79,11 +82,12 @@ const Login = () => {
     return (
         <div className="portal-container loginContainer">
           <div className="portal-logo">PORTAL</div>
-          <div className="portal-subtitle">Sign In</div>
+          <LanguageToggle />
+          <div className="portal-subtitle">{t('login.title')}</div>
           <div className="button-group">
-            <a href="/dashboard" className="btn btn-primary">Go to Dashboard</a>
-            <a href="/" className="btn btn-secondary">Home</a>
-            <button onClick={handleLogout} className="btn btn-danger">Sign Out</button>
+            <a href="/dashboard" className="btn btn-primary">{t('login.goToDashboard')}</a>
+            <a href="/" className="btn btn-secondary">{t('login.home')}</a>
+            <button onClick={handleLogout} className="btn btn-danger">{t('login.signOut')}</button>
           </div>
         </div>
     );
@@ -92,7 +96,8 @@ const Login = () => {
   return (
       <div className="portal-container loginContainer">
         <div className="portal-logo">PORTAL</div>
-        <div className="portal-subtitle">Sign In</div>
+        <LanguageToggle />
+        <div className="portal-subtitle">{t('login.title')}</div>
 
         {message && (
             <div className={`message ${messageType}`}>
@@ -103,7 +108,7 @@ const Login = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">{t('login.email')}</label>
             <input
                 type="email"
                 id="email"
@@ -116,23 +121,23 @@ const Login = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">{t('login.password')}</label>
             <input
                 type="password"
                 id="password"
                 name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                placeholder={t('login.passwordPlaceholder')}
                 required
             />
           </div>
 
           <div className="button-group">
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? t('login.submitLoading') : t('login.submit')}
             </button>
-            <a href="/register" className="btn btn-secondary">Register</a>
+            <a href="/register" className="btn btn-secondary">{t('login.register')}</a>
           </div>
         </form>
       </div>

@@ -15,8 +15,11 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import ModeratorDashboard from './components/moderator/ModeratorDashboard';
 import ModerationHistory from './components/moderator/ModerationHistory';
 import EditProfile from './components/EditProfile';
+import { useI18n } from './i18n/I18nProvider';
 
 function App() {
+  const { t } = useI18n();
+
   return (
     <Router>
       <Routes>
@@ -37,7 +40,7 @@ function App() {
         <Route path="/ad/:id" element={<AdDetails />} />
         <Route path="/support" element={<SupportChat />} />
         <Route path="/error" element={<ErrorPage />} />
-        <Route path="*" element={<ErrorPage defaultCode="404" defaultMessage="Страница не найдена" />} />
+        <Route path="*" element={<ErrorPage defaultCode="404" defaultMessage={t('common.notFound')} />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/moderator" element={<ModeratorDashboard />} />

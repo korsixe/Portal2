@@ -179,6 +179,46 @@
   display: block;
 }
 
+.file-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.file-input-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.file-trigger-btn {
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  cursor: pointer;
+  color: #fff;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--color-mint-dark), var(--color-mint));
+  box-shadow: 0 4px 14px rgba(110, 160, 134, 0.25);
+  transition: all var(--transition-base);
+}
+
+.file-trigger-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(110, 160, 134, 0.35);
+}
+
+.file-name {
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+}
+
 /* Navigation buttons */
 .ca-nav-btns {
   display: flex;
@@ -326,6 +366,36 @@ label {
   font-size: 1rem;
   transition: all var(--transition-base);
   background: var(--color-surface);
+}
+
+.form-control[type="file"] {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.form-control[type="file"]::file-selector-button,
+.form-control[type="file"]::-webkit-file-upload-button,
+input[type="file"].form-control::file-selector-button,
+input[type="file"].form-control::-webkit-file-upload-button {
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  margin-right: 12px;
+  cursor: pointer;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--color-mint-dark), var(--color-mint));
+  box-shadow: 0 4px 14px rgba(110, 160, 134, 0.25);
+  transition: all var(--transition-base);
+}
+
+.form-control[type="file"]:hover::file-selector-button,
+.form-control[type="file"]:hover::-webkit-file-upload-button {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(110, 160, 134, 0.35);
 }
 
 .form-control:focus {

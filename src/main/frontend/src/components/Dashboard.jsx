@@ -3,8 +3,10 @@ import './Dashboard.css';
 import ChangePasswordModal from './ChangePasswordModal';
 import NotificationBell from './NotificationBell';
 import Icon from './Icon';
+import { useI18n } from '../i18n/I18nProvider';
 
 const Dashboard = () => {
+  const { t, language } = useI18n();
   const [user, setUser]               = useState(null);
   const [ads, setAds]                 = useState([]);
   const [favoriteAds, setFavoriteAds] = useState([]);
@@ -42,13 +44,13 @@ const Dashboard = () => {
 
       const bookedRes = await fetch('http://localhost:8080/api/v1/bookings/my', { credentials: 'include' });
       if (bookedRes.ok) setBookedAds(await bookedRes.json());
-    } catch { setErrorMessage('Failed to load data'); }
+    } catch { setErrorMessage(t('dashboard.loadDataError', 'Failed to load data')); }
     finally { setLoading(false); }
   };
 
   const handlePasswordChanged = async (currentPassword, newPassword, confirmPassword) => {
-    if (newPassword !== confirmPassword) { setErrorMessage('Passwords do not match!'); return false; }
-    if (newPassword.length < 8) { setErrorMessage('Password must be at least 8 characters!'); return false; }
+    if (newPassword !== confirmPassword) { setErrorMessage(t('dashboard.passwordsDontMatch', 'Passwords do not match!')); return false; }
+    if (newPassword.length < 8) { setErrorMessage(t('dashboard.passwordTooShort', 'Password must be at least 8 characters!')); return false; }
     try {
       const res = await fetch('http://localhost:8080/api/users/change-password', {
         method: 'POST', credentials: 'include',
@@ -56,23 +58,23 @@ const Dashboard = () => {
         body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
       });
       const data = await res.json();
-      if (res.ok && data.success) { setSuccessMessage(data.message || 'Password changed!'); if (data.user) setUser(data.user); return true; }
-      setErrorMessage(data.message || 'Error changing password'); return false;
-    } catch { setErrorMessage('Error changing password'); return false; }
+      if (res.ok && data.success) { setSuccessMessage(data.message || t('dashboard.passwordChanged', 'Password changed!')); if (data.user) setUser(data.user); return true; }
+      setErrorMessage(data.message || t('dashboard.changePasswordError', 'Error changing password')); return false;
+    } catch { setErrorMessage(t('dashboard.changePasswordError', 'Error changing password')); return false; }
   };
 
   const handleDeleteAccount = async (e) => {
     e.preventDefault();
-    if (!window.confirm('Are you sure? This cannot be undone.')) return;
+    if (!window.confirm(t('dashboard.confirmDeleteAccount', 'Are you sure? This cannot be undone.'))) return;
     try {
       const res = await fetch('http://localhost:8080/api/users/delete-account', {
         method: 'DELETE', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password: deletePassword }),
       });
-      if (res.ok) { setSuccessMessage('Account deleted'); setTimeout(() => window.location.href = '/login', 2000); }
-      else setErrorMessage('Error: ' + await res.text());
-    } catch { setErrorMessage('Error deleting account'); }
+      if (res.ok) { setSuccessMessage(t('dashboard.accountDeleted', 'Account deleted')); setTimeout(() => window.location.href = '/login', 2000); }
+      else setErrorMessage(`${t('common.error')}: ${await res.text()}`);
+    } catch { setErrorMessage(t('dashboard.deleteAccountError', 'Error deleting account')); }
   };
 
   const handleLogout = async () => {
@@ -90,30 +92,36 @@ const Dashboard = () => {
   };
 
   const handleDeleteAd = async (adId) => {
-    if (!window.confirm('Delete this ad?')) return;
+    if (!window.confirm(t('dashboard.confirmDeleteAd', 'Delete this ad?'))) return;
     try {
       const res = await fetch(`http://localhost:8080/api/announcements/${adId}`, { method: 'DELETE', credentials: 'include' });
-      if (res.ok) { setSuccessMessage('Ad deleted'); loadUserData(); }
-      else setErrorMessage('Error deleting ad');
-    } catch { setErrorMessage('Error deleting ad'); }
+      if (res.ok) { setSuccessMessage(t('dashboard.adDeleted', 'Ad deleted')); loadUserData(); }
+      else setErrorMessage(t('dashboard.deleteAdError', 'Error deleting ad'));
+    } catch { setErrorMessage(t('dashboard.deleteAdError', 'Error deleting ad')); }
   };
 
   const formatPrice = (price) => {
-    if (price === -1) return 'Negotiable';
-    if (price === 0)  return 'Free';
-    return `${price.toLocaleString()} ₽`;
+    if (price === -1) return t('home.negotiable');
+    if (price === 0)  return t('home.free');
+    return `${price.toLocaleString(language === 'ru' ? 'ru-RU' : 'en-US')} ₽`;
   };
 
-  const formatDate = (d) => d ? new Date(d).toLocaleDateString('ru-RU') : '—';
+  const formatDate = (d) => d ? new Date(d).toLocaleDateString(language === 'ru' ? 'ru-RU' : 'en-US') : '—';
 
   const formatAddress = (address) => {
-    if (!address) return 'Not specified';
+    if (!address) return t('dashboard.notSpecified', 'Not specified');
     if (typeof address === 'string') return address;
     if (address.fullAddress?.trim()) return address.fullAddress;
-    return [address.city, address.street, address.houseNumber].filter(Boolean).join(', ') || 'Not specified';
+    return [address.city, address.street, address.houseNumber].filter(Boolean).join(', ') || t('dashboard.notSpecified', 'Not specified');
   };
 
-  const STATUS_LABEL = { ACTIVE: 'Active', DRAFT: 'Draft', UNDER_MODERATION: 'Moderation', ARCHIVED: 'Archived', DELETED: 'Deleted' };
+  const STATUS_LABEL = {
+    ACTIVE: t('dashboard.statusActive', 'Active'),
+    DRAFT: t('dashboard.statusDraft', 'Draft'),
+    UNDER_MODERATION: t('dashboard.statusModeration', 'Moderation'),
+    ARCHIVED: t('dashboard.statusArchived', 'Archived'),
+    DELETED: t('dashboard.statusDeleted', 'Deleted')
+  };
   const STATUS_CLASS = { ACTIVE: 'statusActive', DRAFT: 'statusDraft', UNDER_MODERATION: 'statusModeration', ARCHIVED: 'statusArchived', DELETED: 'statusDeleted' };
 
   const activeAds      = ads.filter(a => a.status === 'ACTIVE');
@@ -129,13 +137,14 @@ const Dashboard = () => {
                    : activeSection === 'booked'     ? bookedAds
                    : ads;
 
-  const sectionTitle = activeSection === 'active'     ? 'Active listings'
-                     : activeSection === 'moderation' ? 'Under review'
-                     : activeSection === 'drafts'     ? 'Drafts'
-                     : activeSection === 'archive'    ? 'Archive'
-                     : activeSection === 'favorites'  ? 'Favorites'
-                     : activeSection === 'booked'     ? 'Booked'
-                     : 'All listings';
+    const sectionTitle = activeSection === 'active'     ? t('dashboard.sectionActive', 'Active listings')
+                    : activeSection === 'moderation' ? t('dashboard.sectionModeration', 'Under review')
+                    : activeSection === 'drafts'     ? t('dashboard.sectionDrafts', 'Drafts')
+                    : activeSection === 'archive'    ? t('dashboard.sectionArchive', 'Archive')
+                    : activeSection === 'favorites'  ? t('dashboard.sectionFavorites', 'Favorites')
+                        : activeSection === 'booked' ? t('dashboard.sectionBooked', 'Booked')
+                    : t('dashboard.sectionAll', 'All listings');
+
 
   const openModal  = (name) => setActiveModal(name);
   const closeModal = ()     => setActiveModal(null);
@@ -148,15 +157,15 @@ const Dashboard = () => {
   if (loading) return (
     <div className="loadingContainer">
       <div className="loader"></div>
-      <p>Loading…</p>
+      <p>{t('common.loading')}</p>
     </div>
   );
 
   if (!user) return (
     <div className="loadingContainer">
-      <p>Failed to load user data</p>
+      <p>{t('dashboard.userLoadError', 'Failed to load user data')}</p>
       <button onClick={() => window.location.href = '/login'} className="db-btn-primary" style={{ marginTop: 16 }}>
-        Sign In Again
+        {t('dashboard.signInAgain', 'Sign In Again')}
       </button>
     </div>
   );
@@ -177,7 +186,7 @@ const Dashboard = () => {
           </a>
           <div className="dash-topbar-right">
             <NotificationBell adIds={ads.map(a => a.id)} />
-            <button className="db-btn-ghost" onClick={handleLogout}>Sign Out</button>
+            <button className="db-btn-ghost" onClick={handleLogout}>{t('common.signOut')}</button>
           </div>
         </header>
 
@@ -191,43 +200,27 @@ const Dashboard = () => {
               <div className="db-avatar">
                 <Icon name="user" size={36} />
               </div>
-              <div className="db-avatar-name">{user.name || 'User'}</div>
+              <div className="db-avatar-name">{user.name || t('dashboard.userFallback', 'User')}</div>
               <div className="db-avatar-email">{user.email}</div>
             </div>
 
             {/* About Me */}
             <div className="db-info-section">
-              <div className="db-section-label">About Me</div>
+              <div className="db-section-label">{t('dashboard.aboutMe', 'About Me')}</div>
 
               <div className="db-info-group">
-                <div className="db-info-label">Basic info</div>
-                <div className="db-info-row"><span>Name</span><span>{user.name || '—'}</span></div>
-                <div className="db-info-row"><span>Email</span><span className="db-info-ellipsis">{user.email}</span></div>
-                <div className="db-info-row"><span>Address</span><span className="db-info-ellipsis">{formatAddress(user.address)}</span></div>
+                <div className="db-info-label">{t('dashboard.basicInfo', 'Basic info')}</div>
+                <div className="db-info-row"><span>{t('dashboard.name', 'Name')}</span><span>{user.name || '—'}</span></div>
+                <div className="db-info-row"><span>{t('dashboard.email', 'Email')}</span><span className="db-info-ellipsis">{user.email}</span></div>
+                <div className="db-info-row"><span>{t('dashboard.address', 'Address')}</span><span className="db-info-ellipsis">{formatAddress(user.address)}</span></div>
               </div>
 
               <div className="db-info-group">
-                <div className="db-info-label">Academic</div>
-                <div className="db-info-row"><span>Program</span><span>{user.studyProgram || '—'}</span></div>
-                <div className="db-info-row"><span>Course</span><span>{user.course ? `${user.course} year` : '—'}</span></div>
+                <div className="db-info-label">{t('dashboard.academic', 'Academic')}</div>
+                <div className="db-info-row"><span>{t('dashboard.program', 'Program')}</span><span>{user.studyProgram || '—'}</span></div>
+                <div className="db-info-row"><span>{t('dashboard.course', 'Course')}</span><span>{user.course ? `${user.course} ${t('dashboard.year', 'year')}` : '—'}</span></div>
               </div>
 
-              <div className="db-info-group">
-                <div className="db-info-label">Rating &amp; Coins</div>
-                <div className="db-info-row">
-                  <span>Rating</span>
-                  <span className="db-stars">
-                    {[...Array(5)].map((_, i) => (
-                      <span key={i} className={i < Math.round(user.rating || 0) ? 'star-filled' : 'star-empty'}>★</span>
-                    ))}
-                    <span className="db-rating-num">({(user.rating || 0).toFixed(1)})</span>
-                  </span>
-                </div>
-                <div className="db-info-row">
-                  <span>Coins</span>
-                  <span className="db-coins">🪙 {user.coins || 0}</span>
-                </div>
-              </div>
             </div>
 
             {/* Nav */}
@@ -238,25 +231,25 @@ const Dashboard = () => {
                 className={`db-nav-item db-nav-group-toggle${adsOpen ? ' open' : ''}`}
                 onClick={() => setAdsOpen(o => !o)}
               >
-                <span>Listings</span>
+                <span>{t('dashboard.listings', 'Listings')}</span>
                 <span className="db-chevron">{adsOpen ? '▲' : '▼'}</span>
               </button>
               {adsOpen && (
                 <div className="db-subnav">
                   <button className={`db-subnav-item${activeSection === 'all' ? ' active' : ''}`} onClick={() => selectSection('all')}>
-                    All <span className="db-count">{ads.length}</span>
+                    {t('dashboard.filterAll', 'All')} <span className="db-count">{ads.length}</span>
                   </button>
                   <button className={`db-subnav-item${activeSection === 'active' ? ' active' : ''}`} onClick={() => selectSection('active')}>
-                    Active <span className="db-count">{activeAds.length}</span>
+                    {t('dashboard.filterActive', 'Active')} <span className="db-count">{activeAds.length}</span>
                   </button>
                   <button className={`db-subnav-item${activeSection === 'moderation' ? ' active' : ''}`} onClick={() => selectSection('moderation')}>
-                    Under review <span className="db-count">{moderationAds.length}</span>
+                    {t('dashboard.filterModeration', 'Under review')} <span className="db-count">{moderationAds.length}</span>
                   </button>
                   <button className={`db-subnav-item${activeSection === 'drafts' ? ' active' : ''}`} onClick={() => selectSection('drafts')}>
-                    Drafts <span className="db-count">{draftAds.length}</span>
+                    {t('dashboard.filterDrafts', 'Drafts')} <span className="db-count">{draftAds.length}</span>
                   </button>
                   <button className={`db-subnav-item${activeSection === 'archive' ? ' active' : ''}`} onClick={() => selectSection('archive')}>
-                    Archive <span className="db-count">{archivedAds.length}</span>
+                    {t('dashboard.filterArchive', 'Archive')} <span className="db-count">{archivedAds.length}</span>
                   </button>
                 </div>
               )}
@@ -265,40 +258,40 @@ const Dashboard = () => {
                 className={`db-nav-item${activeSection === 'favorites' ? ' active' : ''}`}
                 onClick={() => selectSection('favorites')}
               >
-                ♡ Favorites <span className="db-count">{favoriteAds.length}</span>
+                ♡ {t('dashboard.filterFavorites', 'Favorites')} <span className="db-count">{favoriteAds.length}</span>
               </button>
 
               <button
                 className={`db-nav-item${activeSection === 'booked' ? ' active' : ''}`}
                 onClick={() => selectSection('booked')}
               >
-                🔖 Booked <span className="db-count">{bookedAds.length}</span>
+                🔖 {t('dashboard.filterBooked', 'Booked')} <span className="db-count">{bookedAds.length}</span>
               </button>
 
               <a href="/" className="db-nav-item">
-                Browse Marketplace
+                {t('dashboard.browseMarketplace', 'Browse Marketplace')}
               </a>
 
               <a href="/edit-profile" className="db-nav-item">
-                Edit Profile
+                {t('dashboard.editProfile', 'Edit Profile')}
               </a>
 
               <button className="db-nav-item" onClick={() => openModal('account')}>
-                Account Settings
+                {t('dashboard.accountSettings', 'Account Settings')}
               </button>
 
-              <a href="/support" className="db-nav-item db-nav-muted">
-                Support
+              <a href="/support" className="db-nav-item">
+                {t('dashboard.support', 'Support')}
               </a>
 
               {user.moderator && (
                 <button className="db-nav-item db-nav-role db-nav-moderator" onClick={() => window.location.href = '/moderator/dashboard'}>
-                  Moderator Panel
+                  {t('dashboard.moderatorPanel', 'Moderator Panel')}
                 </button>
               )}
               {user.admin && (
                 <button className="db-nav-item db-nav-role db-nav-admin" onClick={() => window.location.href = '/admin/dashboard'}>
-                  Admin Panel
+                  {t('dashboard.adminPanel', 'Admin Panel')}
                 </button>
               )}
             </nav>
@@ -309,21 +302,21 @@ const Dashboard = () => {
             <div className="dash-main-head">
               <h2>{sectionTitle}</h2>
               <button className="db-btn-primary" onClick={() => window.location.href = '/create-ad'}>
-                + New listing
+                + {t('dashboard.newListing', 'New listing')}
               </button>
             </div>
 
             {visibleAds.length === 0 ? (
               <div className="db-empty">
                 <div className="db-empty-icon">📦</div>
-                <h3>No listings here</h3>
+                <h3>{t('dashboard.noListingsTitle', 'No listings here')}</h3>
                 <p>
-                  {activeSection === 'drafts'    ? 'You have no drafts.' :
-                   activeSection === 'archive'   ? 'Your archive is empty.' :
-                   activeSection === 'active'    ? 'No active listings yet.' :
-                   activeSection === 'favorites' ? 'No saved listings yet. Click the heart on any ad!' :
-                   activeSection === 'booked'    ? 'You have no booked items.' :
-                   'Create your first listing!'}
+                  {activeSection === 'drafts'  ? t('dashboard.noDrafts', 'You have no drafts.') :
+                   activeSection === 'archive' ? t('dashboard.archiveEmpty', 'Your archive is empty.') :
+                   activeSection === 'active'  ? t('dashboard.noActive', 'No active listings yet.') :
+                   activeSection === 'favorites' ? t('dashboard.noFavorites', 'No saved listings yet. Click the heart on any ad!') :
+                   activeSection === 'booked'    ? t('dashboard.noBooked', 'You have no booked items.') :
+                   t('dashboard.createFirst', 'Create your first listing!')}
                 </p>
               </div>
             ) : (
@@ -344,7 +337,7 @@ const Dashboard = () => {
                         <button
                           className="db-like-btn liked"
                           onClick={(e) => handleUnfavorite(e, ad.id)}
-                          title="Remove from favorites"
+                          title={t('dashboard.removeFromFavorites', 'Remove from favorites')}
                         >
                           <svg viewBox="0 0 24 24" width="16" height="16">
                             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -369,8 +362,8 @@ const Dashboard = () => {
                       </div>
                       {activeSection !== 'favorites' && activeSection !== 'booked' && (
                         <div className="db-ad-actions" onClick={e => e.stopPropagation()}>
-                          <button className="db-btn-edit" onClick={() => window.location.href = `/edit-ad?adId=${ad.id}`}>Edit</button>
-                          <button className="db-btn-danger" onClick={() => handleDeleteAd(ad.id)}>Delete</button>
+                            <button className="db-btn-edit" onClick={() => window.location.href = `/edit-ad?adId=${ad.id}`}>{t('dashboard.edit', 'Edit')}</button>
+                            <button className="db-btn-danger" onClick={() => handleDeleteAd(ad.id)}>{t('dashboard.delete', 'Delete')}</button>
                         </div>
                       )}
                     </div>
@@ -387,10 +380,10 @@ const Dashboard = () => {
         <div className="db-modal" onClick={e => e.target === e.currentTarget && closeModal()}>
           <div className="db-modal-content">
             <button className="db-modal-close" onClick={closeModal}>×</button>
-            <h3>Account Settings</h3>
+            <h3>{t('dashboard.accountSettings', 'Account Settings')}</h3>
             <div className="db-modal-actions">
-              <button className="db-btn-primary" onClick={() => openModal('password')}>Change Password</button>
-              <button className="db-btn-danger"  onClick={() => openModal('delete')}>Delete Account</button>
+              <button className="db-btn-primary" onClick={() => openModal('password')}>{t('dashboard.changePassword', 'Change Password')}</button>
+              <button className="db-btn-danger"  onClick={() => openModal('delete')}>{t('dashboard.deleteAccount', 'Delete Account')}</button>
             </div>
           </div>
         </div>
@@ -404,18 +397,18 @@ const Dashboard = () => {
         <div className="db-modal" onClick={e => e.target === e.currentTarget && closeModal()}>
           <div className="db-modal-content">
             <button className="db-modal-close" onClick={closeModal}>×</button>
-            <h3>Delete Account</h3>
+            <h3>{t('dashboard.deleteAccount', 'Delete Account')}</h3>
             <div className="db-warning-box">
-              This action is irreversible. All your data and listings will be permanently deleted.
+              {t('dashboard.deleteWarning', 'This action is irreversible. All your data and listings will be permanently deleted.')}
             </div>
             <form onSubmit={handleDeleteAccount}>
               <div className="db-form-group">
-                <label>Confirm with your password</label>
+                <label>{t('dashboard.confirmWithPassword', 'Confirm with your password')}</label>
                 <input type="password" required value={deletePassword} onChange={e => setDeletePassword(e.target.value)} />
               </div>
               <div className="db-modal-actions">
-                <button type="submit"  className="db-btn-danger">Delete Account</button>
-                <button type="button" className="db-btn-secondary" onClick={closeModal}>Cancel</button>
+                <button type="submit"  className="db-btn-danger">{t('dashboard.deleteAccount', 'Delete Account')}</button>
+                <button type="button" className="db-btn-secondary" onClick={closeModal}>{t('common.cancel')}</button>
               </div>
             </form>
           </div>
