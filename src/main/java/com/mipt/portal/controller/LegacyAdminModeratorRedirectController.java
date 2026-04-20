@@ -39,6 +39,6 @@ public class LegacyAdminModeratorRedirectController {
         "/moderator/history"
     })
     public String forwardToSpa() {
-        return "forward:/index.html";
+        return "forward:/src/main/frontend/public/index.html";
     }
 }
