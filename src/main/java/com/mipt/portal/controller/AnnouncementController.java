@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.mipt.portal.enums.Category;
 import com.mipt.portal.enums.Condition;
+import com.mipt.portal.service.ElasticSearchService;
 
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,7 @@ import java.util.Map;
 @RequestMapping("/api/announcements")
 @RequiredArgsConstructor
 public class AnnouncementController {
-
+  private final  ElasticSearchService elasticSearchService;
   private final AnnouncementService service;
   private final MediaService mediaService;
   private final ModerationHistoryService moderationHistoryService;
@@ -142,6 +143,8 @@ public class AnnouncementController {
     if (ad == null) {
       return ResponseEntity.notFound().build();
     }
+    service.incrementViewCount(id);
+
     return ResponseEntity.ok(ad);
   }
 
@@ -264,5 +267,20 @@ public class AnnouncementController {
     log.info("Announcement {} deleted by user {}", id, currentUser.getEmail());
 
     return ResponseEntity.ok().body("Объявление удалено");
+  }
+
+  @GetMapping("/elastic-search")
+  public List<Announcement> elasticSearch(@RequestParam String query) {
+    return elasticSearchService.searchWithTypos(query);
+  }
+
+  /**
+   * POST /api/announcements/reindex — ручная переиндексация ES из Postgres.
+   * В продакшене это делалось бы через Debezium + Kafka
+   */
+  @PostMapping("/reindex")
+  public ResponseEntity<String> reindex() {
+    int count = elasticSearchService.reindexAll();
+    return ResponseEntity.ok("Reindexed " + count + " announcements");
   }
 }

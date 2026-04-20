@@ -202,4 +202,13 @@ public class AnnouncementService {
         log.debug("Updating announcement data for ID: {}", ad.getId());
         return repository.save(ad);
     }
+
+    @Transactional
+    public void incrementViewCount(Long id) {
+        log.info("Request to increment view count for adId={}", id);
+        int updated = repository.incrementViews(id);
+        if (updated == 0) {
+            log.warn("Failed to increment view count. Announcement with id={} not found", id);
+        }
+    }
 }
