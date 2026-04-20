@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Home.css';
 import { useI18n } from '../i18n/I18nProvider';
 import LanguageToggle from './LanguageToggle';
-
+import { Link, useNavigate } from 'react-router-dom';
 const API_BASE = 'http://localhost:8080';
 
 const CATEGORY_COLORS = {
@@ -23,6 +23,7 @@ const CONDITION_COLORS = {
 const Home = () => {
     const { t, language } = useI18n();
     const [ads, setAds] = useState([]);
+    const navigate = useNavigate();
     const [filters, setFilters] = useState({
         searchQuery: '',
         minPrice: '',
@@ -67,28 +68,36 @@ const Home = () => {
     };
 
     const fetchAds = async () => {
-        setLoading(true);
-        try {
-            const queryParams = new URLSearchParams({
-                text: filters.searchQuery,
-                minPrice: filters.minPrice,
-                maxPrice: filters.maxPrice,
-                category: filters.category,
-                condition: filters.condition
-            });
+            setLoading(true);
+            try {
+                // Если в поиске что-то введено, используем наш новый ElasticSearch эндпоинт
+                // Если поиск пустой - используем обычный фильтр
+                let url;
+                if (filters.searchQuery && filters.searchQuery.length > 2) {
+                    // Это тот самый эндпоинт, который мы напишем для ElasticSearchService
+                    url = `${API_BASE}/api/announcements/elastic-search?query=${encodeURIComponent(filters.searchQuery)}`;
+                } else {
+                    const queryParams = new URLSearchParams({
+                        text: filters.searchQuery,
+                        minPrice: filters.minPrice,
+                        maxPrice: filters.maxPrice,
+                        category: filters.category,
+                        condition: filters.condition
+                    });
+                    url = `${API_BASE}/api/announcements/search?${queryParams}`;
+                }
 
-            const response = await fetch(`${API_BASE}/api/announcements/search?${queryParams}`);
-
-            if (response.ok) {
-                const data = await response.json();
-                setAds(data);
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    setAds(data);
+                }
+            } catch (error) {
+                console.error('Network error:', error);
+            } finally {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error('Network error:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+        };
 
     const handleFilterSubmit = (e) => {
         e.preventDefault();
@@ -122,10 +131,10 @@ const Home = () => {
                 {/* Top bar */}
                 <header className="portal-topbar">
                     <div className="portal-brand-wrap">
-                        <a href="/" className="portal-brand">
+                        <Link to="/" className="portal-brand">
                             <div className="portal-brand-mark"></div>
                             <span>PORTAL</span>
-                        </a>
+                        </Link>
                         <LanguageToggle />
                     </div>
 
@@ -145,8 +154,8 @@ const Home = () => {
                     </form>
 
                     {isLoggedIn
-                        ? <a href="/dashboard" className="topbar-link">{t('common.profile')}</a>
-                        : <a href="/login"     className="topbar-link">{t('common.signIn')}</a>
+                        ? <Link to="/dashboard" className="topbar-link">{t('common.profile')}</Link>
+                        : <Link to="/login"     className="topbar-link">{t('common.signIn')}</Link>
                     }
                 </header>
 
@@ -312,7 +321,7 @@ const Home = () => {
                         <h3>{t('home.haveSomethingToSell')}</h3>
                         <p>{t('home.ctaText')}</p>
                     </div>
-                    <a href="/create-ad" className="cta-link">{t('home.startSelling')} →</a>
+                    <Link to="/create-ad" className="cta-link">{t('home.startSelling')} →</Link>
                 </section>
 
             </div>

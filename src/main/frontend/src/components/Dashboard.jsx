@@ -4,7 +4,8 @@ import ChangePasswordModal from './ChangePasswordModal';
 import NotificationBell from './NotificationBell';
 import Icon from './Icon';
 import { useI18n } from '../i18n/I18nProvider';
-
+import { Link, useNavigate } from 'react-router-dom';
+const API_BASE = 'http://localhost:8080';
 const Dashboard = () => {
   const { t, language } = useI18n();
   const [user, setUser]               = useState(null);
@@ -47,7 +48,48 @@ const Dashboard = () => {
     } catch { setErrorMessage(t('dashboard.loadDataError', 'Failed to load data')); }
     finally { setLoading(false); }
   };
-
+  const handleCancelBooking = async (adId) => {
+      if (!window.confirm(t('dashboard.cancelBookingQuestion', 'Снять бронь с объявления?'))) {
+          return;
+      }
+      try {
+          const res = await fetch(`${API_BASE}/api/v1/bookings/${adId}`, {
+              method: 'DELETE',
+              credentials: 'include'
+          });
+          if (res.ok) {
+              alert(t('dashboard.bookingCancelled', 'Бронь снята'));
+              loadUserData();
+          } else {
+              const msg = await res.text();
+              alert(`${t('dashboard.error', 'Ошибка')}: ${msg}`);
+          }
+      } catch (err) {
+          console.error('Cancel booking error:', err);
+          alert(t('dashboard.networkError', 'Сетевая ошибка'));
+      }
+  };
+  const handleConfirmSale = async (adId) => {
+      if (!window.confirm(t('dashboard.confirmSaleQuestion', 'Подтвердить продажу? Объявление уйдёт в архив.'))) {
+          return;
+      }
+      try {
+          const res = await fetch(`${API_BASE}/api/v1/bookings/${adId}/confirm`, {
+              method: 'POST',
+              credentials: 'include'
+          });
+          if (res.ok) {
+              alert(t('dashboard.saleConfirmed', 'Продажа подтверждена!'));
+              loadUserData(); // перезагружаем список
+          } else {
+              const msg = await res.text();
+              alert(`${t('dashboard.error', 'Ошибка')}: ${msg}`);
+          }
+      } catch (err) {
+          console.error('Confirm sale error:', err);
+          alert(t('dashboard.networkError', 'Сетевая ошибка'));
+      }
+  };
   const handlePasswordChanged = async (currentPassword, newPassword, confirmPassword) => {
     if (newPassword !== confirmPassword) { setErrorMessage(t('dashboard.passwordsDontMatch', 'Passwords do not match!')); return false; }
     if (newPassword.length < 8) { setErrorMessage(t('dashboard.passwordTooShort', 'Password must be at least 8 characters!')); return false; }
@@ -120,9 +162,11 @@ const Dashboard = () => {
     DRAFT: t('dashboard.statusDraft', 'Draft'),
     UNDER_MODERATION: t('dashboard.statusModeration', 'Moderation'),
     ARCHIVED: t('dashboard.statusArchived', 'Archived'),
-    DELETED: t('dashboard.statusDeleted', 'Deleted')
+    DELETED: t('dashboard.statusDeleted', 'Deleted'),
+    BOOKED: t('dashboard.statusBooked', 'Забронировано')
+
   };
-  const STATUS_CLASS = { ACTIVE: 'statusActive', DRAFT: 'statusDraft', UNDER_MODERATION: 'statusModeration', ARCHIVED: 'statusArchived', DELETED: 'statusDeleted' };
+  const STATUS_CLASS = { ACTIVE: 'statusActive', DRAFT: 'statusDraft', UNDER_MODERATION: 'statusModeration', ARCHIVED: 'statusArchived', DELETED: 'statusDeleted', BOOKED: 'statusBooked' };
 
   const activeAds      = ads.filter(a => a.status === 'ACTIVE');
   const moderationAds  = ads.filter(a => a.status === 'UNDER_MODERATION');
@@ -180,10 +224,10 @@ const Dashboard = () => {
 
         {/* Top bar */}
         <header className="dash-topbar">
-          <a href="/" className="dash-brand">
+          <Link href="/" className="dash-brand">
             <div className="dash-brand-mark"></div>
             <span>PORTAL</span>
-          </a>
+          </Link>
           <div className="dash-topbar-right">
             <NotificationBell adIds={ads.map(a => a.id)} />
             <button className="db-btn-ghost" onClick={handleLogout}>{t('common.signOut')}</button>
@@ -268,21 +312,21 @@ const Dashboard = () => {
                 🔖 {t('dashboard.filterBooked', 'Booked')} <span className="db-count">{bookedAds.length}</span>
               </button>
 
-              <a href="/" className="db-nav-item">
+              <Link href="/" className="db-nav-item">
                 {t('dashboard.browseMarketplace', 'Browse Marketplace')}
-              </a>
+              </Link>
 
-              <a href="/edit-profile" className="db-nav-item">
+              <Link href="/edit-profile" className="db-nav-item">
                 {t('dashboard.editProfile', 'Edit Profile')}
-              </a>
+              </Link>
 
               <button className="db-nav-item" onClick={() => openModal('account')}>
                 {t('dashboard.accountSettings', 'Account Settings')}
               </button>
 
-              <a href="/support" className="db-nav-item">
+              <Link href="/support" className="db-nav-item">
                 {t('dashboard.support', 'Support')}
-              </a>
+              </Link>
 
               {user.moderator && (
                 <button className="db-nav-item db-nav-role db-nav-moderator" onClick={() => window.location.href = '/moderator/dashboard'}>
@@ -361,10 +405,40 @@ const Dashboard = () => {
                         <span className="db-ad-date">{formatDate(ad.createdAt)}</span>
                       </div>
                       {activeSection !== 'favorites' && activeSection !== 'booked' && (
-                        <div className="db-ad-actions" onClick={e => e.stopPropagation()}>
-                            <button className="db-btn-edit" onClick={() => window.location.href = `/edit-ad?adId=${ad.id}`}>{t('dashboard.edit', 'Edit')}</button>
-                            <button className="db-btn-danger" onClick={() => handleDeleteAd(ad.id)}>{t('dashboard.delete', 'Delete')}</button>
-                        </div>
+                       <div className="db-ad-actions" onClick={e => e.stopPropagation()}>
+                           {/* НОВАЯ КНОПКА ПОДТВЕРЖДЕНИЯ (видна только если статус BOOKED и ты автор) */}
+                           {ad.status === 'BOOKED' && (
+                             <button
+                               className="db-btn-primary"
+                               style={{background: '#28a745', marginRight: '8px', border: 'none', color: 'white', padding: '5px 10px', borderRadius: '5px', cursor: 'pointer'}}
+                               onClick={() => handleConfirmSale(ad.id)}
+                             >
+                               💰 {t('dashboard.confirmSale', 'Подтвердить продажу')}
+                             </button>
+                           )}
+
+                           {/* Кнопка отмены брони со стороны продавца (если покупатель передумал) */}
+                           {ad.status === 'BOOKED' && (
+                             <button
+                               className="db-btn-ghost"
+                               style={{marginRight: '8px', color: '#dc3545'}}
+                               onClick={() => handleCancelBooking(ad.id)}
+                             >
+                               {t('dashboard.cancelBooking', 'Снять бронь')}
+                             </button>
+                           )}
+
+                           {/* Твои старые кнопки редактирования и удаления */}
+                           {ad.status !== 'BOOKED' && (
+                             <button className="db-btn-edit" onClick={() => window.location.href = `/edit-ad?adId=${ad.id}`}>
+                               {t('dashboard.edit', 'Edit')}
+                             </button>
+                           )}
+
+                           <button className="db-btn-danger" onClick={() => handleDeleteAd(ad.id)}>
+                             {t('dashboard.delete', 'Delete')}
+                           </button>
+                       </div>
                       )}
                     </div>
                   </div>

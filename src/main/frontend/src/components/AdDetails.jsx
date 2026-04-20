@@ -13,14 +13,14 @@ const AdDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [announcement, setAnnouncement] = useState(null);
-  const [details, setDetails] = useState({ authorName: '', photoCount: 0 });
+  const [details, setDetails] = useState({ authorName: '', photoCount: 0, buyerId: null });
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
   const [commentFeedback, setCommentFeedback] = useState({ type: '', text: '' });
   const [hasPhoto, setHasPhoto] = useState(false);
   const [liked, setLiked] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
-  const [bookingStatus, setBookingStatus] = useState('idle'); // idle | loading | done | error
+  const [bookingStatus, setBookingStatus] = useState('idle');
 
   const formatPrice = (price) => {
     if (price === -1) return t('home.negotiable');
@@ -33,6 +33,7 @@ const AdDetails = () => {
     return new Date(value).toLocaleString(language === 'ru' ? 'ru-RU' : 'en-US');
   };
 
+  // ✨ ИЗМЕНЕНО: единственная функция загрузки всех данных
   const loadData = async () => {
     setLoading(true);
     setError('');
@@ -54,7 +55,7 @@ const AdDetails = () => {
       }
 
       const adData = await adResp.json();
-      const detailsData = detailsResp.ok ? await detailsResp.json() : { authorName: t('adDetails.unknownUser', 'Unknown user'), photoCount: 0 };
+      const detailsData = detailsResp.ok ? await detailsResp.json() : { authorName: '', photoCount: 0 };
       const commentsData = commentsResp.ok ? await commentsResp.json() : [];
 
       setAnnouncement(adData);
@@ -79,32 +80,80 @@ const AdDetails = () => {
     }
   };
 
+  // ✨ ИЗМЕНЕНО: единственный useEffect, вызывает loadData + инкремент просмотров
+  useEffect(() => {
+    loadData();
+    // Инкремент просмотров — fire-and-forget
+    fetch(`${API_BASE}/api/announcements/${id}/view`, {
+      method: 'POST',
+      credentials: 'include'
+    }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  // ✨ ИЗМЕНЕНО: убран buyerId из URL (bakend берёт из сессии)
   const handleBook = async () => {
     if (!currentUserId) { navigate('/login'); return; }
     setBookingStatus('loading');
     try {
-      const res = await fetch(`${API_BASE}/api/v1/bookings/${id}?buyerId=${currentUserId}`, {
-        method: 'POST', credentials: 'include'
+      const res = await fetch(`${API_BASE}/api/v1/bookings/${id}`, {
+        method: 'POST',
+        credentials: 'include'
       });
       if (res.ok) {
         setBookingStatus('done');
+        alert(t('adDetails.bookedOk', 'Товар забронирован на 24 часа'));
+        loadData(); // перезагружаем, чтобы обновить статус
       } else {
         const msg = await res.text();
-        setError(msg || 'Не удалось забронировать');
+        setError(msg || t('adDetails.bookError', 'Не удалось забронировать'));
         setBookingStatus('error');
       }
     } catch (e) {
-      setError(e.message || 'Ошибка бронирования');
+      setError(e.message || t('adDetails.bookError', 'Ошибка бронирования'));
       setBookingStatus('error');
     }
   };
 
-  useEffect(() => {
-    if (id) {
-      loadData();
+  // ✨ ИЗМЕНЕНО: DELETE + правильный URL (без /cancel)
+  const handleCancelBooking = async () => {
+    if (!window.confirm(t('adDetails.confirmCancel', 'Отменить бронь?'))) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/bookings/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (res.ok) {
+        alert(t('adDetails.bookingCancelled', 'Бронь отменена'));
+        loadData();
+      } else {
+        const msg = await res.text();
+        setError(msg || 'Ошибка отмены');
+      }
+    } catch (e) {
+      setError(e.message || 'Ошибка отмены');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  };
+
+  // ✨ НОВОЕ: подтверждение продажи (для автора)
+  const handleConfirmSale = async () => {
+    if (!window.confirm(t('adDetails.confirmSale', 'Подтвердить продажу? Объявление уйдёт в архив.'))) return;
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/bookings/${id}/confirm`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (res.ok) {
+        alert(t('adDetails.saleConfirmed', 'Продажа подтверждена!'));
+        navigate('/dashboard');
+      } else {
+        const msg = await res.text();
+        setError(msg || 'Ошибка подтверждения');
+      }
+    } catch (e) {
+      setError(e.message || 'Ошибка подтверждения');
+    }
+  };
 
   const toggleFavorite = async () => {
     const res = await fetch(`${API_BASE}/api/favorites/${id}`, {
@@ -130,17 +179,11 @@ const AdDetails = () => {
       body: JSON.stringify({ content: text })
     });
 
-    if (response.status === 401) {
-      navigate('/login');
-      return;
-    }
+    if (response.status === 401) { navigate('/login'); return; }
 
     if (!response.ok) {
       const message = await response.text();
-      setCommentFeedback({
-        type: 'error',
-        text: message || t('adDetails.commentAddError', 'Failed to add comment')
-      });
+      setCommentFeedback({ type: 'error', text: message || t('adDetails.commentAddError', 'Failed to add comment') });
       return;
     }
 
@@ -160,6 +203,12 @@ const AdDetails = () => {
     return <div className="adDetailsPage"><div className="adDetailsCard">{t('adDetails.notFound', 'Listing not found')}</div></div>;
   }
 
+  // ✨ НОВОЕ: вспомогательные флаги для условий отображения кнопок
+  const isAuthor = currentUserId && currentUserId === announcement.authorId;
+  const isLoggedIn = !!currentUserId;
+  const isActive = announcement.status === 'ACTIVE';
+  const isBooked = announcement.status === 'BOOKED';
+
   return (
     <div className="adDetailsPage">
       <div className="adDetailsLayout">
@@ -167,16 +216,52 @@ const AdDetails = () => {
           <div className="adTitleRow">
             <h1>{announcement.title}</h1>
             <div className="adTitleActions">
-              {currentUserId && currentUserId !== announcement.authorId && (
+
+              {/* ✨ ИЗМЕНЕНО: кнопка Забронировать — только для не-автора, активного объявления */}
+              {isActive && isLoggedIn && !isAuthor && (
                 <button
-                  className={`adBookBtn${bookingStatus === 'done' ? ' booked' : ''}`}
+                  className="adBookBtn"
                   onClick={handleBook}
-                  disabled={bookingStatus === 'loading' || bookingStatus === 'done'}
-                  title={bookingStatus === 'done' ? 'Забронировано' : 'Забронировать товар'}
+                  disabled={bookingStatus === 'loading'}
+                  title={t('adDetails.bookTitle', 'Забронировать товар')}
                 >
-                  {bookingStatus === 'done' ? 'Забронировано' : bookingStatus === 'loading' ? '...' : 'Забронировать'}
+                  {bookingStatus === 'loading'
+                    ? t('adDetails.booking', 'Бронируем...')
+                    : t('adDetails.book', '📦 Забронировать')}
                 </button>
               )}
+
+              {/* ✨ НОВОЕ: статус + кнопки при BOOKED */}
+              {isBooked && (
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <span style={{ background: '#ffc107', padding: '5px 10px', borderRadius: '5px' }}>
+                    ⚠️ {t('adDetails.isBooked', 'Забронировано')}
+                  </span>
+
+                  {/* Автор видит кнопку "Подтвердить продажу" */}
+                  {isAuthor && (
+                    <button
+                      className="adBookBtn"
+                      onClick={handleConfirmSale}
+                      style={{ background: '#28a745', color: 'white' }}
+                    >
+                      💰 {t('adDetails.confirm', 'Подтвердить продажу')}
+                    </button>
+                  )}
+
+                  {/* Любой авторизованный пользователь (автор или покупатель) может отменить */}
+                  {isLoggedIn && (
+                    <button
+                      className="adBookBtn"
+                      onClick={handleCancelBooking}
+                      style={{ background: '#dc3545', color: 'white' }}
+                    >
+                      ❌ {t('adDetails.cancelBooking', 'Отменить бронь')}
+                    </button>
+                  )}
+                </div>
+              )}
+
               <button
                 className={`adLikeBtn${liked ? ' liked' : ''}`}
                 onClick={toggleFavorite}
@@ -188,6 +273,7 @@ const AdDetails = () => {
               </button>
             </div>
           </div>
+
           <div className="price">{formatPrice(announcement.price)}</div>
 
           <div className="metaRow">
