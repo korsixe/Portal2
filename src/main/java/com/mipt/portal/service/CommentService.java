@@ -1,5 +1,6 @@
 package com.mipt.portal.service;
 
+import com.mipt.portal.dto.kafka.KafkaEventPayloads;
 import com.mipt.portal.entity.Comment;
 import com.mipt.portal.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.List;
 public class CommentService {
 
   private final CommentRepository commentRepository;
+  private final KafkaMessageService kafkaMessageService;
 
   @Transactional
   public Comment createComment(Long advertisementId, Long userId, String content) {
@@ -26,6 +28,11 @@ public class CommentService {
 
     Comment savedComment = commentRepository.save(comment);
     log.info("Комментарий добавлен к объявлению {} от пользователя {}", advertisementId, userId);
+    kafkaMessageService.sendCommentEvent(
+        "comment.created",
+        String.valueOf(savedComment.getId()),
+        new KafkaEventPayloads.CommentCreated(savedComment.getId(), advertisementId, userId, null)
+    );
     return savedComment;
   }
 
@@ -40,6 +47,11 @@ public class CommentService {
 
     Comment savedComment = commentRepository.save(comment);
     log.info("Комментарий добавлен к объявлению {} от пользователя {}", advertisementId, userName);
+    kafkaMessageService.sendCommentEvent(
+        "comment.created",
+        String.valueOf(savedComment.getId()),
+        new KafkaEventPayloads.CommentCreated(savedComment.getId(), advertisementId, userId, userName)
+    );
     return savedComment;
   }
 
@@ -57,15 +69,25 @@ public class CommentService {
   public void deleteComment(Long id) {
     commentRepository.deleteById(id);
     log.info("Комментарий {} удален", id);
+    kafkaMessageService.sendCommentEvent(
+        "comment.deleted",
+        String.valueOf(id),
+        new KafkaEventPayloads.CommentDeleted(id)
+    );
   }
-
 
   @Transactional
   public Comment updateComment(Long id, String newContent) {
     Comment comment = findById(id);
     if (comment != null) {
       comment.setContent(newContent);
-      return commentRepository.save(comment);
+      Comment saved = commentRepository.save(comment);
+      kafkaMessageService.sendCommentEvent(
+          "comment.updated",
+          String.valueOf(saved.getId()),
+          new KafkaEventPayloads.CommentUpdated(saved.getId(), saved.getAdvertisementId(), saved.getUserId())
+      );
+      return saved;
     }
     return null;
   }

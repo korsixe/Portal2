@@ -6,6 +6,8 @@ import com.mipt.portal.enums.Role;
 import com.mipt.portal.entity.User;
 import com.mipt.portal.repository.UserRepository;
 import com.mipt.portal.util.UserValidator;
+import com.mipt.portal.dto.kafka.KafkaEventPayloads;
+import com.mipt.portal.exception.InsufficientCoinsException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,6 +28,7 @@ public class UserService {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final UserValidator userValidator;
+  private final KafkaMessageService kafkaMessageService;
 
   @Transactional
   public Optional<User> registerUser(String email, String name, String password,
@@ -73,6 +76,11 @@ public class UserService {
       User savedUser = userRepository.save(user);
 
       log.info("User registered successfully with ID: {} and email: {}", savedUser.getId(), email);
+      kafkaMessageService.sendUserEvent(
+          "user.registered",
+          String.valueOf(savedUser.getId()),
+          new KafkaEventPayloads.UserRegistered(savedUser.getId(), savedUser.getEmail(), savedUser.getName())
+      );
       return Optional.of(savedUser);
 
     } catch (Exception e) {
@@ -129,6 +137,11 @@ public class UserService {
       user.setHashPassword(null);
       user.setSalt(null);
 
+      kafkaMessageService.sendUserEvent(
+          "user.login",
+          String.valueOf(user.getId()),
+          new KafkaEventPayloads.UserLogin(user.getId(), user.getEmail())
+      );
       return Optional.of(user);
 
     } catch (Exception e) {
@@ -183,6 +196,11 @@ public class UserService {
 
       User updatedUser = userRepository.save(existing);
       log.info("User updated successfully: {}", user.getEmail());
+      kafkaMessageService.sendUserEvent(
+          "user.updated",
+          String.valueOf(updatedUser.getId()),
+          new KafkaEventPayloads.UserUpdated(updatedUser.getId(), updatedUser.getEmail())
+      );
       return Optional.of(updatedUser);
 
     } catch (IllegalArgumentException e) {
@@ -213,6 +231,11 @@ public class UserService {
         user.getAdList().add(adId);
         userRepository.save(user);
         log.info("Announcement {} added to user {}", adId, userId);
+        kafkaMessageService.sendUserEvent(
+            "user.announcement.added",
+            String.valueOf(userId),
+            new KafkaEventPayloads.UserAnnouncementChanged(userId, adId)
+        );
       }
 
       return Optional.of(true);
@@ -243,6 +266,11 @@ public class UserService {
         user.getAdList().remove(adId);
         userRepository.save(user);
         log.info("Announcement {} removed from user {}", adId, userId);
+        kafkaMessageService.sendUserEvent(
+            "user.announcement.removed",
+            String.valueOf(userId),
+            new KafkaEventPayloads.UserAnnouncementChanged(userId, adId)
+        );
         return Optional.of(true);
       } else {
         log.warn("Delete announcement failed - announcement {} not found for user {}", adId, userId);
@@ -265,6 +293,11 @@ public class UserService {
 
       userRepository.deleteById(userId);
       log.info("User deleted successfully: {}", userId);
+      kafkaMessageService.sendUserEvent(
+          "user.deleted",
+          String.valueOf(userId),
+          new KafkaEventPayloads.UserDeleted(userId)
+      );
       return Optional.of(true);
 
     } catch (Exception e) {
@@ -323,11 +356,55 @@ public class UserService {
       user.setRating(newRating);
       userRepository.save(user); // save возвращает User, игнорируем
       log.info("User {} rating updated to {}", userId, newRating);
+      kafkaMessageService.sendUserEvent(
+          "user.rating.updated",
+          String.valueOf(userId),
+          new KafkaEventPayloads.UserRatingUpdated(userId, newRating)
+      );
       return Optional.of(true);
 
     } catch (Exception e) {
       log.error("Error updating user rating: {}", e.getMessage(), e);
       return Optional.empty();
+    }
+  }
+
+  @Transactional
+  public boolean toggleFavorite(Long userId, Long adId) {
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+    if (user.getAdList() == null) {
+      user.setAdList(new ArrayList<>());
+    }
+    boolean liked;
+    if (user.getAdList().contains(adId)) {
+      user.getAdList().remove(adId);
+      liked = false;
+    } else {
+      user.getAdList().add(adId);
+      liked = true;
+    }
+    userRepository.save(user);
+    kafkaMessageService.sendUserEvent(
+        "user.favorite.toggled",
+        String.valueOf(userId),
+        new KafkaEventPayloads.UserFavoriteToggled(userId, adId, liked)
+    );
+    return liked;
+  }
+
+  public List<Long> getFavoriteIds(Long userId) {
+    return userRepository.findById(userId)
+        .map(u -> u.getAdList() != null ? u.getAdList() : List.<Long>of())
+        .orElse(List.of());
+  }
+
+  public boolean existsByEmail(String email) {
+    try {
+      return userRepository.existsByEmail(email);
+    } catch (Exception e) {
+      log.error("Error checking if email exists: {}", e.getMessage(), e);
+      return false;
     }
   }
 
@@ -341,7 +418,7 @@ public class UserService {
       return users;
     } catch (Exception e) {
       log.error("Error getting all users: {}", e.getMessage(), e);
-      return List.of(); // Возвращаем пустой список в случае ошибки
+      return List.of();
     }
   }
 
@@ -362,47 +439,13 @@ public class UserService {
 
       long regularUsers = users.size() - adminCount - moderatorCount;
       if (regularUsers < 0) {
-        regularUsers = 0; // на случай неконсистентных ролей
+        regularUsers = 0;
       }
 
       return new SystemStats(users.size(), adminCount, moderatorCount, regularUsers);
     } catch (Exception e) {
       log.error("Error building system stats: {}", e.getMessage(), e);
       return new SystemStats(0, 0, 0, 0);
-    }
-  }
-
-  @Transactional
-  public boolean toggleFavorite(Long userId, Long adId) {
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
-    if (user.getAdList() == null) {
-      user.setAdList(new ArrayList<>());
-    }
-    boolean liked;
-    if (user.getAdList().contains(adId)) {
-      user.getAdList().remove(adId);
-      liked = false;
-    } else {
-      user.getAdList().add(adId);
-      liked = true;
-    }
-    userRepository.save(user);
-    return liked;
-  }
-
-  public List<Long> getFavoriteIds(Long userId) {
-    return userRepository.findById(userId)
-        .map(u -> u.getAdList() != null ? u.getAdList() : List.<Long>of())
-        .orElse(List.of());
-  }
-
-  public boolean existsByEmail(String email) {
-    try {
-      return userRepository.existsByEmail(email);
-    } catch (Exception e) {
-      log.error("Error checking if email exists: {}", e.getMessage(), e);
-      return false;
     }
   }
 
@@ -424,6 +467,11 @@ public class UserService {
       user.addCoins(coinsToAdd);
       userRepository.save(user);
       log.info("Added {} coins to user {}. New balance: {}", coinsToAdd, userId, user.getCoins());
+      kafkaMessageService.sendUserEvent(
+          "user.coins.added",
+          String.valueOf(userId),
+          new KafkaEventPayloads.UserCoinsChanged(userId, coinsToAdd, user.getCoins())
+      );
       return Optional.of(true);
 
     } catch (Exception e) {
@@ -450,13 +498,20 @@ public class UserService {
       if (!user.spendCoins(coinsToDeduct)) {
         log.warn("Deduct coins failed - insufficient coins for user {}. Balance: {}, required: {}",
             userId, user.getCoins(), coinsToDeduct);
-        return Optional.empty();
+        throw new InsufficientCoinsException(userId, user.getCoins(), coinsToDeduct);
       }
 
       userRepository.save(user);
       log.info("Deducted {} coins from user {}. New balance: {}", coinsToDeduct, userId, user.getCoins());
+      kafkaMessageService.sendUserEvent(
+          "user.coins.deducted",
+          String.valueOf(userId),
+          new KafkaEventPayloads.UserCoinsChanged(userId, coinsToDeduct, user.getCoins())
+      );
       return Optional.of(true);
 
+    } catch (InsufficientCoinsException e) {
+      throw e;
     } catch (Exception e) {
       log.error("Error deducting coins: {}", e.getMessage(), e);
       return Optional.empty();
@@ -481,6 +536,11 @@ public class UserService {
 
       userRepository.save(user);
       log.info("Moderator role assigned successfully to user: {}", userId);
+      kafkaMessageService.sendUserEvent(
+          "user.role.changed",
+          String.valueOf(userId),
+          new KafkaEventPayloads.UserRoleChanged(userId, "MODERATOR", "assigned")
+      );
       return Optional.of(true);
 
     } catch (Exception e) {
@@ -507,6 +567,11 @@ public class UserService {
 
       userRepository.save(user);
       log.info("Moderator role revoked successfully from user: {}", userId);
+      kafkaMessageService.sendUserEvent(
+          "user.role.changed",
+          String.valueOf(userId),
+          new KafkaEventPayloads.UserRoleChanged(userId, "MODERATOR", "revoked")
+      );
       return Optional.of(true);
 
     } catch (Exception e) {
@@ -568,6 +633,11 @@ public class UserService {
 
       userRepository.save(user);
       log.info("Admin role assigned successfully to user: {}", userId);
+      kafkaMessageService.sendUserEvent(
+          "user.role.changed",
+          String.valueOf(userId),
+          new KafkaEventPayloads.UserRoleChanged(userId, "ADMIN", "assigned")
+      );
       return Optional.of(true);
 
     } catch (Exception e) {
@@ -594,6 +664,11 @@ public class UserService {
 
       userRepository.save(user);
       log.info("Admin role revoked successfully from user: {}", userId);
+      kafkaMessageService.sendUserEvent(
+          "user.role.changed",
+          String.valueOf(userId),
+          new KafkaEventPayloads.UserRoleChanged(userId, "ADMIN", "revoked")
+      );
       return Optional.of(true);
 
     } catch (Exception e) {
@@ -660,7 +735,6 @@ public class UserService {
     return true;
   }
 
-
   /**
    * Удаление аккаунта пользователя
    */
@@ -685,7 +759,5 @@ public class UserService {
   public PasswordEncoder getPasswordEncoder() {
     return this.passwordEncoder;
   }
-
 }
-
 

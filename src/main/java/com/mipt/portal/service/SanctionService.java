@@ -1,5 +1,6 @@
 package com.mipt.portal.service;
 
+import com.mipt.portal.dto.kafka.KafkaEventPayloads;
 import com.mipt.portal.entity.User;
 import com.mipt.portal.entity.UserSanction;
 import com.mipt.portal.enums.SanctionType;
@@ -21,6 +22,7 @@ public class SanctionService {
 
     private final UserRepository userRepository;
     private final UserSanctionRepository sanctionRepository;
+    private final KafkaMessageService kafkaMessageService;
 
     @Transactional
     public Optional<Boolean> freezeUser(Long actorId, Long userId, String reason, int hours) {
@@ -43,6 +45,11 @@ public class SanctionService {
         user.setBannedUntil(null);
         user.setBanReason(null);
         userRepository.save(user);
+        kafkaMessageService.sendUserEvent(
+            "user.sanction.lifted",
+            String.valueOf(userId),
+            new KafkaEventPayloads.UserSanctionLifted(userId)
+        );
         return Optional.of(true);
     }
 
@@ -75,6 +82,18 @@ public class SanctionService {
         }
 
         userRepository.save(user);
+        kafkaMessageService.sendUserEvent(
+            "user.sanction.applied",
+            String.valueOf(userId),
+            new KafkaEventPayloads.UserSanctionApplied(
+                userId,
+                actorId,
+                type.name(),
+                duration,
+                end.toString(),
+                (reason != null && !reason.isBlank()) ? reason : null
+            )
+        );
         return Optional.of(true);
     }
 }

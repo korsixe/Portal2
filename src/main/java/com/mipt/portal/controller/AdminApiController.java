@@ -9,10 +9,13 @@ import com.mipt.portal.dto.SystemStats;
 import com.mipt.portal.entity.AdminActionAudit;
 import com.mipt.portal.entity.User;
 import com.mipt.portal.enums.Role;
+import com.mipt.portal.exception.InsufficientCoinsException;
 import com.mipt.portal.repository.AdminActionAuditRepository;
 import com.mipt.portal.service.AdminService;
 import com.mipt.portal.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -62,18 +65,33 @@ public class AdminApiController {
     }
 
     @PostMapping("/coins")
-    public SimpleActionResponse manageCoins(@RequestBody CoinManagementRequest request, Authentication authentication) {
+    public ResponseEntity<SimpleActionResponse> manageCoins(@RequestBody CoinManagementRequest request, Authentication authentication) {
         Long adminId = resolveCurrentUserId(authentication);
         boolean success = false;
         String action = request.getAction() == null ? "" : request.getAction().toLowerCase();
 
-        if (action.equals("add")) {
-            success = adminService.addCoinsToUser(adminId, request.getTargetUserId(), request.getAmount()).orElse(false);
-        } else if (action.equals("deduct")) {
-            success = adminService.deductCoinsFromUser(adminId, request.getTargetUserId(), request.getAmount()).orElse(false);
-        }
+        try {
+            if (action.equals("add")) {
+                success = adminService.addCoinsToUser(adminId, request.getTargetUserId(), request.getAmount()).orElse(false);
+            } else if (action.equals("deduct")) {
+                success = adminService.deductCoinsFromUser(adminId, request.getTargetUserId(), request.getAmount()).orElse(false);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new SimpleActionResponse(false, "Invalid action"));
+            }
 
-        return new SimpleActionResponse(success, success ? "Coins updated" : "Coins update failed");
+            if (success) {
+                return ResponseEntity.ok(new SimpleActionResponse(true, "Coins updated"));
+            }
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new SimpleActionResponse(false, "Coins update failed"));
+
+        } catch (InsufficientCoinsException e) {
+            String message = "Insufficient coins. Balance: " + e.getBalance() + ", required: " + e.getRequired();
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new SimpleActionResponse(false, message));
+        }
     }
 
     @PostMapping("/sanction")
@@ -103,4 +121,3 @@ public class AdminApiController {
             .orElse(null);
     }
 }
-

@@ -1,5 +1,6 @@
 package com.mipt.portal.service;
 
+import com.mipt.portal.dto.kafka.KafkaEventPayloads;
 import com.mipt.portal.entity.Announcement;
 import com.mipt.portal.entity.Booking;
 import com.mipt.portal.enums.AdStatus;
@@ -10,19 +11,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j 
+import java.util.List;
+import java.util.Objects;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookingService {
 
     private final BookingRepository bookingRepository;
     private final AnnouncementRepository announcementRepository;
+    private final KafkaMessageService kafkaMessageService;
 
     @Transactional(readOnly = true)
-    public java.util.List<com.mipt.portal.entity.Announcement> getBookedAdsForBuyer(Long buyerId) {
+    public List<Announcement> getBookedAdsForBuyer(Long buyerId) {
         return bookingRepository.findAllByBuyerId(buyerId).stream()
                 .map(b -> announcementRepository.findById(b.getAnnouncementId()).orElse(null))
-                .filter(java.util.Objects::nonNull)
+                .filter(Objects::nonNull)
                 .toList();
     }
 
@@ -52,6 +57,16 @@ public class BookingService {
         announcementRepository.save(ad);
 
         log.info("Successfully booked adId={} with bookingId={}", adId, savedBooking.getId());
+        kafkaMessageService.sendBookingEvent(
+                "booking.created",
+                String.valueOf(savedBooking.getId()),
+                new KafkaEventPayloads.BookingCreated(
+                        savedBooking.getId(),
+                        adId,
+                        buyerId,
+                        AdStatus.BOOKED.name()
+                )
+        );
         return savedBooking;
     }
 }

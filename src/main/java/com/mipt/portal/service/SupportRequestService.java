@@ -1,5 +1,6 @@
 package com.mipt.portal.service;
 
+import com.mipt.portal.dto.kafka.KafkaEventPayloads;
 import com.mipt.portal.entity.SupportRequest;
 import com.mipt.portal.repository.SupportRequestRepository;
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SupportRequestService {
 
   private final SupportRequestRepository supportRequestRepository;
+  private final KafkaMessageService kafkaMessageService;
 
   @Transactional(readOnly = true)
   public List<SupportRequest> getByUserId(Long userId) {
@@ -26,7 +28,12 @@ public class SupportRequestService {
     request.setUserName(userName);
     request.setMessage(message);
     request.setCreatedAt(LocalDateTime.now());
-    return supportRequestRepository.save(request);
+    SupportRequest saved = supportRequestRepository.save(request);
+    kafkaMessageService.sendSupportEvent(
+        "support.request.created",
+        String.valueOf(saved.getId()),
+        new KafkaEventPayloads.SupportRequestCreated(saved.getId(), userId, userName)
+    );
+    return saved;
   }
 }
-

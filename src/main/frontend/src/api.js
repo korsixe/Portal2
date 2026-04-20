@@ -21,8 +21,13 @@ export async function apiPost(path, body) {
     body: JSON.stringify(body || {})
   });
   if (!response.ok) {
+    let errorBody = null;
+    try {
+      errorBody = await response.json();
+    } catch {}
     const error = new Error(`Request failed: ${response.status}`);
     error.status = response.status;
+    error.body = errorBody;
     throw error;
   }
   return response.json();

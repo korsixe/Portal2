@@ -1,19 +1,20 @@
 package com.mipt.portal.service;
 
+import com.mipt.portal.dto.kafka.KafkaEventPayloads;
 import com.mipt.portal.entity.ModerationHistory;
 import com.mipt.portal.enums.AdStatus;
 import com.mipt.portal.repository.ModerationHistoryRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ModerationHistoryService {
 
     private final ModerationHistoryRepository moderationHistoryRepository;
+    private final KafkaMessageService kafkaMessageService;
 
     @Transactional
     public void record(Long adId, Long moderatorId, AdStatus fromStatus, AdStatus toStatus, String reason) {
@@ -23,7 +24,19 @@ public class ModerationHistoryService {
         history.setFromStatus(fromStatus);
         history.setToStatus(toStatus);
         history.setReason(reason);
-        moderationHistoryRepository.save(history);
+        ModerationHistory saved = moderationHistoryRepository.save(history);
+        kafkaMessageService.sendModerationEvent(
+            "moderation.history.recorded",
+            String.valueOf(saved.getId()),
+            new KafkaEventPayloads.ModerationHistoryRecorded(
+                saved.getId(),
+                adId,
+                moderatorId,
+                fromStatus.name(),
+                toStatus.name(),
+                (reason != null && !reason.isBlank()) ? reason : null
+            )
+        );
     }
 
     @Transactional(readOnly = true)

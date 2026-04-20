@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -23,6 +24,7 @@ public class ModerationMessageService {
 
     private final ModerationService moderationService;
     private final UserService userService;
+    private final KafkaMessageService kafkaMessageService;
 
     /**
      * Логирует действие модератора
@@ -53,6 +55,17 @@ public class ModerationMessageService {
             Long messageId = System.currentTimeMillis(); // Временный ID
             log.info("✅ Сообщение модератора успешно обработано (ID: {})", messageId);
 
+            kafkaMessageService.sendModerationEvent(
+                "moderation.action.logged",
+                String.valueOf(messageId),
+                Map.of(
+                    "messageId", messageId,
+                    "adId", adId,
+                    "action", action,
+                    "moderatorId", moderatorUserId,
+                    "reason", (reason != null && !reason.trim().isEmpty()) ? reason : null
+                )
+            );
             return Optional.of(messageId);
 
         } catch (Exception e) {
@@ -96,6 +109,17 @@ public class ModerationMessageService {
             message.setIsRead(false);
 
             log.info("Moderation message created: {}", message);
+            kafkaMessageService.sendModerationEvent(
+                "moderation.message.created",
+                String.valueOf(message.getId()),
+                Map.of(
+                    "messageId", message.getId(),
+                    "adId", adId,
+                    "action", action,
+                    "moderatorId", moderatorUserId,
+                    "reason", (reason != null && !reason.trim().isEmpty()) ? reason : null
+                )
+            );
             return Optional.of(message);
 
         } catch (Exception e) {

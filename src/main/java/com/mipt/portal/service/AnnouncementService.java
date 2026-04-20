@@ -12,6 +12,7 @@ import com.mipt.portal.enums.AdminActionType;
 import com.mipt.portal.enums.AuditTargetType;
 import com.mipt.portal.repository.AnnouncementRepository;
 import com.mipt.portal.repository.UserRepository;
+import com.mipt.portal.dto.kafka.KafkaEventPayloads;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class AnnouncementService {
     private final AuditService auditService;
     private final CategoryService categoryService;
     private final CommentService commentService;
+    private final KafkaMessageService kafkaMessageService;
 
     @Transactional
     public Announcement create(AnnouncementCreateDto dto) {
@@ -73,6 +75,15 @@ public class AnnouncementService {
 
         Announcement savedAd = repository.save(ad);
         log.info("Announcement created successfully with ID: {}", savedAd.getId());
+        kafkaMessageService.sendAnnouncementEvent(
+            "announcement.created",
+            String.valueOf(savedAd.getId()),
+            new KafkaEventPayloads.AnnouncementCreated(
+                savedAd.getId(),
+                savedAd.getAuthorId(),
+                savedAd.getStatus().name()
+            )
+        );
         return savedAd;
     }
 
@@ -115,6 +126,11 @@ public class AnnouncementService {
             ad.setUpdatedAt(Instant.now());
             repository.save(ad);
             log.info("Announcement ID: {} sent to moderation", id);
+            kafkaMessageService.sendAnnouncementEvent(
+                "announcement.sent_to_moderation",
+                String.valueOf(id),
+                new KafkaEventPayloads.AnnouncementSentToModeration(id, ad.getStatus().name())
+            );
         });
     }
 
@@ -129,6 +145,17 @@ public class AnnouncementService {
             auditService.logAdminAction(moderatorId, null, AdminActionType.AD_STATUS_CHANGE, AuditTargetType.ANNOUNCEMENT, id,
                 "Статус " + previous + " -> " + newStatus + (reason != null ? (". Причина: " + reason) : ""));
             log.info("Status changed for Ad ID: {}. New status: {}", id, newStatus);
+            kafkaMessageService.sendAnnouncementEvent(
+                "announcement.status_changed",
+                String.valueOf(id),
+                new KafkaEventPayloads.AnnouncementStatusChanged(
+                    id,
+                    previous.name(),
+                    newStatus.name(),
+                    moderatorId,
+                    (reason != null && !reason.isBlank()) ? reason : null
+                )
+            );
             return saved;
         });
     }
@@ -200,6 +227,12 @@ public class AnnouncementService {
     public Announcement save(Announcement ad) {
         ad.setUpdatedAt(Instant.now());
         log.debug("Updating announcement data for ID: {}", ad.getId());
-        return repository.save(ad);
+        Announcement saved = repository.save(ad);
+        kafkaMessageService.sendAnnouncementEvent(
+            "announcement.updated",
+            String.valueOf(saved.getId()),
+            new KafkaEventPayloads.AnnouncementUpdated(saved.getId(), saved.getStatus().name())
+        );
+        return saved;
     }
 }

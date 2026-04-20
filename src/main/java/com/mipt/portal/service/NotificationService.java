@@ -1,22 +1,27 @@
 package com.mipt.portal.service;
 
+import com.mipt.portal.dto.kafka.KafkaEventPayloads;
 import com.mipt.portal.entity.ModerationMessage;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class NotificationService {
 
   // Хранилище уведомлений
   private final Map<Long, List<ModerationMessage>> notificationStorage = new ConcurrentHashMap<>();
   private long nextId = 1;
+
+  private final KafkaMessageService kafkaMessageService;
 
   // Получить уведомления для списка объявлений
   public List<ModerationMessage> getUserNotifications(List<Long> adIds) {
@@ -61,6 +66,11 @@ public class NotificationService {
       for (ModerationMessage msg : notifications) {
         if (msg.getId().equals(notificationId)) {
           msg.setIsRead(true);
+          kafkaMessageService.sendNotificationEvent(
+              "notification.read",
+              String.valueOf(notificationId),
+              new KafkaEventPayloads.NotificationRead(notificationId)
+          );
           return true;
         }
       }
@@ -74,6 +84,11 @@ public class NotificationService {
 
     for (List<ModerationMessage> notifications : notificationStorage.values()) {
       if (notifications.removeIf(n -> n.getId().equals(notificationId))) {
+        kafkaMessageService.sendNotificationEvent(
+            "notification.deleted",
+            String.valueOf(notificationId),
+            new KafkaEventPayloads.NotificationDeleted(notificationId)
+        );
         return true;
       }
     }
@@ -92,6 +107,11 @@ public class NotificationService {
       for (Long adId : adIds) {
         notificationStorage.remove(adId);
       }
+      kafkaMessageService.sendNotificationEvent(
+          "notification.all_deleted",
+          "bulk",
+          Map.of("adIds", adIds)
+      );
       return true;
     } catch (Exception e) {
       log.error("Ошибка при удалении всех уведомлений: {}", e.getMessage());
@@ -112,6 +132,11 @@ public class NotificationService {
         notifications.forEach(msg -> msg.setIsRead(true));
       }
     }
+    kafkaMessageService.sendNotificationEvent(
+        "notification.all_read",
+        "bulk",
+        Map.of("adIds", adIds)
+    );
     return true;
   }
 
@@ -127,6 +152,17 @@ public class NotificationService {
     msg.setIsRead(false);
 
     notificationStorage.computeIfAbsent(adId, k -> new ArrayList<>()).add(msg);
+    kafkaMessageService.sendNotificationEvent(
+        "notification.created",
+        String.valueOf(msg.getId()),
+        new KafkaEventPayloads.NotificationCreated(
+            msg.getId(),
+            adId,
+            action,
+            moderatorEmail,
+            (reason != null && !reason.isBlank()) ? reason : null
+        )
+    );
     return msg;
   }
 }

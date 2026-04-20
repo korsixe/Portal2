@@ -13,12 +13,31 @@ spring:
     password: ${DB_PASSWORD:mypassword}
     driver-class-name: org.postgresql.Driver
 
+  sql:
+    init:
+      mode: always
+      separator: "^^"
+
   jpa:
     open-in-view: false
     hibernate:
       ddl-auto: update
     show-sql: true
+    defer-datasource-initialization: true
     # dialect определяется автоматически
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    admin:
+      auto-create: true
+    consumer:
+      group-id: portal-app
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 server:
   port: 8080
@@ -37,3 +56,13 @@ logging:
 app:
   security:
     pepper: "szfdxghjdakslbnvcxagsftuyidolajskhdhsf123"
+  kafka:
+    topic:
+      audit: portal.audit.events
+      user: portal.user.events
+      announcement: portal.announcement.events
+      moderation: portal.moderation.events
+      booking: portal.booking.events
+      comment: portal.comment.events
+      support: portal.support.events
+      notification: portal.notification.events

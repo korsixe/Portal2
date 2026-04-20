@@ -83,7 +83,8 @@ function AdminDashboard() {
       showNotification(res.message || 'Готово', res.success ? 'success' : 'error');
       await refreshDashboard();
     } catch (err) {
-      showNotification('Не удалось обновить монеты', 'error');
+      const message = err?.body?.message || 'Не удалось обновить монеты';
+      showNotification(message, 'error');
     }
   };
 
