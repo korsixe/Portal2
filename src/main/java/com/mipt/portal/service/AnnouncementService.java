@@ -235,4 +235,13 @@ public class AnnouncementService {
         );
         return saved;
     }
+
+    @Transactional
+    public void incrementViewCount(Long id) {
+        log.info("Request to increment view count for adId={}", id);
+        int updated = repository.incrementViews(id);
+        if (updated == 0) {
+            log.warn("Failed to increment view count. Announcement with id={} not found", id);
+        }
+    }
 }

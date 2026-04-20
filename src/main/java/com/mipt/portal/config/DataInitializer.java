@@ -147,7 +147,9 @@ public class DataInitializer implements CommandLineRunner {
                 return null;
             }
         }
-
+        String salt = UUID.randomUUID().toString().substring(0, 10);
+        user.setSalt(salt);
+        user.setHashPassword(passwordEncoder.encode(password + salt));
         applyTestUserProfile(user, role);
         return userRepository.save(user);
     }
