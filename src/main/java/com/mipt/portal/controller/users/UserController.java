@@ -158,6 +158,15 @@ public class UserController {
 
     return userService.findUserById(userId)
         .map(user -> {
+          // Refresh Spring Security context so @PreAuthorize picks up any newly assigned roles
+          UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+          UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+              userDetails, null, userDetails.getAuthorities());
+          SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+          securityContext.setAuthentication(auth);
+          SecurityContextHolder.setContext(securityContext);
+          session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
+
           user.setHashPassword(null);
           user.setSalt(null);
           session.setAttribute("user", user);
