@@ -137,7 +137,6 @@ public class DataInitializer implements CommandLineRunner {
             log.info("Creating user: {} with role: {}", email, role);
             user = new User();
             user.setEmail(email);
-
             String salt = UUID.randomUUID().toString().substring(0, 10);
             user.setSalt(salt);
             user.setHashPassword(passwordEncoder.encode(password + salt));
@@ -150,6 +149,10 @@ public class DataInitializer implements CommandLineRunner {
         String salt = UUID.randomUUID().toString().substring(0, 10);
         user.setSalt(salt);
         user.setHashPassword(passwordEncoder.encode(password + salt));
+        // Гарантируем, что роль всегда есть у пользователя
+        if (user.getRoles() == null || !user.getRoles().contains(role)) {
+            user.addRole(role);
+        }
         applyTestUserProfile(user, role);
         return userRepository.save(user);
     }

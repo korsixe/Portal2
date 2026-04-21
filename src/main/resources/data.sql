@@ -1,25 +1,9 @@
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1
-    FROM pg_constraint c
-    JOIN pg_class t ON c.conrelid = t.oid
-    WHERE t.relname = 'ads' AND c.conname = 'ads_status_check'
-  ) THEN
-    ALTER TABLE ads DROP CONSTRAINT ads_status_check;
-  END IF;
+ALTER TABLE ads DROP CONSTRAINT IF EXISTS ads_status_check;
+ALTER TABLE ads ADD CONSTRAINT ads_status_check CHECK (status IN ('DRAFT', 'UNDER_MODERATION', 'ACTIVE', 'BOOKED', 'REJECTED', 'ARCHIVED', 'DELETED'));
 
-  ALTER TABLE ads
-    ADD CONSTRAINT ads_status_check CHECK (
-      status IN (
-        'DRAFT',
-        'UNDER_MODERATION',
-        'ACTIVE',
-        'BOOKED',
-        'REJECTED',
-        'ARCHIVED',
-        'DELETED'
-      )
-    );
-END $$
-^^
+ALTER TABLE users ADD COLUMN IF NOT EXISTS telegram_username VARCHAR(255);
+
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS cancelled_at TIMESTAMP;
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS cancel_notification_sent_at TIMESTAMP;
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS confirmed_at TIMESTAMP;
+ALTER TABLE bookings ADD COLUMN IF NOT EXISTS confirm_notification_sent_at TIMESTAMP;

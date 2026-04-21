@@ -74,13 +74,27 @@ const Register = () => {
 
       if (response.ok) {
         setMessage({ type: 'success', text: t('register.success', 'Registration successful! Redirecting to sign in page.') });
+        setFieldErrors({});
         setTimeout(() => {
           window.location.href = '/login';
         }, 2000);
       } else {
-        const errorData = await response.text();
-        console.error('Server response:', errorData);
-        setMessage({ type: 'error', text: errorData || t('register.errors.submit', 'Registration failed. Please check your data.') });
+        const errorText = await response.text();
+        const newFieldErrors = {};
+        if (errorText.toLowerCase().includes('почт') || errorText.toLowerCase().includes('email')) {
+          newFieldErrors.email = errorText;
+        } else if (errorText.toLowerCase().includes('имя') || errorText.toLowerCase().includes('name')) {
+          newFieldErrors.name = errorText;
+        } else if (errorText.toLowerCase().includes('пароль') || errorText.toLowerCase().includes('password')) {
+          newFieldErrors.password = errorText;
+        }
+        if (Object.keys(newFieldErrors).length > 0) {
+          setFieldErrors(newFieldErrors);
+          setMessage({ type: '', text: '' });
+        } else {
+          setFieldErrors({});
+          setMessage({ type: 'error', text: errorText || t('register.errors.submit', 'Registration failed. Please check your data.') });
+        }
       }
     } catch (error) {
       console.error('Network error:', error);
@@ -107,7 +121,17 @@ const Register = () => {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Email *</label>
-            <input type="email" name="email" placeholder="ivanov.ii@phystech.edu" required onChange={handleChange} />
+            <input
+              type="email"
+              name="email"
+              placeholder="ivanov.ii@phystech.edu"
+              required
+              onChange={handleChange}
+              className={fieldErrors.email ? 'error-field' : ''}
+            />
+            {fieldErrors.email && (
+              <small style={{ color: '#dc3545', marginTop: '5px', display: 'block' }}>{fieldErrors.email}</small>
+            )}
           </div>
 
           <div className="form-group">
@@ -133,7 +157,16 @@ const Register = () => {
             <div className="password-info">
               {t('register.passwordHint', 'Password must contain at least 8 characters.')}
             </div>
-            <input type="password" name="password" required onChange={handleChange} />
+            <input
+              type="password"
+              name="password"
+              required
+              onChange={handleChange}
+              className={fieldErrors.password ? 'error-field' : ''}
+            />
+            {fieldErrors.password && (
+              <small style={{ color: '#dc3545', marginTop: '5px', display: 'block' }}>{fieldErrors.password}</small>
+            )}
           </div>
 
           <div className="form-group">

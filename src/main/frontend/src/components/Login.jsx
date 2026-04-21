@@ -48,10 +48,18 @@ const Login = () => {
       });
 
       if (response.ok) {
+        const user = await response.json();
         setMessageType('success');
         setMessage(t('login.success'));
+        const roles = user.roles || [];
+        let redirectUrl = '/dashboard';
+        if (roles.includes('ADMIN')) {
+          redirectUrl = '/admin/dashboard';
+        } else if (roles.includes('MODERATOR')) {
+          redirectUrl = '/moderator/dashboard';
+        }
         setTimeout(() => {
-          window.location.href = '/dashboard';
+          window.location.href = redirectUrl;
         }, 1000);
       } else {
         setMessageType('error');

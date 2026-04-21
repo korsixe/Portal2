@@ -3,9 +3,11 @@ package com.mipt.portal.service;
 import com.mipt.portal.dto.kafka.KafkaEventPayloads;
 import com.mipt.portal.entity.Announcement;
 import com.mipt.portal.entity.Booking;
+import com.mipt.portal.entity.User;
 import com.mipt.portal.enums.AdStatus;
 import com.mipt.portal.repository.AnnouncementRepository;
 import com.mipt.portal.repository.BookingRepository;
+import com.mipt.portal.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,11 +26,13 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final AnnouncementRepository announcementRepository;
     private final KafkaMessageService kafkaMessageService;
+    private final UserRepository userRepository;
+    private final EmailService emailService;
 
     @Transactional(readOnly = true)
     public List<Announcement> getBookedAdsForBuyer(Long buyerId) {
         log.info("Fetching all booked announcements for buyerId={}", buyerId);
-        List<Booking> bookings = bookingRepository.findAllByBuyerId(buyerId);
+        List<Booking> bookings = bookingRepository.findAllByBuyerIdAndCancelledAtIsNullAndConfirmedAtIsNull(buyerId);
         return bookings.stream()
             .map(booking -> announcementRepository.findById(booking.getAnnouncementId()).orElse(null))
             .filter(java.util.Objects::nonNull)
@@ -50,7 +54,7 @@ public class BookingService {
             throw new RuntimeException("Объявление недоступно для бронирования");
         }
 
-        if (bookingRepository.existsByAnnouncementId(adId)) {
+        if (bookingRepository.existsByAnnouncementIdAndCancelledAtIsNullAndConfirmedAtIsNull(adId)) {
             log.error("Conflict! adId={} is already booked!", adId);
             throw new RuntimeException("Товар уже забронирован кем-то другим!");
         }
@@ -64,6 +68,13 @@ public class BookingService {
         announcementRepository.save(ad);
 
         log.info("Successfully booked adId={} with bookingId={}", adId, savedBooking.getId());
+
+        userRepository.findById(buyerId).map(User::getEmail).ifPresent(buyerEmail ->
+            userRepository.findById(ad.getAuthorId()).map(User::getEmail).ifPresent(sellerEmail ->
+                emailService.sendBookingCreated(buyerEmail, sellerEmail, ad.getTitle(), adId)
+            )
+        );
+
         kafkaMessageService.sendBookingEvent(
                 "booking.created",
                 String.valueOf(savedBooking.getId()),
@@ -97,8 +108,14 @@ public class BookingService {
         ad.setStatus(AdStatus.ARCHIVED);
         announcementRepository.save(ad);
 
-        bookingRepository.deleteByAnnouncementId(adId);
-        log.info("Sale successfully confirmed for adId={}. Ad moved to ARCHIVED. Booking deleted.", adId);
+        bookingRepository.findByAnnouncementIdAndCancelledAtIsNullAndConfirmedAtIsNull(adId).ifPresent(booking -> {
+            booking.setConfirmedAt(Instant.now());
+            bookingRepository.save(booking);
+            userRepository.findById(booking.getBuyerId()).map(User::getEmail).ifPresent(buyerEmail ->
+                emailService.sendBookingConfirmed(buyerEmail, ad.getTitle())
+            );
+        });
+        log.info("Sale successfully confirmed for adId={}. Ad moved to ARCHIVED.", adId);
     }
 
     @Transactional
@@ -108,7 +125,7 @@ public class BookingService {
         Announcement ad = announcementRepository.findById(adId)
             .orElseThrow(() -> new RuntimeException("Объявление не найдено"));
 
-        Booking booking = bookingRepository.findByAnnouncementId(adId)
+        Booking booking = bookingRepository.findByAnnouncementIdAndCancelledAtIsNullAndConfirmedAtIsNull(adId)
             .orElseThrow(() -> new RuntimeException("Бронь не найдена"));
 
         if (!booking.getBuyerId().equals(userId) && !ad.getAuthorId().equals(userId)) {
@@ -118,7 +135,14 @@ public class BookingService {
 
         ad.setStatus(AdStatus.ACTIVE);
         announcementRepository.save(ad);
-        bookingRepository.delete(booking);
+        booking.setCancelledAt(Instant.now());
+        bookingRepository.save(booking);
+
+        boolean cancelledByBuyer = booking.getBuyerId().equals(userId);
+        userRepository.findById(booking.getBuyerId()).map(User::getEmail).ifPresent(buyerEmail ->
+            emailService.sendBookingCancelled(buyerEmail, ad.getTitle(), cancelledByBuyer)
+        );
+
         log.info("Booking cancelled for adId={} by userId={}. Ad moved back to ACTIVE.", adId, userId);
     }
 
@@ -128,7 +152,7 @@ public class BookingService {
         log.info("Scheduled job started: checking for expired bookings (older than 24h)");
         Instant timeLimit = Instant.now().minus(24, ChronoUnit.HOURS);
 
-        List<Booking> expiredBookings = bookingRepository.findAllByCreatedAtBefore(timeLimit);
+        List<Booking> expiredBookings = bookingRepository.findAllByCreatedAtBeforeAndCancelledAtIsNullAndConfirmedAtIsNull(timeLimit);
         log.debug("Found {} expired bookings to process", expiredBookings.size());
 
         for (Booking booking : expiredBookings) {
@@ -138,7 +162,8 @@ public class BookingService {
                     ad.setStatus(AdStatus.ACTIVE);
                     announcementRepository.save(ad);
                 }
-                bookingRepository.delete(booking);
+                booking.setCancelledAt(Instant.now());
+                bookingRepository.save(booking);
                 log.info("Auto-cancelled expired booking id={} for adId={}", booking.getId(), booking.getAnnouncementId());
             } catch (Exception e) {
                 log.error("Failed to auto-cancel booking id={}", booking.getId(), e);

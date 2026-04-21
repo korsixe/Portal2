@@ -12,6 +12,7 @@ import com.mipt.portal.enums.Role;
 import com.mipt.portal.exception.InsufficientCoinsException;
 import com.mipt.portal.repository.AdminActionAuditRepository;
 import com.mipt.portal.service.AdminService;
+import com.mipt.portal.service.EmailService;
 import com.mipt.portal.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,7 @@ public class AdminApiController {
     private final UserService userService;
     private final AdminService adminService;
     private final AdminActionAuditRepository adminActionAuditRepository;
+    private final EmailService emailService;
 
     @GetMapping("/dashboard")
     public AdminDashboardResponse dashboard() {
@@ -103,10 +105,22 @@ public class AdminApiController {
 
         if ("freeze".equals(type)) {
             success = adminService.freezeUser(adminId, request.getTargetUserId(), request.getReason(), duration).orElse(false);
+            if (success) {
+                userService.findUserById(request.getTargetUserId())
+                    .ifPresent(u -> emailService.sendSanctionApplied(u.getEmail(), "freeze", request.getReason(), duration));
+            }
         } else if ("ban".equals(type)) {
             success = adminService.banUser(adminId, request.getTargetUserId(), request.getReason(), duration).orElse(false);
+            if (success) {
+                userService.findUserById(request.getTargetUserId())
+                    .ifPresent(u -> emailService.sendSanctionApplied(u.getEmail(), "ban", request.getReason(), duration));
+            }
         } else if ("lift".equals(type)) {
             success = adminService.liftSanctions(adminId, request.getTargetUserId()).orElse(false);
+            if (success) {
+                userService.findUserById(request.getTargetUserId())
+                    .ifPresent(u -> emailService.sendSanctionLifted(u.getEmail()));
+            }
         }
 
         return new SimpleActionResponse(success, success ? "Sanction updated" : "Sanction update failed");

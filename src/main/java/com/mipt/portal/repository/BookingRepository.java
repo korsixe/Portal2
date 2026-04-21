@@ -10,10 +10,13 @@ import java.util.Optional;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    boolean existsByAnnouncementId(Long announcementId);
+    boolean existsByAnnouncementIdAndCancelledAtIsNullAndConfirmedAtIsNull(Long announcementId);
 
-    java.util.List<Booking> findAllByBuyerId(Long buyerId);
-    Optional<Booking> findByAnnouncementId(Long announcementId);
-    List<Booking> findAllByCreatedAtBefore(Instant timeLimit);
+    List<Booking> findAllByBuyerIdAndCancelledAtIsNullAndConfirmedAtIsNull(Long buyerId);
+    Optional<Booking> findByAnnouncementIdAndCancelledAtIsNullAndConfirmedAtIsNull(Long announcementId);
+    List<Booking> findAllByCreatedAtBeforeAndCancelledAtIsNullAndConfirmedAtIsNull(Instant timeLimit);
     void deleteByAnnouncementId(Long announcementId);
+
+    List<Booking> findByCancelledAtIsNotNullAndCancelNotificationSentAtIsNull();
+    List<Booking> findByConfirmedAtIsNotNullAndConfirmNotificationSentAtIsNull();
 }

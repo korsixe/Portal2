@@ -29,26 +29,28 @@ public class UserController {
   private final CustomUserDetailsService userDetailsService;
 
   @PostMapping("/register")
-  public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
+  public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
     log.info("Received registration request for email: {}", request.getEmail());
-    Address address = new Address(request.getAddress());
-    return userService.registerUser(
-            request.getEmail(),
-            request.getName(),
-            request.getPassword(),
-            request.getPasswordAgain(),
-            address,
-            request.getStudyProgram(),
-            request.getCourse()
-        )
-        .map(user -> {
-          log.info("Successfully registered user: {}", request.getEmail());
-          return ResponseEntity.status(HttpStatus.CREATED).body(user);
-        })
-        .orElseGet(() -> {
-          log.warn("Failed to register user: {}", request.getEmail());
-          return ResponseEntity.badRequest().build();
-        });
+    try {
+      Address address = new Address(request.getAddress());
+      return userService.registerUser(
+              request.getEmail(),
+              request.getName(),
+              request.getPassword(),
+              request.getPasswordAgain(),
+              address,
+              request.getStudyProgram(),
+              request.getCourse()
+          )
+          .map(user -> {
+            log.info("Successfully registered user: {}", request.getEmail());
+            return ResponseEntity.status(HttpStatus.CREATED).body((Object) user);
+          })
+          .orElseGet(() -> ResponseEntity.badRequest().body("Ошибка при регистрации."));
+    } catch (IllegalArgumentException e) {
+      log.warn("Registration failed for {}: {}", request.getEmail(), e.getMessage());
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
 
   @PostMapping("/login")

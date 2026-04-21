@@ -35,6 +35,7 @@ public class AnnouncementService {
     private final CategoryService categoryService;
     private final CommentService commentService;
     private final KafkaMessageService kafkaMessageService;
+    private final EmailService emailService;
 
     @Transactional
     public Announcement create(AnnouncementCreateDto dto) {
@@ -145,6 +146,15 @@ public class AnnouncementService {
             auditService.logAdminAction(moderatorId, null, AdminActionType.AD_STATUS_CHANGE, AuditTargetType.ANNOUNCEMENT, id,
                 "Статус " + previous + " -> " + newStatus + (reason != null ? (". Причина: " + reason) : ""));
             log.info("Status changed for Ad ID: {}. New status: {}", id, newStatus);
+            userRepository.findById(ad.getAuthorId()).map(User::getEmail).ifPresent(authorEmail -> {
+                if (newStatus == AdStatus.ACTIVE) {
+                    emailService.sendAdApproved(authorEmail, ad.getTitle());
+                } else if (newStatus == AdStatus.REJECTED) {
+                    emailService.sendAdRejected(authorEmail, ad.getTitle(), reason);
+                } else if (newStatus == AdStatus.DELETED) {
+                    emailService.sendAdDeleted(authorEmail, ad.getTitle(), reason);
+                }
+            });
             kafkaMessageService.sendAnnouncementEvent(
                 "announcement.status_changed",
                 String.valueOf(id),

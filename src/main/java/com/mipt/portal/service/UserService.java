@@ -28,6 +28,7 @@ public class UserService {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final UserValidator userValidator;
+  private final EmailService emailService;
   private final KafkaMessageService kafkaMessageService;
 
   @Transactional
@@ -36,28 +37,20 @@ public class UserService {
     log.info("Attempting to register user with email: {}", email);
     try {
       if (email == null || email.trim().isEmpty()) {
-        log.warn("Registration failed - email is empty");
-        return Optional.empty();
+        throw new IllegalArgumentException("Почта обязательна.");
       }
 
-      try {
-        userValidator.validateEmail(email);
-        userValidator.validateName(name);
-        userValidator.validatePassword(password);
-        userValidator.isPasswordStrong(password);
-      } catch (IllegalArgumentException e) {
-        log.warn("Validation failed: {}", e.getMessage());
-        return Optional.empty();
-      }
+      userValidator.validateEmail(email);
+      userValidator.validateName(name);
+      userValidator.validatePassword(password);
+      userValidator.isPasswordStrong(password);
 
       if (!password.equals(passwordAgain)) {
-        log.warn("Registration failed - passwords do not match");
-        return Optional.empty();
+        throw new IllegalArgumentException("Пароли не совпадают.");
       }
 
       if (userRepository.existsByEmail(email)) {
-        log.warn("Registration failed - email already exists: {}", email);
-        return Optional.empty();
+        throw new IllegalArgumentException("Пользователь с таким email уже зарегистрирован.");
       }
 
       User user = new User();
@@ -76,6 +69,7 @@ public class UserService {
       User savedUser = userRepository.save(user);
 
       log.info("User registered successfully with ID: {} and email: {}", savedUser.getId(), email);
+      emailService.sendWelcome(savedUser.getEmail(), savedUser.getName());
       kafkaMessageService.sendUserEvent(
           "user.registered",
           String.valueOf(savedUser.getId()),
@@ -83,9 +77,12 @@ public class UserService {
       );
       return Optional.of(savedUser);
 
+    } catch (IllegalArgumentException e) {
+      log.warn("Registration validation failed: {}", e.getMessage());
+      throw e;
     } catch (Exception e) {
       log.error("Error during user registration: {}", e.getMessage(), e);
-      return Optional.empty();
+      throw new IllegalArgumentException("Ошибка при регистрации. Попробуйте позже.");
     }
   }
 
