@@ -1,8 +1,8 @@
 # Portal — цифровая экосистема МФТИ
 
-Продолжение проекта реализуется здесь: https://github.com/korsixe/Portal2
-
 **Telegram-бот:** https://github.com/korsixe/Portal.Bot/
+
+**Фронтенд:** https://github.com/ArturOzolin/portal-frontend
 
 Portal — единая цифровая экосистема для решения ключевых бытовых проблем студентов МФТИ. Проект содержит один функциональный блок:
 
@@ -233,4 +233,4 @@ npm start
 
 ## Планы по развитию
 - бебебе
-https://github.com/ArturOzolin/portal-frontend - Фронт
+
