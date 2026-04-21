@@ -230,7 +230,7 @@ public class AnnouncementController {
 
     ad.setTitle(dto.getTitle());
     ad.setDescription(dto.getDescription());
-    ad.setCategory(Category.valueOf(dto.getCategory()));
+    ad.setCategory(Category.fromDisplayName(dto.getCategory()));
     ad.setSubcategory(dto.getSubcategory());
     ad.setLocation(dto.getLocation());
     ad.setCondition(Condition.valueOf(dto.getCondition()));
