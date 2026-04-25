@@ -50,14 +50,18 @@ public class SecurityConfig implements WebMvcConfigurer {
                 mvc.pattern("/users/login"),
                 mvc.pattern("/users/register"),
                 mvc.pattern("/custom-login"),
-                mvc.pattern("/api/**")
+                mvc.pattern("/api/**"),
+                mvc.pattern("/admin"),
+                mvc.pattern("/admin/**"),
+                mvc.pattern("/moderator"),
+                mvc.pattern("/moderator/**")
             ).permitAll()
-            .requestMatchers(mvc.pattern("/moderator/**")).hasAnyRole("MODERATOR", "ADMIN")
-            .requestMatchers(mvc.pattern("/admin/**")).hasRole("ADMIN")
             .requestMatchers(
                 mvc.pattern("/api/announcements/*/history"),
-                mvc.pattern("/api/announcements/*/approve")
+                mvc.pattern("/api/announcements/*/approve"),
+                mvc.pattern("/api/moderator/**")
             ).hasAnyRole("MODERATOR", "ADMIN")
+            .requestMatchers(mvc.pattern("/api/admin/**")).hasRole("ADMIN")
             .anyRequest().permitAll()
         )
         .formLogin(AbstractHttpConfigurer::disable)
