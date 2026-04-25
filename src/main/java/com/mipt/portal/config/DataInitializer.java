@@ -53,9 +53,9 @@ public class DataInitializer implements CommandLineRunner {
     private void ensureAdditionalRegularUsers() {
         List<RegularUserSeed> seeds = List.of(
             new RegularUserSeed("ivanov.aa@phystech.edu", "Алексей Иванов", "student1", "ФПМИ", 1, "Долгопрудный, ул. Первомайская, д. 18"),
-            new RegularUserSeed("petrova.mv@phystech.edu", "Мария Петрова", "student2", "ФРКТ", 2, "Москва, ул. Бауманская, д. 7"),
+            new RegularUserSeed("petrova.mv@phystech.edu", "Мария Петрова", "student2", "ФРКТ", 2, "Долгопрудный, ул. Бауманская, д. 7"),
             new RegularUserSeed("sidorov.dk@phystech.edu", "Даниил Сидоров", "student3", "ЛФИ", 3, "Долгопрудный, Лихачевский проспект, д. 64"),
-            new RegularUserSeed("smirnova.ea@phystech.edu", "Елена Смирнова", "student4", "ФЭФМ", 4, "Москва, Дмитровское шоссе, д. 107"),
+            new RegularUserSeed("smirnova.ea@phystech.edu", "Елена Смирнова", "student4", "ФЭФМ", 4, "Долгопрудный, Дмитровское шоссе, д. 107"),
             new RegularUserSeed("kozlov.np@phystech.edu", "Никита Козлов", "student5", "ВШПИ", 5, "Долгопрудный, ул. Спортивная, д. 9")
         );
 
@@ -70,17 +70,17 @@ public class DataInitializer implements CommandLineRunner {
             new TestAdSeed("Алексей Иванов", "ivanov.aa@phystech.edu", "Bluetooth-колонка Sony", "Портативная колонка с чистым звуком и хорошим аккумулятором.", Category.ELECTRONICS, "Аксессуары", Condition.USED, 3500, "Долгопрудный, ул. Первомайская, д. 18", "src/main/frontend/public/images/test_ads/bluetooth_speaker.jpeg", List.of("Sony", "Синий", "Пластик", "Б/у отличное")),
             new TestAdSeed("Алексей Иванов", "ivanov.aa@phystech.edu", "Ковер для гостиной", "Мягкий домашний ковер, чистый и без повреждений.", Category.HOME, "Текстиль", Condition.USED, 4200, "Долгопрудный, ул. Первомайская, д. 18", "src/main/frontend/public/images/test_ads/carpet.jpeg", List.of("Бежевый", "Шерсть", "Б/у хорошее", "Современный")),
 
-            new TestAdSeed("Мария Петрова", "petrova.mv@phystech.edu", "Компьютерная мышь Microsoft", "Удобная беспроводная мышь для учебы и работы.", Category.ELECTRONICS, "Компьютеры", Condition.USED, 1800, "Москва, ул. Бауманская, д. 7", "src/main/frontend/public/images/test_ads/computer_mouse.jpeg", List.of("Microsoft", "Серый", "Пластик", "Б/у отличное")),
-            new TestAdSeed("Мария Петрова", "petrova.mv@phystech.edu", "Белый комод для комнаты", "Вместительный комод в хорошем состоянии, отлично подойдет в спальню.", Category.HOME, "Мебель", Condition.USED, 7800, "Москва, ул. Бауманская, д. 7", "src/main/frontend/public/images/test_ads/dresser.jpeg", List.of("Белый", "Дерево", "Б/у хорошее", "Минимализм")),
-            new TestAdSeed("Мария Петрова", "petrova.mv@phystech.edu", "Проводные наушники Sony", "Легкие наушники для ежедневного использования, звучат чисто.", Category.ELECTRONICS, "Наушники", Condition.USED, 2300, "Москва, ул. Бауманская, д. 7", "src/main/frontend/public/images/test_ads/earphones.jpeg", List.of("Sony", "Черный", "Пластик", "Б/у хорошее")),
+            new TestAdSeed("Мария Петрова", "petrova.mv@phystech.edu", "Компьютерная мышь Microsoft", "Удобная беспроводная мышь для учебы и работы.", Category.ELECTRONICS, "Компьютеры", Condition.USED, 1800, "Долгопрудный, ул. Бауманская, д. 7", "src/main/frontend/public/images/test_ads/computer_mouse.jpeg", List.of("Microsoft", "Серый", "Пластик", "Б/у отличное")),
+            new TestAdSeed("Мария Петрова", "petrova.mv@phystech.edu", "Белый комод для комнаты", "Вместительный комод в хорошем состоянии, отлично подойдет в спальню.", Category.HOME, "Мебель", Condition.USED, 7800, "Долгопрудный, ул. Бауманская, д. 7", "src/main/frontend/public/images/test_ads/dresser.jpeg", List.of("Белый", "Дерево", "Б/у хорошее", "Минимализм")),
+            new TestAdSeed("Мария Петрова", "petrova.mv@phystech.edu", "Проводные наушники Sony", "Легкие наушники для ежедневного использования, звучат чисто.", Category.ELECTRONICS, "Наушники", Condition.USED, 2300, "Долгопрудный, ул. Бауманская, д. 7", "src/main/frontend/public/images/test_ads/earphones.jpeg", List.of("Sony", "Черный", "Пластик", "Б/у хорошее")),
 
             new TestAdSeed("Даниил Сидоров", "sidorov.dk@phystech.edu", "Футбольный мяч", "Практически новый мяч для игры на улице и в зале.", Category.SPORTS, "Игровые виды", Condition.NEW, 1600, "Долгопрудный, Лихачевский проспект, д. 64", "src/main/frontend/public/images/test_ads/football.jpeg", List.of("Белый", "Резина", "Новое", "Спортивный")),
             new TestAdSeed("Даниил Сидоров", "sidorov.dk@phystech.edu", "iPhone в хорошем состоянии", "Рабочий смартфон Apple, аккумулятор держит уверенно.", Category.ELECTRONICS, "Смартфоны", Condition.USED, 29900, "Долгопрудный, Лихачевский проспект, д. 64", "src/main/frontend/public/images/test_ads/iphone.jpg", List.of("Apple", "Черный", "Стекло", "Б/у отличное")),
             new TestAdSeed("Даниил Сидоров", "sidorov.dk@phystech.edu", "Клавиатура для ПК", "Полноразмерная клавиатура для компьютера, клавиши работают мягко.", Category.ELECTRONICS, "Компьютеры", Condition.USED, 2500, "Долгопрудный, Лихачевский проспект, д. 64", "src/main/frontend/public/images/test_ads/keyboard.jpeg", List.of("Microsoft", "Черный", "Пластик", "Б/у хорошее")),
 
-            new TestAdSeed("Елена Смирнова", "smirnova.ea@phystech.edu", "Настольная лампа Philips", "Яркая лампа для рабочего стола, отлично подходит для учебы.", Category.HOME, "Освещение", Condition.USED, 2100, "Москва, Дмитровское шоссе, д. 107", "src/main/frontend/public/images/test_ads/lamp.jpeg", List.of("Philips", "Белый", "Металл", "Б/у отличное")),
-            new TestAdSeed("Елена Смирнова", "smirnova.ea@phystech.edu", "Ноутбук Lenovo для учебы", "Ноутбук в рабочем состоянии, браузер и офис тянет без проблем.", Category.ELECTRONICS, "Ноутбуки", Condition.USED, 25500, "Москва, Дмитровское шоссе, д. 107", "src/main/frontend/public/images/test_ads/laptop.jpg", List.of("Lenovo", "Серый", "Металл", "Б/у хорошее")),
-            new TestAdSeed("Елена Смирнова", "smirnova.ea@phystech.edu", "Микроволновка LG", "Компактная микроволновая печь для общежития или съемной квартиры.", Category.HOME, "Бытовая техника", Condition.USED, 4900, "Москва, Дмитровское шоссе, д. 107", "src/main/frontend/public/images/test_ads/microwave.jpg", List.of("LG", "Белый", "Металл", "Б/у хорошее")),
+            new TestAdSeed("Елена Смирнова", "smirnova.ea@phystech.edu", "Настольная лампа Philips", "Яркая лампа для рабочего стола, отлично подходит для учебы.", Category.HOME, "Освещение", Condition.USED, 2100, "Долгопрудный, Дмитровское шоссе, д. 107", "src/main/frontend/public/images/test_ads/lamp.jpeg", List.of("Philips", "Белый", "Металл", "Б/у отличное")),
+            new TestAdSeed("Елена Смирнова", "smirnova.ea@phystech.edu", "Ноутбук Lenovo для учебы", "Ноутбук в рабочем состоянии, браузер и офис тянет без проблем.", Category.ELECTRONICS, "Ноутбуки", Condition.USED, 25500, "Долгопрудный, Дмитровское шоссе, д. 107", "src/main/frontend/public/images/test_ads/laptop.jpg", List.of("Lenovo", "Серый", "Металл", "Б/у хорошее")),
+            new TestAdSeed("Елена Смирнова", "smirnova.ea@phystech.edu", "Микроволновка LG", "Компактная микроволновая печь для общежития или съемной квартиры.", Category.HOME, "Бытовая техника", Condition.USED, 4900, "Долгопрудный, Дмитровское шоссе, д. 107", "src/main/frontend/public/images/test_ads/microwave.jpg", List.of("LG", "Белый", "Металл", "Б/у хорошее")),
 
             new TestAdSeed("Никита Козлов", "kozlov.np@phystech.edu", "Набор тарелок", "Керамические тарелки без сколов, использовались аккуратно.", Category.HOME, "Посуда", Condition.USED, 1700, "Долгопрудный, ул. Спортивная, д. 9", "src/main/frontend/public/images/test_ads/plate.jpg", List.of("Белый", "Керамика", "Б/у отличное", "Классический")),
             new TestAdSeed("Никита Козлов", "kozlov.np@phystech.edu", "Теплый свитер", "Шерстяной свитер на зиму, размер M, приятный к телу.", Category.CLOTHING, "Мужская одежда", Condition.USED, 2200, "Долгопрудный, ул. Спортивная, д. 9", "src/main/frontend/public/images/test_ads/sweater.jpeg", List.of("Серый", "Шерсть", "M", "Зима")),
@@ -306,7 +306,7 @@ public class DataInitializer implements CommandLineRunner {
 
         Address address = user.getAddress() != null ? user.getAddress() : new Address();
         if (address.getCity() == null || address.getCity().isBlank()) {
-            address.setCity("Москва");
+            address.setCity("Долгопрудный");
         }
         if (address.getStreet() == null || address.getStreet().isBlank()) {
             address.setStreet(role == Role.USER ? "ул. Студенческая" : "ул. Академическая");
