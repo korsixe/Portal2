@@ -1,5 +1,6 @@
 package com.mipt.portal.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mipt.portal.entity.Address;
 import com.mipt.portal.enums.Role;
 import java.time.Instant;
@@ -92,6 +93,7 @@ public class User {
   /**
    * Проверяет, является ли пользователь модератором
    */
+  @JsonProperty("moderator")
   public boolean isModerator() {
     return hasRole(Role.MODERATOR) || hasRole(Role.ADMIN);
   }
@@ -99,6 +101,7 @@ public class User {
   /**
    * Проверяет, является ли пользователь администратором
    */
+  @JsonProperty("admin")
   public boolean isAdmin() {
     return hasRole(Role.ADMIN);
   }

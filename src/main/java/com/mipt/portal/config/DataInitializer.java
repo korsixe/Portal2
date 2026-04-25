@@ -20,6 +20,7 @@ import com.mipt.portal.repository.AnnouncementRepository;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -36,13 +37,6 @@ public class DataInitializer implements CommandLineRunner {
     private final AnnouncementRepository announcementRepository;
     private final JdbcTemplate jdbcTemplate;
 
-  private static final String TEST_PHOTO_BASE64 =
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
-  private static final String TEST_PHOTO_BASE64_ALT_1 =
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAEAQH/cetH5QAAAABJRU5ErkJggg==";
-  private static final String TEST_PHOTO_BASE64_ALT_2 =
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/58BAgMDAwD0KQf7w2Y3WQAAAABJRU5ErkJggg==";
-
     @Override
     @Transactional
     public void run(String... args) throws IOException {
@@ -50,64 +44,54 @@ public class DataInitializer implements CommandLineRunner {
 
         User admin = createTestUser("admin.test@phystech.edu", "admin", Role.ADMIN);
         User moderator = createTestUser("moderator.test@phystech.edu", "moderator", Role.MODERATOR);
-        User user = createTestUser("user.test@phystech.edu", "user", Role.USER);
-
-        createSampleAnnouncements(admin, moderator, user);
-        ensureRegularUserHasApprovedAds(user);
-        ensureSeededAnnouncementsHavePhotos();
+        createTestUser("user.test@phystech.edu", "user", Role.USER);
+        ensureAdditionalRegularUsers();
+        removeLegacyPixelSeedAnnouncements();
+        ensureAdditionalRegularUserAnnouncements();
     }
 
-    private void ensureRegularUserHasApprovedAds(User regularUser) {
-        if (regularUser == null || regularUser.getId() == null) {
-            return;
+    private void ensureAdditionalRegularUsers() {
+        List<RegularUserSeed> seeds = List.of(
+            new RegularUserSeed("ivanov.aa@phystech.edu", "Алексей Иванов", "student1", "ФПМИ", 1, "Долгопрудный, ул. Первомайская, д. 18"),
+            new RegularUserSeed("petrova.mv@phystech.edu", "Мария Петрова", "student2", "ФРКТ", 2, "Долгопрудный, ул. Бауманская, д. 7"),
+            new RegularUserSeed("sidorov.dk@phystech.edu", "Даниил Сидоров", "student3", "ЛФИ", 3, "Долгопрудный, Лихачевский проспект, д. 64"),
+            new RegularUserSeed("smirnova.ea@phystech.edu", "Елена Смирнова", "student4", "ФЭФМ", 4, "Долгопрудный, Дмитровское шоссе, д. 107"),
+            new RegularUserSeed("kozlov.np@phystech.edu", "Никита Козлов", "student5", "ВШПИ", 5, "Долгопрудный, ул. Спортивная, д. 9")
+        );
+
+        for (RegularUserSeed seed : seeds) {
+            createRegularUser(seed);
         }
+    }
 
-        List<Announcement> existingUserAds = announcementRepository.findAllByAuthorId(regularUser.getId());
+    private void ensureAdditionalRegularUserAnnouncements() throws IOException {
+        List<TestAdSeed> seeds = List.of(
+            new TestAdSeed("Алексей Иванов", "ivanov.aa@phystech.edu", "Электронный будильник Philips", "Компактный будильник с ярким дисплеем, работает без сбоев.", Category.HOME, "Освещение", Condition.USED, 1200, "Долгопрудный, ул. Первомайская, д. 18", "src/main/frontend/public/images/test_ads/alarm_clock.jpeg", List.of("Philips", "Черный", "Пластик", "Б/у хорошее")),
+            new TestAdSeed("Алексей Иванов", "ivanov.aa@phystech.edu", "Bluetooth-колонка Sony", "Портативная колонка с чистым звуком и хорошим аккумулятором.", Category.ELECTRONICS, "Аксессуары", Condition.USED, 3500, "Долгопрудный, ул. Первомайская, д. 18", "src/main/frontend/public/images/test_ads/bluetooth_speaker.jpeg", List.of("Sony", "Синий", "Пластик", "Б/у отличное")),
+            new TestAdSeed("Алексей Иванов", "ivanov.aa@phystech.edu", "Ковер для гостиной", "Мягкий домашний ковер, чистый и без повреждений.", Category.HOME, "Текстиль", Condition.USED, 4200, "Долгопрудный, ул. Первомайская, д. 18", "src/main/frontend/public/images/test_ads/carpet.jpeg", List.of("Бежевый", "Шерсть", "Б/у хорошее", "Современный")),
 
-        String[] titles = {
-            "iPhone 12 128GB, аккумулятор 89%",
-            "Наушники Sony WH-1000XM4, полный комплект"
-        };
-        String[] descriptions = {
-            "Отличное состояние, всегда в чехле. Есть чек и коробка.",
-            "Шумоподавление работает отлично, без дефектов, продаю из-за апгрейда."
-        };
-        String[] subcategories = {"Смартфоны", "Наушники"};
-        int[] prices = {36500, 14900};
-        byte[][] photos = {
-            decodeBase64Photo(TEST_PHOTO_BASE64_ALT_1),
-            decodeBase64Photo(TEST_PHOTO_BASE64_ALT_2)
-        };
+            new TestAdSeed("Мария Петрова", "petrova.mv@phystech.edu", "Компьютерная мышь Microsoft", "Удобная беспроводная мышь для учебы и работы.", Category.ELECTRONICS, "Компьютеры", Condition.USED, 1800, "Долгопрудный, ул. Бауманская, д. 7", "src/main/frontend/public/images/test_ads/computer_mouse.jpeg", List.of("Microsoft", "Серый", "Пластик", "Б/у отличное")),
+            new TestAdSeed("Мария Петрова", "petrova.mv@phystech.edu", "Белый комод для комнаты", "Вместительный комод в хорошем состоянии, отлично подойдет в спальню.", Category.HOME, "Мебель", Condition.USED, 7800, "Долгопрудный, ул. Бауманская, д. 7", "src/main/frontend/public/images/test_ads/dresser.jpeg", List.of("Белый", "Дерево", "Б/у хорошее", "Минимализм")),
+            new TestAdSeed("Мария Петрова", "petrova.mv@phystech.edu", "Проводные наушники Sony", "Легкие наушники для ежедневного использования, звучат чисто.", Category.ELECTRONICS, "Наушники", Condition.USED, 2300, "Долгопрудный, ул. Бауманская, д. 7", "src/main/frontend/public/images/test_ads/earphones.jpeg", List.of("Sony", "Черный", "Пластик", "Б/у хорошее")),
 
-        int toCreate = 2;
-        for (int i = 0; i < toCreate; i++) {
-            final String desiredTitle = titles[i];
-            boolean alreadyExists = existingUserAds.stream()
-                .anyMatch(ad -> desiredTitle.equals(ad.getTitle()));
-            if (alreadyExists) {
-                continue;
-            }
+            new TestAdSeed("Даниил Сидоров", "sidorov.dk@phystech.edu", "Футбольный мяч", "Практически новый мяч для игры на улице и в зале.", Category.SPORTS, "Игровые виды", Condition.NEW, 1600, "Долгопрудный, Лихачевский проспект, д. 64", "src/main/frontend/public/images/test_ads/football.jpeg", List.of("Белый", "Резина", "Новое", "Спортивный")),
+            new TestAdSeed("Даниил Сидоров", "sidorov.dk@phystech.edu", "iPhone в хорошем состоянии", "Рабочий смартфон Apple, аккумулятор держит уверенно.", Category.ELECTRONICS, "Смартфоны", Condition.USED, 29900, "Долгопрудный, Лихачевский проспект, д. 64", "src/main/frontend/public/images/test_ads/iphone.jpg", List.of("Apple", "Черный", "Стекло", "Б/у отличное")),
+            new TestAdSeed("Даниил Сидоров", "sidorov.dk@phystech.edu", "Клавиатура для ПК", "Полноразмерная клавиатура для компьютера, клавиши работают мягко.", Category.ELECTRONICS, "Компьютеры", Condition.USED, 2500, "Долгопрудный, Лихачевский проспект, д. 64", "src/main/frontend/public/images/test_ads/keyboard.jpeg", List.of("Microsoft", "Черный", "Пластик", "Б/у хорошее")),
 
-            Announcement ad = new Announcement();
-            ad.setTitle(desiredTitle);
-            ad.setDescription(descriptions[i]);
-            ad.setCategory(Category.ELECTRONICS);
-            ad.setSubcategory(subcategories[i]);
-            ad.setCondition(Condition.USED);
-            ad.setPrice(prices[i]);
-            ad.setLocation(i == 0 ? "Москва, Бауманская" : "Долгопрудный, МФТИ");
-            ad.setAuthorId(regularUser.getId());
-            ad.setStatus(AdStatus.ACTIVE);
-            List<String> tags = i == 0
-                ? List.of("apple", "iphone", "б/у")
-                : List.of("sony", "headphones", "noise-canceling");
-            ad.setTags(tags);
-            ad.setTagsCount(tags.size());
-            ad.setPhoto(photos[i]);
-            announcementRepository.save(ad);
+            new TestAdSeed("Елена Смирнова", "smirnova.ea@phystech.edu", "Настольная лампа Philips", "Яркая лампа для рабочего стола, отлично подходит для учебы.", Category.HOME, "Освещение", Condition.USED, 2100, "Долгопрудный, Дмитровское шоссе, д. 107", "src/main/frontend/public/images/test_ads/lamp.jpeg", List.of("Philips", "Белый", "Металл", "Б/у отличное")),
+            new TestAdSeed("Елена Смирнова", "smirnova.ea@phystech.edu", "Ноутбук Lenovo для учебы", "Ноутбук в рабочем состоянии, браузер и офис тянет без проблем.", Category.ELECTRONICS, "Ноутбуки", Condition.USED, 25500, "Долгопрудный, Дмитровское шоссе, д. 107", "src/main/frontend/public/images/test_ads/laptop.jpg", List.of("Lenovo", "Серый", "Металл", "Б/у хорошее")),
+            new TestAdSeed("Елена Смирнова", "smirnova.ea@phystech.edu", "Микроволновка LG", "Компактная микроволновая печь для общежития или съемной квартиры.", Category.HOME, "Бытовая техника", Condition.USED, 4900, "Долгопрудный, Дмитровское шоссе, д. 107", "src/main/frontend/public/images/test_ads/microwave.jpg", List.of("LG", "Белый", "Металл", "Б/у хорошее")),
+
+            new TestAdSeed("Никита Козлов", "kozlov.np@phystech.edu", "Набор тарелок", "Керамические тарелки без сколов, использовались аккуратно.", Category.HOME, "Посуда", Condition.USED, 1700, "Долгопрудный, ул. Спортивная, д. 9", "src/main/frontend/public/images/test_ads/plate.jpg", List.of("Белый", "Керамика", "Б/у отличное", "Классический")),
+            new TestAdSeed("Никита Козлов", "kozlov.np@phystech.edu", "Теплый свитер", "Шерстяной свитер на зиму, размер M, приятный к телу.", Category.CLOTHING, "Мужская одежда", Condition.USED, 2200, "Долгопрудный, ул. Спортивная, д. 9", "src/main/frontend/public/images/test_ads/sweater.jpeg", List.of("Серый", "Шерсть", "M", "Зима")),
+            new TestAdSeed("Никита Козлов", "kozlov.np@phystech.edu", "Электрический чайник Bosch", "Быстро кипятит воду, корпус без трещин и запаха.", Category.HOME, "Бытовая техника", Condition.USED, 2600, "Долгопрудный, ул. Спортивная, д. 9", "src/main/frontend/public/images/test_ads/teapot.jpg", List.of("Bosch", "Серебристый", "Металл", "Б/у хорошее"))
+        );
+
+        ensureTagValuesForSeeds(seeds);
+
+        for (TestAdSeed seed : seeds) {
+            createOrUpdateSeedAnnouncement(seed);
         }
-
-        log.info("Для пользователя {} создано {} одобренных объявлений", regularUser.getEmail(), toCreate);
     }
 
     private void initializeCategoriesAndTags() {
@@ -157,6 +141,155 @@ public class DataInitializer implements CommandLineRunner {
         return userRepository.save(user);
     }
 
+    private User createRegularUser(RegularUserSeed seed) {
+        User user = userRepository.findByEmail(seed.email()).orElseGet(User::new);
+
+        user.setEmail(seed.email());
+        String salt = UUID.randomUUID().toString().substring(0, 10);
+        user.setSalt(salt);
+        user.setHashPassword(passwordEncoder.encode(seed.password() + salt));
+        user.setName(seed.name());
+        user.setStudyProgram(seed.studyProgram());
+        user.setCourse(seed.course());
+
+        if (user.getAdList() == null) {
+            user.setAdList(new ArrayList<>());
+        }
+
+        if (user.getRoles() == null) {
+            user.setRoles(new java.util.HashSet<>());
+        }
+        user.getRoles().clear();
+        user.addRole(Role.USER);
+
+        Address address = user.getAddress() != null ? user.getAddress() : new Address();
+        address.setFullAddress(seed.fullAddress());
+        fillAddressParts(address, seed.fullAddress());
+        user.setAddress(address);
+
+        if (user.getRating() <= 0) {
+            user.setRating(3.0);
+        }
+        if (user.getCoins() < 0) {
+            user.setCoins(0);
+        }
+
+        log.info("Ensured regular test user {}", seed.email());
+        return userRepository.save(user);
+    }
+
+    private void ensureTagValuesForSeeds(List<TestAdSeed> seeds) {
+        for (TestAdSeed seed : seeds) {
+            for (String tagValue : seed.tags()) {
+                ensureTagValueExists(resolveTagName(tagValue), tagValue);
+            }
+        }
+    }
+
+    private void ensureTagValueExists(String tagName, String value) {
+        Integer count = jdbcTemplate.queryForObject(
+            """
+            SELECT COUNT(*)
+            FROM tag_values tv
+            JOIN tags t ON t.id = tv.tag_id
+            WHERE t.name = ? AND tv.value = ?
+            """,
+            Integer.class,
+            tagName,
+            value
+        );
+
+        if (count != null && count > 0) {
+            return;
+        }
+
+        Long tagId = jdbcTemplate.queryForObject("SELECT id FROM tags WHERE name = ?", Long.class, tagName);
+        jdbcTemplate.update("INSERT INTO tag_values (tag_id, value) VALUES (?, ?)", tagId, value);
+        log.info("Добавлено значение тега '{}' -> '{}'", tagName, value);
+    }
+
+    private String resolveTagName(String value) {
+        if (List.of("Apple", "Samsung", "Xiaomi", "Sony", "LG", "Nike", "Adidas", "Zara", "H&M", "Bosch", "Philips", "Canon", "Nikon", "Lenovo", "HP", "Dell", "Asus", "Microsoft", "Intel", "AMD").contains(value)) {
+            return "Бренд";
+        }
+        if (List.of("Черный", "Белый", "Серый", "Красный", "Синий", "Зеленый", "Желтый", "Оранжевый", "Фиолетовый", "Розовый", "Коричневый", "Бежевый", "Голубой", "Серебристый", "Золотой", "Хаки", "Бордовый", "Бирюзовый", "Сиреневый", "Мятный").contains(value)) {
+            return "Цвет";
+        }
+        if (List.of("Пластик", "Металл", "Стекло", "Дерево", "Керамика", "Хлопок", "Шерсть", "Лен", "Шелк", "Кожа", "Замша", "Джинса", "Флис", "Нейлон", "Полиэстер", "Резина", "Бумага", "Картон", "Акрил", "Велюр").contains(value)) {
+            return "Материал";
+        }
+        if (List.of("Новое", "Б/у отличное", "Б/у хорошее", "Б/у удовлетворительное", "Требует ремонта", "На запчасти", "Как новое", "Следы использования").contains(value)) {
+            return "Состояние";
+        }
+        if (List.of("XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL").contains(value)) {
+            return "Размер";
+        }
+        if (List.of("Весна", "Лето", "Осень", "Зима", "Демисезон", "Круглогодичный", "Всесезонный", "Пляжный").contains(value)) {
+            return "Сезон";
+        }
+        if (List.of("Классический", "Современный", "Минимализм", "Хай-тек", "Винтаж", "Ретро", "Лофт", "Спортивный", "Деловой", "Повседневный").contains(value)) {
+            return "Стиль";
+        }
+        throw new IllegalArgumentException("Неизвестное значение тега: " + value);
+    }
+
+    private void createOrUpdateSeedAnnouncement(TestAdSeed seed) throws IOException {
+        User author = userRepository.findByEmail(seed.authorEmail()).orElse(null);
+        if (author == null) {
+            log.warn("Не найден автор {} для объявления '{}'", seed.authorEmail(), seed.title());
+            return;
+        }
+
+        Announcement announcement = announcementRepository.findAll().stream()
+            .filter(existing -> seed.title().equals(existing.getTitle()) && author.getId().equals(existing.getAuthorId()))
+            .findFirst()
+            .orElseGet(Announcement::new);
+
+        announcement.setTitle(seed.title());
+        announcement.setDescription(seed.description());
+        announcement.setCategory(seed.category());
+        announcement.setSubcategory(seed.subcategory());
+        announcement.setCondition(seed.condition());
+        announcement.setPrice(seed.price());
+        announcement.setLocation(seed.location());
+        announcement.setAuthorId(author.getId());
+        announcement.setStatus(AdStatus.ACTIVE);
+        announcement.setTags(seed.tags());
+        announcement.setTagsCount(seed.tags().size());
+        announcement.setPhoto(fileToBytes(seed.imagePath()));
+        if (announcement.getCreatedAt() == null) {
+            announcement.setCreatedAt(Instant.now());
+        }
+        announcement.setUpdatedAt(Instant.now());
+
+        announcementRepository.save(announcement);
+        log.info("Ensured seeded ad '{}' for {}", seed.title(), seed.authorEmail());
+    }
+
+    private void fillAddressParts(Address address, String fullAddress) {
+        if (fullAddress == null || fullAddress.isBlank()) {
+            return;
+        }
+
+        String[] parts = Arrays.stream(fullAddress.split(","))
+            .map(String::trim)
+            .filter(part -> !part.isBlank())
+            .toArray(String[]::new);
+
+        if (parts.length > 0) {
+            address.setCity(parts[0]);
+        }
+        if (parts.length > 1) {
+            address.setStreet(parts[1].replaceFirst("^ул\\.\\s*", ""));
+        }
+        if (parts.length > 2) {
+            address.setHouseNumber(parts[2].replaceFirst("^д\\.\\s*", ""));
+        }
+        if (parts.length > 3) {
+            address.setBuilding(parts[3]);
+        }
+    }
+
     private void applyTestUserProfile(User user, Role role) {
         user.setName("Test " + role.name());
         user.addRole(role);
@@ -173,7 +306,7 @@ public class DataInitializer implements CommandLineRunner {
 
         Address address = user.getAddress() != null ? user.getAddress() : new Address();
         if (address.getCity() == null || address.getCity().isBlank()) {
-            address.setCity("Москва");
+            address.setCity("Долгопрудный");
         }
         if (address.getStreet() == null || address.getStreet().isBlank()) {
             address.setStreet(role == Role.USER ? "ул. Студенческая" : "ул. Академическая");
@@ -191,98 +324,25 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    private void createSampleAnnouncements(User admin, User moderator, User regularUser) throws IOException {
-        if (announcementRepository.count() > 0) {
-            return;
-        }
+  private void removeLegacyPixelSeedAnnouncements() {
+    List<String> legacyTitles = List.of(
+        "MacBook Pro 14\" 2023",
+        "Смартфон Pixel 7a",
+        "Продам учебники",
+        "iPhone 12 128GB, аккумулятор 89%",
+        "Наушники Sony WH-1000XM4, полный комплект"
+    );
 
-        Long adminId = admin != null ? admin.getId() : null;
-        Long moderatorId = moderator != null ? moderator.getId() : null;
-        Long userId = regularUser != null ? regularUser.getId() : null;
+    List<Announcement> legacyAds = announcementRepository.findAll().stream()
+        .filter(ad -> legacyTitles.contains(ad.getTitle()))
+        .toList();
 
-        Announcement pending = new Announcement();
-        pending.setTitle("MacBook Pro 14\" 2023");
-        pending.setDescription("Состояние отличное, есть чек. Жду проверки модерации.");
-        pending.setCategory(Category.ELECTRONICS);
-        pending.setSubcategory("Ноутбуки");
-        pending.setCondition(Condition.USED);
-        pending.setPrice(145000);
-        pending.setLocation("Москва, МФТИ");
-        pending.setAuthorId(userId);
-        pending.setStatus(AdStatus.UNDER_MODERATION);
-        pending.setTags(List.of("macbook", "apple", "m1"));
-        pending.setTagsCount(3);
-        pending.setPhoto(null);
-
-      Announcement active = new Announcement();
-      active.setTitle("Смартфон Pixel 7a");
-      active.setDescription("Официальная версия, полный комплект. Уже одобрено.");
-      active.setCategory(Category.ELECTRONICS);
-      active.setSubcategory("Смартфоны");
-      active.setCondition(Condition.USED);
-      active.setPrice(32000);
-      active.setLocation("Долгопрудный");
-      active.setAuthorId(moderatorId);
-      active.setStatus(AdStatus.ACTIVE);
-      active.setTags(List.of("google", "pixel"));
-      active.setTagsCount(2);
-
-      byte[] testPhoto = getTestPhotoBytes();
-      pending.setPhoto(testPhoto);
-      active.setPhoto(testPhoto);
-
-        Announcement rejected = new Announcement();
-        rejected.setTitle("Продам учебники");
-        rejected.setDescription("Сборник задач по матанализу. Предыдущее объявление отклонено.");
-        rejected.setCategory(Category.BOOKS);
-        rejected.setSubcategory("Учебники");
-        rejected.setCondition(Condition.USED);
-        rejected.setPrice(1500);
-        rejected.setLocation("Москва, ВДНХ");
-        rejected.setAuthorId(adminId);
-        rejected.setStatus(AdStatus.REJECTED);
-        rejected.setTags(List.of("книги", "матан"));
-        rejected.setTagsCount(2);
-        rejected.setPhoto(testPhoto);
-
-        announcementRepository.saveAll(List.of(pending, active, rejected));
-    }
-
-  private byte[] getTestPhotoBytes() {
-    return decodeBase64Photo(TEST_PHOTO_BASE64);
-  }
-
-  private byte[] decodeBase64Photo(String value) {
-    try {
-      byte[] photoBytes = Base64.getDecoder().decode(value);
-      log.info("✅ Test photo prepared, size: {} bytes", photoBytes.length);
-      return photoBytes;
-    } catch (Exception e) {
-      log.error("Failed to decode test photo: {}", e.getMessage());
-      return null;
-    }
-  }
-
-  private void ensureSeededAnnouncementsHavePhotos() {
-    byte[] testPhoto = getTestPhotoBytes();
-    if (testPhoto == null || testPhoto.length == 0) {
+    if (legacyAds.isEmpty()) {
       return;
     }
 
-    List<String> seededTitles = List.of(
-      "MacBook Pro 14\" 2023",
-      "Смартфон Pixel 7a",
-      "Продам учебники"
-    );
-
-    List<Announcement> allAds = announcementRepository.findAll();
-    for (Announcement ad : allAds) {
-      if (seededTitles.contains(ad.getTitle()) && (ad.getPhoto() == null || ad.getPhoto().length == 0)) {
-        ad.setPhoto(testPhoto);
-        announcementRepository.save(ad);
-        log.info("Добавлено тестовое фото для объявления ID={} title='{}'", ad.getId(), ad.getTitle());
-      }
-    }
+    announcementRepository.deleteAll(legacyAds);
+    log.info("Удалено {} старых сидовых объявлений с пиксельными фото", legacyAds.size());
   }
 
   private void initializeCategories() {
@@ -676,4 +736,27 @@ public class DataInitializer implements CommandLineRunner {
     log.error("❌ No photo file found in any of the checked paths");
     return null;
   }
+
+  private record RegularUserSeed(
+      String email,
+      String name,
+      String password,
+      String studyProgram,
+      int course,
+      String fullAddress
+  ) {}
+
+  private record TestAdSeed(
+      String ownerName,
+      String authorEmail,
+      String title,
+      String description,
+      Category category,
+      String subcategory,
+      Condition condition,
+      int price,
+      String location,
+      String imagePath,
+      List<String> tags
+  ) {}
 }
