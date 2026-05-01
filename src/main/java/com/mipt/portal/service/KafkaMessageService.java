@@ -6,7 +6,6 @@ import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +49,7 @@ public class KafkaMessageService {
   }
 
   public void sendAuditEvent(String key, String payload) {
-    kafkaTemplate.send(auditTopic, key, payload);
+    sendEvent(auditTopic, "audit.event", key, payload);
   }
 
   public void sendUserEvent(String eventType, String key, Object payload) {
@@ -83,20 +82,18 @@ public class KafkaMessageService {
 
   private void sendEvent(String topic, String eventType, String key, Object payload) {
     EventEnvelope envelope = new EventEnvelope(eventType, Instant.now().toString(), payload);
-
     try {
       String json = objectMapper.writeValueAsString(envelope);
-      kafkaTemplate.send(topic, key, json);
+      kafkaTemplate.send(topic, key, json).whenComplete((result, ex) -> {
+        if (ex != null) {
+          logger.warn("Failed to deliver Kafka event {} to topic {}", eventType, topic, ex);
+        }
+      });
     } catch (JsonProcessingException ex) {
       logger.warn("Failed to serialize Kafka event {}", eventType, ex);
     }
   }
 
   private record EventEnvelope(String type, String timestamp, Object payload) {
-  }
-
-  @KafkaListener(topics = "${app.kafka.topic.audit:portal.audit.events}")
-  public void onAuditEvent(String payload) {
-    logger.info("Kafka audit event received: {}", payload);
   }
 }

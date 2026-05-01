@@ -22,6 +22,12 @@ public final class KafkaEventPayloads {
   public record BookingCreated(Long bookingId, Long adId, Long buyerId, String status) {
   }
 
+  public record BookingConfirmed(Long bookingId, Long adId, Long buyerId, Long sellerId) {
+  }
+
+  public record BookingCancelled(Long bookingId, Long adId, Long buyerId, boolean cancelledByBuyer) {
+  }
+
   public record CommentCreated(Long commentId, Long adId, Long userId, String userName) {
   }
 

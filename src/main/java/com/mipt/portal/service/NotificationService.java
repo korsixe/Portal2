@@ -2,7 +2,6 @@ package com.mipt.portal.service;
 
 import com.mipt.portal.dto.kafka.KafkaEventPayloads;
 import com.mipt.portal.entity.ModerationMessage;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -110,7 +109,7 @@ public class NotificationService {
       kafkaMessageService.sendNotificationEvent(
           "notification.all_deleted",
           "bulk",
-          Map.of("adIds", adIds)
+          new KafkaEventPayloads.NotificationAllDeleted(adIds)
       );
       return true;
     } catch (Exception e) {
@@ -135,7 +134,7 @@ public class NotificationService {
     kafkaMessageService.sendNotificationEvent(
         "notification.all_read",
         "bulk",
-        Map.of("adIds", adIds)
+        new KafkaEventPayloads.NotificationAllRead(adIds)
     );
     return true;
   }

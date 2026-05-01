@@ -1,5 +1,6 @@
 package com.mipt.portal.service;
 
+import com.mipt.portal.dto.kafka.KafkaEventPayloads;
 import com.mipt.portal.entity.ModerationMessage;
 import com.mipt.portal.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -8,8 +9,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Сервис для работы с сообщениями модерации
@@ -57,13 +58,13 @@ public class ModerationMessageService {
 
             kafkaMessageService.sendModerationEvent(
                 "moderation.action.logged",
-                String.valueOf(messageId),
-                Map.of(
-                    "messageId", messageId,
-                    "adId", adId,
-                    "action", action,
-                    "moderatorId", moderatorUserId,
-                    "reason", (reason != null && !reason.trim().isEmpty()) ? reason : null
+                UUID.randomUUID().toString(),
+                new KafkaEventPayloads.ModerationActionLogged(
+                    messageId,
+                    adId,
+                    action,
+                    moderatorUserId,
+                    (reason != null && !reason.trim().isEmpty()) ? reason : null
                 )
             );
             return Optional.of(messageId);
@@ -111,13 +112,13 @@ public class ModerationMessageService {
             log.info("Moderation message created: {}", message);
             kafkaMessageService.sendModerationEvent(
                 "moderation.message.created",
-                String.valueOf(message.getId()),
-                Map.of(
-                    "messageId", message.getId(),
-                    "adId", adId,
-                    "action", action,
-                    "moderatorId", moderatorUserId,
-                    "reason", (reason != null && !reason.trim().isEmpty()) ? reason : null
+                UUID.randomUUID().toString(),
+                new KafkaEventPayloads.ModerationMessageCreated(
+                    message.getId(),
+                    adId,
+                    action,
+                    moderatorUserId,
+                    (reason != null && !reason.trim().isEmpty()) ? reason : null
                 )
             );
             return Optional.of(message);

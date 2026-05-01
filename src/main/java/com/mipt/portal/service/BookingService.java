@@ -114,6 +114,16 @@ public class BookingService {
             userRepository.findById(booking.getBuyerId()).map(User::getEmail).ifPresent(buyerEmail ->
                 emailService.sendBookingConfirmed(buyerEmail, ad.getTitle())
             );
+            kafkaMessageService.sendBookingEvent(
+                "booking.confirmed",
+                String.valueOf(booking.getId()),
+                new KafkaEventPayloads.BookingConfirmed(
+                    booking.getId(),
+                    adId,
+                    booking.getBuyerId(),
+                    sellerId
+                )
+            );
         });
         log.info("Sale successfully confirmed for adId={}. Ad moved to ARCHIVED.", adId);
     }
@@ -142,7 +152,16 @@ public class BookingService {
         userRepository.findById(booking.getBuyerId()).map(User::getEmail).ifPresent(buyerEmail ->
             emailService.sendBookingCancelled(buyerEmail, ad.getTitle(), cancelledByBuyer)
         );
-
+        kafkaMessageService.sendBookingEvent(
+            "booking.cancelled",
+            String.valueOf(booking.getId()),
+            new KafkaEventPayloads.BookingCancelled(
+                booking.getId(),
+                adId,
+                booking.getBuyerId(),
+                cancelledByBuyer
+            )
+        );
         log.info("Booking cancelled for adId={} by userId={}. Ad moved back to ACTIVE.", adId, userId);
     }
 
@@ -164,6 +183,16 @@ public class BookingService {
                 }
                 booking.setCancelledAt(Instant.now());
                 bookingRepository.save(booking);
+                kafkaMessageService.sendBookingEvent(
+                    "booking.cancelled",
+                    String.valueOf(booking.getId()),
+                    new KafkaEventPayloads.BookingCancelled(
+                        booking.getId(),
+                        booking.getAnnouncementId(),
+                        booking.getBuyerId(),
+                        false
+                    )
+                );
                 log.info("Auto-cancelled expired booking id={} for adId={}", booking.getId(), booking.getAnnouncementId());
             } catch (Exception e) {
                 log.error("Failed to auto-cancel booking id={}", booking.getId(), e);
