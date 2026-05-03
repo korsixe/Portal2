@@ -3,7 +3,6 @@ package com.mipt.portal.service;
 import com.mipt.portal.dto.kafka.KafkaEventPayloads;
 import com.mipt.portal.entity.Announcement;
 import com.mipt.portal.entity.Booking;
-import com.mipt.portal.entity.User;
 import com.mipt.portal.enums.AdStatus;
 import com.mipt.portal.repository.AnnouncementRepository;
 import com.mipt.portal.repository.BookingRepository;
@@ -27,7 +26,6 @@ public class BookingService {
     private final AnnouncementRepository announcementRepository;
     private final KafkaMessageService kafkaMessageService;
     private final UserRepository userRepository;
-    private final EmailService emailService;
 
     @Transactional(readOnly = true)
     public List<Announcement> getBookedAdsForBuyer(Long buyerId) {
@@ -69,12 +67,6 @@ public class BookingService {
 
         log.info("Successfully booked adId={} with bookingId={}", adId, savedBooking.getId());
 
-        userRepository.findById(buyerId).map(User::getEmail).ifPresent(buyerEmail ->
-            userRepository.findById(ad.getAuthorId()).map(User::getEmail).ifPresent(sellerEmail ->
-                emailService.sendBookingCreated(buyerEmail, sellerEmail, ad.getTitle(), adId)
-            )
-        );
-
         kafkaMessageService.sendBookingEvent(
                 "booking.created",
                 String.valueOf(savedBooking.getId()),
@@ -111,9 +103,6 @@ public class BookingService {
         bookingRepository.findByAnnouncementIdAndCancelledAtIsNullAndConfirmedAtIsNull(adId).ifPresent(booking -> {
             booking.setConfirmedAt(Instant.now());
             bookingRepository.save(booking);
-            userRepository.findById(booking.getBuyerId()).map(User::getEmail).ifPresent(buyerEmail ->
-                emailService.sendBookingConfirmed(buyerEmail, ad.getTitle())
-            );
             kafkaMessageService.sendBookingEvent(
                 "booking.confirmed",
                 String.valueOf(booking.getId()),
@@ -149,9 +138,6 @@ public class BookingService {
         bookingRepository.save(booking);
 
         boolean cancelledByBuyer = booking.getBuyerId().equals(userId);
-        userRepository.findById(booking.getBuyerId()).map(User::getEmail).ifPresent(buyerEmail ->
-            emailService.sendBookingCancelled(buyerEmail, ad.getTitle(), cancelledByBuyer)
-        );
         kafkaMessageService.sendBookingEvent(
             "booking.cancelled",
             String.valueOf(booking.getId()),

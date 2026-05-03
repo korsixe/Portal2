@@ -28,7 +28,6 @@ public class UserService {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final UserValidator userValidator;
-  private final EmailService emailService;
   private final KafkaMessageService kafkaMessageService;
 
   @Transactional
@@ -69,7 +68,6 @@ public class UserService {
       User savedUser = userRepository.save(user);
 
       log.info("User registered successfully with ID: {} and email: {}", savedUser.getId(), email);
-      emailService.sendWelcome(savedUser.getEmail(), savedUser.getName());
       kafkaMessageService.sendUserEvent(
           "user.registered",
           String.valueOf(savedUser.getId()),
@@ -720,13 +718,13 @@ public class UserService {
 
     User user = userOpt.get();
 
-    // Проверяем текущий пароль
-    if (!passwordEncoder.matches(currentPassword, user.getHashPassword())) {
+    if (!passwordEncoder.matches(currentPassword + user.getSalt(), user.getHashPassword())) {
       return false;
     }
 
-    // Устанавливаем новый пароль (захешированный)
-    user.setHashPassword(passwordEncoder.encode(newPassword));
+    String newSalt = UUID.randomUUID().toString().substring(0, 10);
+    user.setSalt(newSalt);
+    user.setHashPassword(passwordEncoder.encode(newPassword + newSalt));
     userRepository.save(user);
 
     return true;
@@ -743,8 +741,7 @@ public class UserService {
 
     User user = userOpt.get();
 
-    // Проверяем пароль
-    if (!passwordEncoder.matches(password, user.getHashPassword())) {
+    if (!passwordEncoder.matches(password + user.getSalt(), user.getHashPassword())) {
       return false;
     }
 

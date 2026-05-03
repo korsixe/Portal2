@@ -691,22 +691,62 @@ public class DataInitializer implements CommandLineRunner {
   }
 
   public static byte[] fileToBytes(String filePath) throws IOException {
-    File file = new File(filePath);
+    List<File> candidates = new ArrayList<>();
+    candidates.add(new File(filePath));
 
-    if (!file.exists()) {
-      throw new IOException("File not found: " + filePath);
+    String frontendDir = System.getenv("PORTAL_FRONTEND_DIR");
+    if (frontendDir != null && !frontendDir.isBlank()) {
+      String normalizedPath = filePath.replaceFirst("^src/main/frontend/", "");
+      candidates.add(new File(frontendDir, normalizedPath));
     }
 
-    byte[] bytes = new byte[(int) file.length()];
+    for (File candidate : candidates) {
+      if (candidate.exists() && candidate.length() > 0) {
+        return readFileBytes(candidate);
+      }
+    }
 
+    byte[] fallback = loadFallbackPhoto();
+    if (fallback != null) {
+      log.warn("Seed image '{}' not found; using fallback placeholder", filePath);
+      return fallback;
+    }
+
+    throw new IOException("File not found: " + filePath);
+  }
+
+  private static byte[] readFileBytes(File file) throws IOException {
+    byte[] bytes = new byte[(int) file.length()];
     try (FileInputStream fis = new FileInputStream(file)) {
       int bytesRead = fis.read(bytes);
       if (bytesRead != bytes.length) {
         throw new IOException("Failed to read complete file");
       }
     }
-
     return bytes;
+  }
+
+  private static byte[] loadFallbackPhoto() {
+    String[] paths = {
+      "src/main/resources/photo/кот.jpg",
+      "src/main/resources/photo/cat.jpg",
+      "src/main/resources/static/images/кот.jpg",
+      "photo/кот.jpg"
+    };
+
+    for (String path : paths) {
+      try {
+        File file = new File(path);
+        if (file.exists() && file.length() > 0) {
+          return readFileBytes(file);
+        }
+      } catch (IOException e) {
+        log.debug("Failed to load fallback photo from {}: {}", path, e.getMessage());
+      }
+    }
+
+    log.error("No fallback photo file found; seed images will be empty");
+    return null;
   }
 
   private byte[] loadPhoto() {
