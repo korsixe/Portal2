@@ -20,7 +20,14 @@ const AdDetails = () => {
   const [hasPhoto, setHasPhoto] = useState(false);
   const [liked, setLiked] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [currentUserRoles, setCurrentUserRoles] = useState([]);
   const [bookingStatus, setBookingStatus] = useState('idle'); // idle | loading | done | error
+
+  const hasModeratorAccess = (roles) =>
+    (roles || []).some((role) => {
+      const name = typeof role === 'string' ? role : (role?.name || role?.displayName || '');
+      return String(name).toUpperCase().includes('ADMIN') || String(name).toUpperCase().includes('MODERATOR');
+    });
 
   const formatPrice = (price) => {
     if (price === -1) return t('home.negotiable');
@@ -65,6 +72,7 @@ const AdDetails = () => {
       if (meResp.ok) {
         const meData = await meResp.json();
         setCurrentUserId(meData.id);
+        setCurrentUserRoles(meData.roles || []);
       }
 
       const favRes = await fetch(`${API_BASE}/api/favorites`, { credentials: 'include' });
@@ -152,6 +160,43 @@ const AdDetails = () => {
     }
   };
 
+  const deleteComment = async (commentId) => {
+    setCommentFeedback({ type: '', text: '' });
+    const response = await fetch(`${API_BASE}/api/moderator/comments/${commentId}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    if (response.status === 401 || response.status === 403) {
+      navigate('/login');
+      return;
+    }
+    if (!response.ok) {
+      setCommentFeedback({ type: 'error', text: t('adDetails.commentDeleteError', 'Failed to delete comment') });
+      return;
+    }
+    setCommentFeedback({ type: 'success', text: t('adDetails.commentDeleted', 'Comment deleted') });
+    setComments((prev) => prev.filter((comment) => comment.id !== commentId));
+  };
+
+  const archiveListing = async () => {
+    const reason = window.prompt(t('adDetails.archiveReasonPrompt', 'Reason for hiding (optional):')) || '';
+    const response = await fetch(`${API_BASE}/api/moderator/archive`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ adId: announcement.id, reason })
+    });
+    if (response.status === 401 || response.status === 403) {
+      navigate('/login');
+      return;
+    }
+    if (!response.ok) {
+      setError(t('adDetails.archiveError', 'Failed to hide listing'));
+      return;
+    }
+    await loadData();
+  };
+
   if (loading) {
     return <div className="adDetailsPage"><div className="adDetailsCard">{t('common.loading')}</div></div>;
   }
@@ -175,6 +220,11 @@ const AdDetails = () => {
                   title={bookingStatus === 'done' ? 'Забронировано' : 'Забронировать товар'}
                 >
                   {bookingStatus === 'done' ? 'Забронировано' : bookingStatus === 'loading' ? '...' : 'Забронировать'}
+                </button>
+              )}
+              {hasModeratorAccess(currentUserRoles) && announcement.status === 'ACTIVE' && (
+                <button className="adBookBtn" onClick={archiveListing}>
+                  {t('adDetails.hideListing', 'Скрыть объявление')}
                 </button>
               )}
               <button
@@ -255,6 +305,11 @@ const AdDetails = () => {
                     <span>{formatDate(comment.createdAt)}</span>
                   </div>
                   <p>{comment.content}</p>
+                  {hasModeratorAccess(currentUserRoles) && (
+                    <button className="commentDeleteBtn" type="button" onClick={() => deleteComment(comment.id)}>
+                      {t('adDetails.deleteComment', 'Удалить комментарий')}
+                    </button>
+                  )}
                 </div>
               ))
             )}

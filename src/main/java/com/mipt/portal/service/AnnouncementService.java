@@ -35,6 +35,7 @@ public class AnnouncementService {
     private final CategoryService categoryService;
     private final CommentService commentService;
     private final KafkaMessageService kafkaMessageService;
+    private final NotificationService notificationService;
 
     @Transactional
     public Announcement create(AnnouncementCreateDto dto) {
@@ -156,8 +157,34 @@ public class AnnouncementService {
                     (reason != null && !reason.isBlank()) ? reason : null
                 )
             );
+
+            String action = mapStatusToNotificationAction(newStatus);
+            if (action != null) {
+                String moderatorEmail = moderatorId != null
+                    ? userRepository.findById(moderatorId).map(User::getEmail).orElse(null)
+                    : null;
+                notificationService.createNotification(id, action, reason, moderatorEmail);
+            }
             return saved;
         });
+    }
+
+    private String mapStatusToNotificationAction(AdStatus status) {
+        if (status == null) {
+            return null;
+        }
+        switch (status) {
+            case ACTIVE:
+                return "approve";
+            case REJECTED:
+                return "reject";
+            case DELETED:
+                return "delete";
+            case ARCHIVED:
+                return "archive";
+            default:
+                return null;
+        }
     }
 
     @Transactional(readOnly = true)

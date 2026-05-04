@@ -10,11 +10,14 @@ import com.mipt.portal.entity.Announcement;
 import com.mipt.portal.entity.ModerationHistory;
 import com.mipt.portal.entity.User;
 import com.mipt.portal.enums.AdStatus;
+import com.mipt.portal.enums.AdminActionType;
+import com.mipt.portal.enums.AuditTargetType;
 import com.mipt.portal.repository.AdminActionAuditRepository;
 import com.mipt.portal.repository.ModerationHistoryRepository;
 import com.mipt.portal.service.AnnouncementService;
 import com.mipt.portal.service.CommentService;
 import com.mipt.portal.service.UserService;
+import com.mipt.portal.service.AuditService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -33,6 +36,7 @@ public class ModeratorApiController {
     private final CommentService commentService;
     private final ModerationHistoryRepository moderationHistoryRepository;
     private final AdminActionAuditRepository adminActionAuditRepository;
+    private final AuditService auditService;
 
     @GetMapping("/dashboard")
     public ModeratorDashboardResponse dashboard(Authentication authentication) {
@@ -63,11 +67,27 @@ public class ModeratorApiController {
         return new SimpleActionResponse(success, success ? "Deleted" : "Delete failed");
     }
 
+    @PostMapping("/archive")
+    public SimpleActionResponse archive(@RequestBody ModerationActionRequest request, Authentication authentication) {
+        Long moderatorId = resolveCurrentUserId(authentication);
+        boolean success = announcementService.changeStatus(request.getAdId(), AdStatus.ARCHIVED, moderatorId, request.getReason()).isPresent();
+        return new SimpleActionResponse(success, success ? "Archived" : "Archive failed");
+    }
+
     @DeleteMapping("/comments/{id}")
-    public SimpleActionResponse deleteComment(@PathVariable Long id) {
+    public SimpleActionResponse deleteComment(@PathVariable Long id, Authentication authentication) {
         boolean success;
+        Long moderatorId = resolveCurrentUserId(authentication);
         try {
-            commentService.deleteComment(id);
+            commentService.deleteComment(id, moderatorId);
+            auditService.logAdminAction(
+                moderatorId,
+                null,
+                AdminActionType.COMMENT_DELETE,
+                AuditTargetType.COMMENT,
+                id,
+                "Комментарий удален модератором"
+            );
             success = true;
         } catch (Exception e) {
             success = false;
