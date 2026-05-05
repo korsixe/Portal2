@@ -89,8 +89,8 @@ public class KafkaMessageService {
           logger.warn("Failed to deliver Kafka event {} to topic {}", eventType, topic, ex);
         }
       });
-    } catch (JsonProcessingException ex) {
-      logger.warn("Failed to serialize Kafka event {}", eventType, ex);
+    } catch (Exception ex) {
+      logger.warn("Failed to send Kafka event {} to topic {}", eventType, topic, ex);
     }
   }
 
