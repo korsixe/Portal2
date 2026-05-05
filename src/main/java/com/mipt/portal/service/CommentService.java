@@ -17,6 +17,7 @@ public class CommentService {
 
   private final CommentRepository commentRepository;
   private final KafkaMessageService kafkaMessageService;
+  private final NotificationService notificationService;
 
   @Transactional
   public Comment createComment(Long advertisementId, Long userId, String content) {
@@ -66,7 +67,12 @@ public class CommentService {
   }
 
   @Transactional
-  public void deleteComment(Long id) {
+  public void deleteComment(Long id, Long moderatorId) {
+    Comment comment = commentRepository.findById(id).orElse(null);
+    if (comment == null) {
+      log.warn("Комментарий {} не найден для удаления", id);
+      return;
+    }
     commentRepository.deleteById(id);
     log.info("Комментарий {} удален", id);
     kafkaMessageService.sendCommentEvent(
@@ -74,6 +80,9 @@ public class CommentService {
         String.valueOf(id),
         new KafkaEventPayloads.CommentDeleted(id)
     );
+
+    String reason = "Комментарий удален модератором";
+    notificationService.createNotification(comment.getAdvertisementId(), "comment_delete", reason, null);
   }
 
   @Transactional

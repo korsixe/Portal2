@@ -7,6 +7,7 @@ import com.mipt.portal.repository.ModerationHistoryRepository;
 import com.mipt.portal.service.AnnouncementService;
 import com.mipt.portal.service.CommentService;
 import com.mipt.portal.service.UserService;
+import com.mipt.portal.service.AuditService;
 import com.mipt.portal.support.AbstractWebMvcTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,7 @@ class ModeratorApiControllerTest {
   @MockBean private CommentService commentService;
   @MockBean private ModerationHistoryRepository moderationHistoryRepository;
   @MockBean private AdminActionAuditRepository adminActionAuditRepository;
+  @MockBean private AuditService auditService;
 
   private void asMod() {
     User u = new User();
@@ -126,7 +128,7 @@ class ModeratorApiControllerTest {
   @Test
   void deleteComment_failureCaught() throws Exception {
     asMod();
-    doThrow(new RuntimeException("db")).when(commentService).deleteComment(1L);
+    doThrow(new RuntimeException("db")).when(commentService).deleteComment(1L, 1L);
     mockMvc.perform(delete("/api/moderator/comments/1")
             .with(user("mod@phystech.edu").roles("MODERATOR")))
         .andExpect(jsonPath("$.success").value(false));
@@ -141,3 +143,4 @@ class ModeratorApiControllerTest {
         .andExpect(status().isOk());
   }
 }
+
