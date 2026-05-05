@@ -26,14 +26,18 @@ Portal — единая цифровая экосистема для решен�
 
 | Слой | Технологии |
 |---|---|
-| Backend | Java 21, Spring Boot 3, Spring Security, Spring Data JPA |
-| Frontend | React 18, React Router v6 |
+| Backend | Java 21, Spring Boot 3.1, Spring Security, Spring Data JPA, Spring Data Elasticsearch, Spring Kafka, Spring Boot Actuator |
+| Frontend | React 19, React Router v6 |
 | База данных | PostgreSQL 15 |
-| Очередь сообщений | Apache Kafka + Zookeeper |
-| Поиск | Elasticsearch 8 |
+| Очередь сообщений | Apache Kafka + Zookeeper (Confluent 7.5) |
+| Поиск | Elasticsearch 8.10 |
+| Мониторинг | Prometheus 2.51, Grafana 10.4, Micrometer |
+| API-документация | SpringDoc OpenAPI (Swagger UI) |
 | Email-уведомления | Gmail SMTP / Mailtrap |
+| Утилиты | Lombok |
 | Сборка | Maven |
 | Контейнеризация | Docker, Docker Compose |
+| Тестирование | JUnit 5, Testcontainers, Spring Security Test |
 | VCS | Git |
 
 ---
@@ -83,8 +87,31 @@ services:
       - "9200:9200"
     restart: always
 
+  prometheus:
+    image: prom/prometheus:v2.51.2
+    container_name: portal_prometheus
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    restart: always
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: portal_grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "3030:3000"
+    depends_on:
+      - prometheus
+    restart: always
+
 volumes:
   db_data:
+  prometheus_data:
+  grafana_data:
 ```
 
 ### Подключение к БД
@@ -155,11 +182,14 @@ npm start
 
 ## Доступ к приложению
 
-| Роль | URL |
+| Сервис | URL |
 |---|---|
 | Пользователь | http://localhost:3000 |
 | Администратор | http://localhost:3000/admin/dashboard |
 | Модератор | http://localhost:3000/moderator/dashboard |
+| Swagger UI | http://localhost:8080/swagger-ui/index.html |
+| Prometheus | http://localhost:9090 |
+| Grafana | http://localhost:3030 |
 
 ---
 
@@ -227,9 +257,13 @@ npm start
 **Разработчики:**
 - Шабунина Анастасия ([@korsixe](https://t.me/korsixe))
 - Орлова Елизавета ([@Liza30_06](https://t.me/Liza30_06))
+- Озолинь Артур ([@ArturOzolin](https://github.com/ArturOzolin))
+- Смолева Наталия
 
 ---
 
 ## Планы по развитию
-- бебебе
 
+- Встроенный чат между продавцом и покупателем
+- Развитие финансового модуля (коины, транзакции, история операций)
+- Аналитика цен: рекомендации по стоимости на основе истории продаж
