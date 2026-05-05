@@ -24,6 +24,7 @@ class CommentServiceTest {
 
   @Mock private CommentRepository commentRepository;
   @Mock private KafkaMessageService kafkaMessageService;
+  @Mock private NotificationService notificationService;
   @InjectMocks private CommentService service;
 
   @Test
@@ -75,9 +76,15 @@ class CommentServiceTest {
 
   @Test
   void deleteComment_callsRepoAndPublishes() {
-    service.deleteComment(5L);
+    Comment c = new Comment();
+    c.setId(5L);
+    c.setAdvertisementId(10L);
+    when(commentRepository.findById(5L)).thenReturn(Optional.of(c));
+
+    service.deleteComment(5L, 1L);
     verify(commentRepository).deleteById(5L);
     verify(kafkaMessageService).sendCommentEvent(eq("comment.deleted"), eq("5"), any());
+    verify(notificationService).createNotification(eq(10L), eq("comment_delete"), anyString(), any());
   }
 
   @Test
