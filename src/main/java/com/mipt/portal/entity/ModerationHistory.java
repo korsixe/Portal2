@@ -19,7 +19,7 @@ public class ModerationHistory {
     @Column(name = "ad_id", nullable = false)
     private Long adId;
 
-    @Column(name = "moderator_id", nullable = false)
+    @Column(name = "moderator_id")
     private Long moderatorId;
 
     @Enumerated(EnumType.STRING)
