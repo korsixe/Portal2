@@ -241,24 +241,11 @@
                     <excludes>
                         <!-- Spring boot bootstrap class -->
                         <exclude>com/mipt/portal/PortalApplication.class</exclude>
-                        <!-- Pure Spring infrastructure / configuration — framework wiring, not business logic.
-                             Their behavior is integration-tested implicitly by @SpringBootTest E2E paths. -->
-                        <exclude>com/mipt/portal/config/**</exclude>
-                        <exclude>com/mipt/portal/security/**</exclude>
                         <!-- JSP / static frontend bridge controllers — pure forwarding/redirects. -->
                         <exclude>com/mipt/portal/controller/ReactController.class</exclude>
                         <exclude>com/mipt/portal/controller/LegacyAdminModeratorRedirectController.class</exclude>
-                        <exclude>com/mipt/portal/controller/AdWebController.class</exclude>
                         <exclude>com/mipt/portal/controller/AdDetailsController.class</exclude>
                         <exclude>com/mipt/portal/controller/TestController.class</exclude>
-                        <exclude>com/mipt/portal/controller/NotificationTestController.class</exclude>
-                        <!-- Manual JDBC infra utility, no business logic. -->
-                        <exclude>com/mipt/portal/infrastructure/database/**</exclude>
-                        <!-- Custom repository impls use PostgreSQL-specific features (jsonb, native queries);
-                             they require Testcontainers + real Postgres for meaningful tests. -->
-                        <exclude>com/mipt/portal/repository/CustomAnnouncementRepositoryImpl.class</exclude>
-                        <exclude>com/mipt/portal/repository/CustomCategoryRepositoryImpl.class</exclude>
-                        <exclude>com/mipt/portal/repository/CustomTagRepositoryImpl.class</exclude>
                     </excludes>
                 </configuration>
             </plugin>
